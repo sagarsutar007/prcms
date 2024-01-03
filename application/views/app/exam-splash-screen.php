@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Start <?= $exam_info['name']; ?></title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		.text-sm {
+			font-size: 14px;
+		}
+	</style>
+</head>
+<body>
+	<section class="wrapper">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6 mx-auto">
+					<div style="height:50px;"></div>
+					<div class="card">
+					  <div class="card-body">
+					    <div class="text-center">
+					    	<h4><?= $exam_info['name']; ?></h4>
+					    	<p class="m-0 p-0 text-secondary text-sm"><?= "Duration: " . $exam_info['duration']." mins"; ?></p>
+					    	<p class="m-0 p-0 text-secondary text-sm"><?= "Languages: " . ucfirst($exam_info['lang']); ?></p>
+					    	<p class="text-secondary text-sm"><?= "Total Questions: " . ucfirst($exam_info['total_question']); ?></p>
+
+					    	<h6 class="mt-5">Exam Starting in</h6>
+					    	<button class="btn btn-primary btn-sm " id="btn-start-exam" disabled></button>
+					    </div>
+					  </div>
+					</div>
+					<div style="height:50px;"></div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+	// $(document).ready(function () {
+	//     var examStartTime = new Date('<?=$exam_info['exam_datetime'];?>').getTime();
+	//     var btnStartExam = $('#btn-start-exam');
+	//     function updateCountdown() {
+	//         var now = new Date().getTime();
+	//         // var serverTime = <?= $now = time() * 1000; ?>;
+	//         var timeRemaining = examStartTime -  now;
+	//         // var timeRemaining = examStartTime - serverTime + now;
+
+	//         if (timeRemaining <= 0) {
+	//             btnStartExam.text('Start Exam');
+	//             btnStartExam.prop('disabled', false);
+	//             clearInterval(countdownInterval);
+	//         } else {
+	//             var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+	//             var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+	//             btnStartExam.text(minutes + 'm ' + seconds + 's');
+	//         }
+	//     }
+	//     updateCountdown();
+	//     var countdownInterval = setInterval(updateCountdown, 1000);
+	// });
+
+	$(document).ready(function () {
+          var serverTime = <?= $now = time() * 1000; ?>; // Get server time in milliseconds
+          var examStartTime = new Date('<?=$exam_info['exam_datetime'];?>').getTime();
+          var btnStartExam = $('#btn-start-exam');
+
+          function updateCountdown() {
+          	serverTime += 1000;
+              var now = serverTime; // Use server time
+              var timeRemaining = examStartTime - now;
+
+              if (timeRemaining <= 0) {
+                  btnStartExam.text('Start Exam');
+                  btnStartExam.prop('disabled', false);
+                  clearInterval(countdownInterval);
+              } else {
+                  var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                  var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                  btnStartExam.text(minutes + 'm ' + seconds + 's');
+              }
+          }
+
+          updateCountdown();
+          var countdownInterval = setInterval(updateCountdown, 1000);
+      });
+
+	function enableButtonAndNavigate() {
+	    var myButton = document.getElementById('btn-start-exam');
+
+	    if (myButton && !myButton.hasAttribute('disabled')) {
+	        window.location.href = "<?= base_url('exams/' . $exam_info['url'] . '/exam'); ?>";
+	    }
+	}
+	var myButton = document.getElementById('btn-start-exam');
+	myButton.addEventListener('click', enableButtonAndNavigate);
+
+	</script>
+
+</body>
+</html>

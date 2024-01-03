@@ -1,0 +1,81 @@
+#passwordToggle {
+  cursor: pointer;
+}
+.form-control, .login-card-body .input-group .input-group-text, .register-card-body .input-group .input-group-text {
+  /* border-radius: 0rem!important; */
+}
+.btn-light-primary {
+  color: #fff;
+  background-color: #00aeee;
+  border-color: #00aeee;
+  box-shadow: none;
+}
+.btn-light-primary:hover, .btn-light-primary:not(:disabled):not(.disabled).active, .btn-light-primary:not(:disabled):not(.disabled):active, .show>.btn-light-primary.dropdown-toggle {
+    color: #fff;
+    background-color: #0093d0;
+    border-color: #0093d0;
+}
+.text-designation {
+  font-size: 10px;
+  color: #c2c7d0;
+}
+
+.data-row {
+  padding: 5px 0px;
+  border: 1px solid #d5d5d5;
+  margin-top: 10px;
+  background-color: #fff;
+}
+
+.custom-data {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.title {
+  margin-left: 24px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: inherit;
+}
+
+.card {
+    /* border-radius: 0rem; */
+}
+
+.fw-4 {
+  font-weight: 400!important;
+}
+
+.settting-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
+.settting-links:hover {
+  background-color: #f8f9fa;
+}
+
+a .settting-links {
+  color: #343a40;
+  font-size: 18px;
+}
+
+.settting-links i {
+  color: #6c757d;
+}
+
+#data-table_length {
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.custom-file-input, .custom-file-label {
+  /* border-radius: 0px; */
+}

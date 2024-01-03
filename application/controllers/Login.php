@@ -197,7 +197,8 @@ class Login extends CI_Controller {
 			$record['companies'] = $this->business_model->getUserCompanies(null, 'admin');
 			$record['type'] = $type;
 			$this->session->set_userdata($record);
-			$this->redirectToDashboard($type);
+			if ($value) { redirect('exams/'.$value.'/begin'); }
+			else { $this->redirectToDashboard($type); }
 		} else if (get_cookie('email', TRUE)) {
 			$email = $this->encryption->decrypt(get_cookie('email', TRUE));
 			$record = $this->user_model->getByEmail($email, $type);
@@ -205,7 +206,8 @@ class Login extends CI_Controller {
 			$record['companies'] = $this->business_model->getUserCompanies(null, 'admin');
 			$record['type'] = $type;
 			$this->session->set_userdata($record);
-			$this->redirectToDashboard($type);
+			if ($value) { redirect('exams/'.$value.'/begin'); }
+			else { $this->redirectToDashboard($type); }
 		} else {
 			$data['app_info'] = $this->Login_model->getApplicationInfo();
 			$data['title'] = "Candidate Login";
@@ -299,6 +301,7 @@ class Login extends CI_Controller {
 			}
 		}
 	}
+
 
 	public function logout() {
 		$type = $this->session->userdata('type');

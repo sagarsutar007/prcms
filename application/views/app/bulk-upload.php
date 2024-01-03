@@ -47,7 +47,7 @@
             <div class="row">
               <div class="col-12 mtb-3">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                  <strong><?= $this->session->flashdata('error'); ?></strong>
+                  <strong>Error! </strong><?= strip_tags($this->session->flashdata('error')); ?>
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>

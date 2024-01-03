@@ -44,62 +44,6 @@ class Candidates extends CI_Controller {
 		$this->load->view('app/candidates', $data);
 	}
 
-	public function testMail($value='')
-	{
-		$htmlContent = '<div>
-		    <table align="center" width="600" cellspacing="0" cellpadding="0" border="0">
-		        <tr>
-		            <td>
-		                <div style="width: 100%;padding: 40px;">
-		                    <div style="text-align: center;"><span style="font-size: 1rem;">Hello</span><span
-		                            style="color: rgb(52, 58, 64); font-weight: bolder; font-size: 1rem; text-align: left;">Sagar</span><span
-		                            style="color: rgb(52, 58, 64); font-size: 1rem; font-weight: bolder;">,</span></div>
-		                    <p><span style="font-size: 1rem; color: rgb(52, 58, 64);"><br></span></p>
-		                    <div style="text-align: center;">Here"s your link to login page.</div>
-		                    <div style="text-align: center;">Just click on the link below<br><span
-		                            style="caret-color: rgb(52, 58, 64); color: rgb(52, 58, 64); text-align: left;">https://www.simrangroups.com/candidate-login</span><br>
-		                    </div>
-		                    <p></p>
-		                    <p><span style="font-size: 1rem; color: rgb(52, 58, 64);"></span></p>
-		                    <p style="text-align: center;"><span style="font-weight: bolder; color: rgb(52, 58, 64);">Simran
-		                            Group</span><span style="color: rgb(52, 58, 64);">All Rights Reserved</span></p>
-		                </div>
-		            </td>
-		        </tr>
-		    </table>
-		</div>';
-
-		// $htmlContent = "<h1>Hello Test Mail</h1>";
-		// $htmlContent .= "<p>This is a text paragraph to test if mail is working or not!</p>";
-		// $htmlContent .= "<strong>Simrangroups</strong>";
-
-		$site_data = $this->setting_model->getSiteSetting();
-		// $config_arr=[
-		// 	'api_url' => $site_data['out_smtp'],
-		// 	'sender_address' => $site_data['smtp_email'],
-		// 	'to_address' => '1sagarsutar@gmail.com',
-		// 	'subject' => 'Link to login into your dashboard!',
-		// 	'body' => $htmlContent,
-		// 	'api_key' => $site_data['smtp_pass'],
-		// 	'to_name' => 'Sagar'
-		// ];
-
-		$config_arr=[
-			'out_smtp' => $site_data['out_smtp'],
-			'smtp_port' => $site_data['smtp_port'],
-			'smtp_email' => $site_data['smtp_email'],
-			'smtp_pass' => $site_data['smtp_pass'],
-			'app_name' => 'Simrangroups',
-			'subject' => 'Link to login into your dashboard!',
-			'body' => $htmlContent,
-			'email' => 'ds.sagarsutar@gmail.com',
-		];
-
-		$email_response = sendMailViaSMTP($config_arr);
-
-		echo $email_response;
-	}
-
 	public function getData() {
 		$filter = [];
 		if(isset($_GET['company_id']) && !empty($_GET['company_id'])) {
@@ -852,9 +796,9 @@ class Candidates extends CI_Controller {
 		if ($this->input->post()) {
 			$config['upload_path']   = './assets/admin/formats/';
 	        $config['allowed_types'] = 'csv|CSV|xlsx|XLSX|xls|XLS';
-			
+			$this->upload->initialize($config);
 	        if (!$this->upload->do_upload('excel_file')) {
-	        	$this->session->set_flashdata('error', 'Error uploading file!');
+	        	$this->session->set_flashdata('error', $this->upload->display_errors());
 	        } else {
 	        	$upload_data = $this->upload->data();
 	            $file_path = $upload_data['full_path'];

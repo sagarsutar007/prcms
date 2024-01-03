@@ -834,6 +834,7 @@ class Exams extends CI_Controller {
 							'status' => 'active',
 							'password' => md5($password),
 							'company_id' => (!empty($company))?$company['id']:'',
+							'source' => 'bulk',
 						);
 
 						$last_id = $this->candidate_model->insert($xlx_data);

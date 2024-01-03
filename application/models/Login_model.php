@@ -18,7 +18,7 @@ class Login_model extends CI_Model {
 		} else if ($type=='client') {
 			$this->db->from('clients');
 		} else {
-			$this->db->select('company_id');
+			$this->db->select('company_id, source');
 			$this->db->from('candidates');
 		}
 		$this->db->where(['email'=>strtolower($data['email']), 'password'=>md5($data['password'])]);

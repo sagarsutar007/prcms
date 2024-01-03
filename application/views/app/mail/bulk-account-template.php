@@ -3,7 +3,7 @@
 		<h2 style="text-align: center;">Hi <?= $name; ?>,</h2>
 		<p style="margin: 15px 0px;text-align: center;">Your account is now active on <?= $company_name; ?> panel. Use the following link to complete your Sign Up procedures. Please use the given credentials to get into dashboard.</p>
 		<div>
-			<p><span>Link: </span><a href="<?= base_url('candidate-login'); ?>" target="_blank">Login Link</a></p>
+			<p><span>URL: </span><a href="<?= base_url('candidate-login'); ?>" target="_blank"><?= base_url('candidate-login'); ?></a></p>
 			<p><span>Email: </span><?= $email; ?></p>
 			<p><span>Password: </span><?= $password; ?></p>
 		</div>

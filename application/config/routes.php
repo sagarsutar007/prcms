@@ -29,15 +29,14 @@ $route['candidate-signup/update-bank'] = 'signup/updateCandidateBank';
 $route['candidate-signup/update-house'] = 'signup/updateCandidateHouse';
 $route['candidate-signup/update-other'] = 'signup/updateCandidateOther';
 $route['registration-complete'] = 'signup/regComplete';
+$route['update-profile-image'] = 'login/updateProfilePhoto';
 
 $route['client-login'] = 'Login/client';
 $route['admin-login'] = 'Login/admin';
 $route['business-login'] = 'Login/businessUnit';
 $route['candidate-login'] = 'Login/candidate';
 
-
 $route['qr-codes'] = 'Qrcodes';
-
 
 $route['business-units'] = 'BusinessUnits';
 $route['business-units/(:num)'] = 'BusinessUnits/$1';

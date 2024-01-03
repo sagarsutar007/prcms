@@ -230,22 +230,22 @@ class Login extends CI_Controller {
 						redirect('candidate-login');
 					} else {
 
-						$extra_details = $this->candidate_model->getUserDetails($record['id']);
-						if (
-							empty($extra_details['pa_address']) || 
-							empty($extra_details['pa_city']) || 
-							empty($extra_details['pa_dist']) || 
-							empty($extra_details['pa_pin']) || 
-							empty($extra_details['pa_state']) || 
-							empty($extra_details['ca_address']) || 
-							empty($extra_details['ca_city']) || 
-							empty($extra_details['ca_dist']) || 
-							empty($extra_details['ca_pin']) || 
-							empty($extra_details['ca_state']) 
-						) {
-							$this->session->set_userdata('user_id', $record['id']);
-							redirect('candidate-signup/update-address');
-						}
+						// $extra_details = $this->candidate_model->getUserDetails($record['id']);
+						// if (
+						// 	empty($extra_details['pa_address']) || 
+						// 	empty($extra_details['pa_city']) || 
+						// 	empty($extra_details['pa_dist']) || 
+						// 	empty($extra_details['pa_pin']) || 
+						// 	empty($extra_details['pa_state']) || 
+						// 	empty($extra_details['ca_address']) || 
+						// 	empty($extra_details['ca_city']) || 
+						// 	empty($extra_details['ca_dist']) || 
+						// 	empty($extra_details['ca_pin']) || 
+						// 	empty($extra_details['ca_state']) 
+						// ) {
+						// 	$this->session->set_userdata('user_id', $record['id']);
+						// 	redirect('candidate-signup/update-address');
+						// }
 
 						// if (
 						// 	empty($extra_details['bank_name']) || 
@@ -258,20 +258,21 @@ class Login extends CI_Controller {
 						// 	redirect('candidate-signup/update-bank');
 						// }
 
-						if (
-							empty($extra_details['father_name']) || 
-							empty($extra_details['marital_status']) || 
-							(empty($extra_details['aadhaar_card_front_pic']) || empty($extra_details['aadhaar_card_back_pic'])) 
-						) {
-							$this->session->set_userdata('user_id', $record['id']);
-							redirect('candidate-signup/update-house');
-						}
+						// if (
+						// 	empty($extra_details['father_name']) || 
+						// 	empty($extra_details['marital_status']) || 
+						// 	(empty($extra_details['aadhaar_card_front_pic']) || empty($extra_details['aadhaar_card_back_pic'])) 
+						// ) {
+						// 	$this->session->set_userdata('user_id', $record['id']);
+						// 	redirect('candidate-signup/update-house');
+						// }
 
 						if ($record['status'] == 'active') {
 							if($this->input->post('remember')){
 								$this->input->set_cookie('email', $this->encryption->encrypt(strtolower($this->input->post('email'))), 86400*30);
 								$this->input->set_cookie('userid', $this->encryption->encrypt($record['id']), 86400*30);
 							}
+
 							$record['companies'] = $this->business_model->getUserCompanies(null, 'admin');
 							$record['type'] = $type;
 							$this->session->set_userdata($record);
@@ -287,9 +288,13 @@ class Login extends CI_Controller {
 								];
 								
 								$this->Login_model->captureLog($logs_arr);
-								$this->redirectToDashboard($type);
+
+								if (empty($record['profile_img']) && $record['source'] == 'bulk') {
+									redirect('update-profile-image');
+								} else {
+									$this->redirectToDashboard($type);
+								}								
 							}
-							
 						} else {
 							$this->session->set_flashdata('error', 'You account has been blocked! Please contact Administrator for assistance.');
 							redirect('candidate-login');
@@ -316,12 +321,10 @@ class Login extends CI_Controller {
 			redirect(base_url('business-login'));
 		} else {
 			redirect(base_url('admin-login'));
-		}
-        
+		}   
     }
 
-    public function redirectToDashboard($type='')
-    {
+    public function redirectToDashboard($type=''){
     	if ($type == "candidate" || $type == "client") {
     		redirect('dashboard');
 		} else {
@@ -413,7 +416,7 @@ class Login extends CI_Controller {
 		$this->load->view('app/reset-password', $data);
 	}
 
-	public function getIpAddress(){
+	public function getIpAddress() {
 		$client_ip = "";
 		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
 			$client_ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -426,12 +429,48 @@ class Login extends CI_Controller {
 		return $client_ip;
 	}
 
-	public function getBrowserInfo(){
+	public function getBrowserInfo() {
 
 		$detect = new MobileDetect();
 
 		$deviceType = ($detect->isMobile() ? ($detect->isTablet() ? 'tablet' : 'phone') : 'computer');
 		return $deviceType;
+	}
+
+	public function updateProfilePhoto($value='') {
+		if (!$this->session->has_userdata('id')) { redirect('logout'); }
+		$data['candidate'] = $this->candidate_model->get($this->session->userdata('id'));
+		if (!$data['candidate']) { redirect('logout'); }
+		if ($this->input->post()) {
+			$post = $this->input->post();
+			$this->form_validation->set_rules('userid', 'Userid', 'required');
+			if (empty($_FILES['profile_img']['name'])) { 
+				$this->form_validation->set_rules('profile_img', 'Passport Size Photo', 'required'); 
+			}
+
+			if ($this->form_validation->run() == TRUE) {
+				$config['upload_path']   = './assets/img/';
+		        $config['allowed_types'] = 'gif|jpg|jpeg|png';
+		        $config['max_size']      = 20480;
+		        $config['encrypt_name']  = TRUE;
+
+		        $this->upload->initialize($config);
+				if ($this->upload->do_upload('profile_img')) {
+		            $updateData['profile_img'] = $this->upload->data('file_name');
+		            $row_aff = $this->candidate_model->updateCandidate($updateData, $post['userid']);
+		            if ($row_aff) {
+		            	redirect('dashboard');
+		            } else {
+		            	$this->session->set_flashdata('error', 'Something went wrong!');
+		            	redirect('logout');
+		            }
+		        } else {
+		        	$this->session->set_flashdata('error', $this->upload->display_errors());
+		        }
+			}
+		}
+
+		$this->load->view('candidate-profile-img', $data);
 	}
 }
 

@@ -130,6 +130,7 @@ class Candidates extends CI_Controller {
 				$userInfo['company_id'] = $this->input->post('company_id');
 				$userInfo['status'] = 'active';
 				$userInfo['empid'] = $this->input->post('empid');
+				$userInfo['source'] = 'manual';
 
 				if (!empty($this->input->post('password'))) {
 					$userInfo['password'] = md5($this->input->post('password'));
@@ -236,7 +237,7 @@ class Candidates extends CI_Controller {
 								'middlename' => $userInfo['middlename'],
 								'lastname' => $userInfo['lastname'],
 								'company_name' => $site_data['app_name'],
-								'login_url' => base_url('candidate-login'),
+								'login_url' => $site_data['cl_shortlink'],
 								'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
 								'exam_date' => '',
 								'exam_time' => '',
@@ -309,7 +310,7 @@ class Candidates extends CI_Controller {
 								'middlename' => $userInfo['middlename'],
 								'lastname' => $userInfo['lastname'],
 								'company_name' => $site_data['app_name'],
-								'login_url' => base_url('candidate-login'),
+								'login_url' => $site_data['cl_shortlink'],
 								'login_qr' => '',
 								'exam_date' => '',
 								'exam_time' => '',
@@ -829,6 +830,7 @@ class Candidates extends CI_Controller {
 								'gender' => $row[20],
 								'status' => 'active',
 								'password' => md5($password),
+								'source' => 'bulk'
 							);
 							
 							$last_id = $this->candidate_model->insert($xlx_data);
@@ -868,7 +870,7 @@ class Candidates extends CI_Controller {
 										'middlename' => $xlx_data['middlename'],
 										'lastname' => $xlx_data['lastname'],
 										'company_name' => $app_info['app_name'],
-										'login_url' => base_url('candidate-login'),
+										'login_url' => $app_info['cl_shortlink'],
 										'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
 										'exam_date' => '',
 										'exam_time' => '',
@@ -1061,7 +1063,7 @@ class Candidates extends CI_Controller {
 					'middlename' => $get_candidate['middlename'],
 					'lastname' => $get_candidate['lastname'],
 					'company_name' => $site_data['app_name'],
-					'login_url' => base_url('candidate-login'),
+					'login_url' => $site_data['cl_shortlink'],
 					'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
 					'exam_date' => '',
 					'exam_time' => '',
@@ -1147,114 +1149,6 @@ class Candidates extends CI_Controller {
 		}
 	}
 
-	// public function sendLoginMail()
-	// {
-	// 	if (!$this->session->has_userdata('id')) {
-	// 		$data['status'] = "ERROR";
-	// 		$data['message'] = "Something went wrong!";
-	// 	}
-	// 	$site_data = $this->setting_model->getSiteSetting();
-	// 	$post = $this->input->post();
-	// 	$ids = json_decode($post['checkedValues']);
-	// 	$this->load->library('email');
-	// 	foreach ($ids as $key => $obj) {
-	// 		$get_candidate = $this->candidate_model->get($obj);
-	// 		$business = $this->business_model->get($get_candidate['company_id']);
-
-	// 		if($get_candidate) {
-	// 			$templateKeys = [
-	// 				'name' => $get_candidate['firstname'] ." " . $get_candidate['middlename'] ." " . $get_candidate['lastname'],
-	// 				'firstname' => $get_candidate['firstname'],
-	// 				'middlename' => $get_candidate['middlename'],
-	// 				'lastname' => $get_candidate['lastname'],
-	// 				'company_name' => $site_data['app_name'],
-	// 				'login_url' => base_url('candidate-login'),
-	// 				'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
-	// 				'exam_date' => '',
-	// 				'exam_time' => '',
-	// 				'exam_datetime' => '',
-	// 				'business_name' => $business['company_name']??$site_data['app_name'],
-	// 				'business_addr' => $business['company_address']??'',
-	// 				'exam_login_url' => '',
-	// 			];
-		
-	// 			$inputString = $site_data['candidate_login_mail'];
-	// 			$replacementString = $inputString;
-
-	// 			foreach ($templateKeys as $key => $obj) {
-	// 				$placeholder = '${' . $key . '}';
-	// 				if($key == 'login_qr'){
-	// 					$obj = htmlspecialchars('<div style="margin:0px auto; text-align:center;"><img src="'.$obj.'" height="100px" ></div>');
-	// 				}
-	// 				if (!empty($obj)){
-	// 					$replacementString = str_replace($placeholder, $obj, $replacementString);
-	// 				} else {
-	// 					$replacementString = str_replace($placeholder, '', $replacementString);
-	// 				}
-	// 			}
-
-	// 			$email_html = [];
-	// 			$email_html['data'] = $replacementString;
-	// 			$email_config = Array(    
-	// 				'protocol'  => 'smtp',
-	// 				'smtp_host' => 'smtp.zeptomail.in',
-	// 				'smtp_port' => '465',
-	// 				'smtp_user' => 'emailappsmtp.757594b729ac1e50',
-	// 				'smtp_pass' => 'GypiHjERkQsh',
-	// 				'mailtype'  => 'html',
-	// 				'charset'   => 'utf-8'
-	// 			);
-	// 			$this->email->initialize($email_config);
-	// 			$this->email->set_mailtype("html");
-	// 			$this->email->set_newline("\r\n");
-				
-	// 			$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
-	// 			$this->email->to($get_candidate['email']);
-	// 			$this->email->from($email_config['smtp_user'], $site_data['app_name'] .' Support');
-	// 			$this->email->subject('QR code to login into your dashboard');
-	// 			$this->email->message($htmlContent);
-
-	// 			// $config_arr=[
-	// 			// 	'api_url' => $site_data['out_smtp'],
-	// 			// 	'sender_address' => $site_data['smtp_email'],
-	// 			// 	'to_address' => $get_candidate['email'],
-	// 			// 	'subject' => 'QR code to login into your dashboard',
-	// 			// 	'body' => $htmlContent,
-	// 			// 	'api_key' => $site_data['smtp_pass'],
-	// 			// 	'to_name' => $get_candidate['firstname']
-	// 			// ];
-
-	// 			$email_response = $this->email->send();
-	// 			// $email_response = sendMailViaApi($config_arr);
-
-	// 			// echo $htmlContent;
-
-	// 			// print_r(testApiMail($config_arr));
-	// 			print_r($email_response);
-	// 			exit();
-
-	// 			$n_data['type'] = 'email';
-	// 			$n_data['user_id'] = $get_candidate['id'];
-	// 			$n_data['notif_type'] = 'Login';
-	// 			$n_data['text'] = htmlspecialchars($htmlContent);
-	// 			$n_data['to_recipient'] = $get_candidate['email'];
-	// 			$n_data['created_on'] = date('Y-m-d H:i:s');
-
-	// 			if ($email_response) {
-	// 				$n_data['response'] = 'success';
-	// 				$this->notif_model->insertLog($n_data);
-	// 			} else {
-	// 				$n_data['response'] = 'failed';
-	// 				$n_data['req_response'] = htmlspecialchars($this->email->print_debugger());
-	// 				$this->notif_model->insertLog($n_data);
-	// 			}
-	// 		}
-	// 	}
-	// 	$data['status'] = "SUCCESS";
-	// 	$data['message'] = "Mail sent successfully!";
-	// 	echo json_encode($data);
-	// }
-
 	public function sendLoginSms()
 	{
 		if (!$this->session->has_userdata('id')) {
@@ -1276,7 +1170,7 @@ class Candidates extends CI_Controller {
 				'middlename' => $get_candidate['middlename'],
 				'lastname' => $get_candidate['lastname'],
 				'company_name' => $site_data['app_name'],
-				'login_url' => base_url('candidate-login'),
+				'login_url' => $site_data['cl_shortlink'],
 				'login_qr' => '',
 				'exam_date' => '',
 				'exam_time' => '',

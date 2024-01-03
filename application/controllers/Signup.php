@@ -47,9 +47,6 @@ class Signup extends CI_Controller {
 			        $this->upload->initialize($config);
 					if ($this->upload->do_upload('profile_img')) {
 			            $post['profile_img'] = $this->upload->data('file_name');
-			        } else {
-			        	echo $this->upload->display_errors();
-			        	exit();
 			        }
 		        }
 
@@ -64,6 +61,7 @@ class Signup extends CI_Controller {
 				$candidate['status'] = 'active';
 				$candidate['company_id'] = $post['company_id'];
 				$candidate['created_at'] = date('Y-m-d H:i:s');
+				$candidate['source'] = 'manual';
 
 				//Insert candidate data in main candidate table
 				$user_detail['user_id'] = $this->candidate_model->insert($candidate);
@@ -260,7 +258,7 @@ class Signup extends CI_Controller {
 						'middlename' => $get_candidate['middlename'],
 						'lastname' => $get_candidate['lastname'],
 						'company_name' => $app_info['app_name'],
-						'login_url' => base_url('candidate-login'),
+						'login_url' => $app_info['cl_shortlink'],
 						'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
 						'exam_date' => '',
 						'exam_time' => '',
@@ -325,7 +323,6 @@ class Signup extends CI_Controller {
 						$n_data['req_response'] = $email_response;
 						$this->notif_model->insertLog($n_data);
 					}
-
 				}
 
 				if ($app_info['new_user_sms_notif'] == 'on') {
@@ -335,7 +332,7 @@ class Signup extends CI_Controller {
 						'middlename' => $get_candidate['middlename'],
 						'lastname' => $get_candidate['lastname'],
 						'company_name' => $app_info['app_name'],
-						'login_url' => base_url('candidate-login'),
+						'login_url' => $app_info['cl_shortlink'],
 						'login_qr' => '',
 						'exam_date' => '',
 						'exam_time' => '',
@@ -425,11 +422,11 @@ class Signup extends CI_Controller {
 			$data['company'] = $this->business_model->get($user['company_id']);
 			if (!$user) { redirect('candidate-signup'); }
 		}
-		
 
 		$data['title'] = "Registration Complete";
 		$data['app_info'] = $this->login_model->getApplicationInfo();
 		$this->session->set_userdata('email', $user['email']);
+		$this->session->sess_destroy();
 		$this->load->view('registration-complete', $data);
 	}
 

@@ -102,7 +102,7 @@
                           <?= strtoupper($record['question_type']); ?>
                       </td>
                       <td width="15%">
-                        <a href="<?= base_url('question-bank/view/').$record['question_id']; ?>" class="btn btn-link btn-sm "> <i class="fas fa-eye"></i> </a> / <a href="<?= base_url('question-bank/edit/').$record['question_id']; ?>" class="btn btn-link btn-sm "> <i class="fas fa-edit"></i> </a> / <a href="<?= base_url('question-bank/delete/').$record['question_id']; ?>" onClick="return confirm('This question along with its options will be deleted and can\'t be recovered. Are you sure to delete?');" class="btn btn-link btn-sm "><i class="fas fa-trash"></i></a>
+                        <a href="<?= base_url('question-bank/view/').$record['question_id']; ?>" class="btn btn-link btn-sm "> <i class="fas fa-eye"></i> </a> / <a href="<?= base_url('question-bank/edit/').$record['question_id']; ?>" class="btn btn-link btn-sm" target="_blank"> <i class="fas fa-edit"></i> </a> / <a href="<?= base_url('question-bank/delete/').$record['question_id']; ?>" onClick="return confirm('This question along with its options will be deleted and can\'t be recovered. Are you sure to delete?');" class="btn btn-link btn-sm "><i class="fas fa-trash"></i></a>
                       </td>
                     </tr>
                     <?php $i++; } ?>

@@ -334,6 +334,16 @@ class QuestionBank extends CI_Controller {
     	$this->load->view('app/view-question', $data, FALSE);
     }
 
+     public function ajaxView($value='')
+    {
+    	$this->isValidUser();
+    	if(!$value){ redirect('question-bank'); }
+    	$data['title'] = 'View Question';
+    	$data['question'] = $this->question_model->getQuestion($value);
+    	$data['answers'] = $this->answer_model->getAnswersOfQuestion($value);
+    	$this->load->view('app/ajax/view-question', $data, FALSE);
+    }
+
 }
 
 /* End of file  */

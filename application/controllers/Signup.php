@@ -28,10 +28,10 @@ class Signup extends CI_Controller {
 			$this->form_validation->set_rules('dob', 'Date of Birth', 'trim|required');
 			$this->form_validation->set_rules('company_id', 'Company', 'trim|required');
 			$this->form_validation->set_rules('gender', 'Gender', 'trim|required');
-			$this->form_validation->set_rules('phone', 'Phone number', 'required|integer|exact_length[10]|is_unique[users.phone]', array(
+			$this->form_validation->set_rules('phone', 'Phone number', 'required|integer|exact_length[10]|is_unique[candidates.phone]', array(
                 'is_unique'     => 'This %s already exists.'
 	        ));
-			$this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[users.email]', array(
+			$this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[candidates.email]', array(
                 'is_unique'     => 'This %s already registered.'
 	        ));
 	        if (empty($_FILES['profile_img']['name'])) { $this->form_validation->set_rules('profile_img', 'Passport Size Photo', 'required'); }

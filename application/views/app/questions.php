@@ -102,7 +102,7 @@
                           <?= strtoupper($record['question_type']); ?>
                       </td>
                       <td width="15%">
-                        <a href="<?= base_url('question-bank/view/').$record['question_id']; ?>" class="btn btn-link btn-sm "> <i class="fas fa-eye"></i> </a> / <a href="<?= base_url('question-bank/edit/').$record['question_id']; ?>" class="btn btn-link btn-sm" target="_blank"> <i class="fas fa-edit"></i> </a> / <a href="<?= base_url('question-bank/delete/').$record['question_id']; ?>" onClick="return confirm('This question along with its options will be deleted and can\'t be recovered. Are you sure to delete?');" class="btn btn-link btn-sm "><i class="fas fa-trash"></i></a>
+                        <a data-href="<?= base_url('question-bank/view/').$record['question_id']; ?>" class="btn btn-link btn-sm btn-view-question" data-qid='<?= $record['question_id']; ?>'> <i class="fas fa-eye"></i> </a> / <a href="<?= base_url('question-bank/edit/').$record['question_id']; ?>" class="btn btn-link btn-sm" target="_blank"> <i class="fas fa-edit"></i> </a> / <a href="<?= base_url('question-bank/delete/').$record['question_id']; ?>" onClick="return confirm('This question along with its options will be deleted and can\'t be recovered. Are you sure to delete?');" class="btn btn-link btn-sm "><i class="fas fa-trash"></i></a>
                       </td>
                     </tr>
                     <?php $i++; } ?>
@@ -135,6 +135,22 @@
         </div>
       </div>
       <?php $this->load->view('app/includes/footer'); ?>
+    </div>
+
+    <div class="modal fade" id="view-modal">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">View Question</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="view-question-modal">
+            
+          </div>
+        </div>
+      </div>
     </div>
     <!-- Scripts -->
     <script src="<?= base_url('assets/admin/plugins/jquery/jquery.min.js'); ?>"></script>
@@ -245,6 +261,23 @@
                     }
                 });
             }
+        });
+
+
+        $(document).on('click', '.btn-view-question', function(event) {
+          event.preventDefault();
+          const qid = $(this).data('qid');
+          console.log(qid);
+          if (qid != null) {
+            $.ajax({
+              url: '<?= base_url('QuestionBank/ajaxView/'); ?>' + qid,
+              type: 'GET'
+            })
+            .done(function(response) {
+              $("#view-question-modal").empty().html(response);
+              $("#view-modal").modal('show');
+            });
+          }
         });
 
     });

@@ -111,6 +111,17 @@ class Candidates_model extends CI_Model {
 		return $q->row_array();
 	}
 
+	public function candidateExists($value='')
+	{
+		$this->db->from('candidates c');
+		if ($value) {
+			$this->db->where('c.phone', $value);
+		}
+
+		$q = $this->db->get();
+		return $q->row_array();
+	}
+
 	public function getData($start, $length, $search, $filter=[], $columnName=null, $columnSortOrder=null) {
 
 		$this->db->select('c.id as user_id, c.firstname, c.middlename, c.lastname, c.phone, c.email, c.gender, cd.dob, cd.father_name, cd.aadhaar_number');

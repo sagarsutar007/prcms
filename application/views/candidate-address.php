@@ -43,28 +43,33 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="ca_address" value="<?= set_value('ca_address'); ?>" placeholder="Enter Address">
+                                    <input type="text" class="form-control" name="ca_address" value="<?= set_value('ca_address')??$candidate['ca_address']; ?>" placeholder="Enter Address">
                                     <?= form_error('ca_address', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control"  name="ca_address_landmark" value="<?= set_value('ca_address_landmark'); ?>" placeholder="Enter Landmark">
+                                    <input type="text" class="form-control"  name="ca_address_landmark" value="<?= set_value('ca_address_landmark')??$candidate['ca_address_landmark']; ?>" placeholder="Enter Landmark">
                                     <?= form_error('ca_address_landmark', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="ca_city" value="<?= set_value('ca_city'); ?>" placeholder="Enter City">
+                                    <input type="text" class="form-control" name="ca_city" value="<?= set_value('ca_city')??$candidate['ca_city']; ?>" placeholder="Enter City">
                                     <?= form_error('ca_city', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="ca_dist" value="<?= set_value('ca_dist'); ?>" placeholder="Enter District">
+                                    <input type="text" class="form-control" name="ca_dist" value="<?= set_value('ca_dist')??$candidate['ca_dist']; ?>" placeholder="Enter District">
                                     <?= form_error('ca_dist', '<div class="text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <select name="ca_state" class="custom-select d-block w-100">
+                                                <?php 
+                                                    if (isset($candidate['ca_state']) && !empty($candidate['ca_state'])) {
+                                                        echo "<option value=\"$candidate['ca_state']\" selected hidden>$candidate['ca_state']</option>";
+                                                    }
+                                                ?>
                                                   <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
                                                   <option value="Andhra Pradesh">Andhra Pradesh</option>
                                                   <option value="Arunachal Pradesh">Arunachal Pradesh</option>
@@ -106,7 +111,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <input type="number" class="form-control" maxlength="6" name="ca_pin" value="<?= set_value('ca_pin'); ?>" placeholder="Enter Pin">
+                                            <input type="number" class="form-control" maxlength="6" name="ca_pin" value="<?= set_value('ca_pin')??$candidate['ca_pin']; ?>" placeholder="Enter Pin">
                                             <?= form_error('ca_pin', '<div class="text-danger">', '</div>'); ?>
                                         </div>
                                     </div>
@@ -128,28 +133,33 @@
                                 </div>
                             
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="pa_address" value="<?= set_value('pa_address'); ?>" placeholder="Enter Address">
+                                    <input type="text" class="form-control" name="pa_address" value="<?= set_value('pa_address')??$candidate['pa_address']; ?>" placeholder="Enter Address">
                                     <?= form_error('pa_address', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control"  name="pa_address_landmark" value="<?= set_value('pa_address_landmark'); ?>" placeholder="Enter Landmark">
+                                    <input type="text" class="form-control"  name="pa_address_landmark" value="<?= set_value('pa_address_landmark')??$candidate['pa_address_landmark']; ?>" placeholder="Enter Landmark">
                                     <?= form_error('pa_address_landmark', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="pa_city" value="<?= set_value('pa_city'); ?>" placeholder="Enter City">
+                                    <input type="text" class="form-control" name="pa_city" value="<?= set_value('pa_city')??$candidate['pa_city']; ?>" placeholder="Enter City">
                                     <?= form_error('pa_city', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="pa_dist" value="<?= set_value('pa_dist'); ?>" placeholder="Enter District">
+                                    <input type="text" class="form-control" name="pa_dist" value="<?= set_value('pa_dist')??$candidate['pa_dist']; ?>" placeholder="Enter District">
                                     <?= form_error('pa_dist', '<div class="text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <select name="pa_state" class="custom-select d-block w-100">
+                                                <?php 
+                                                    if (isset($candidate['pa_state']) && !empty($candidate['pa_state'])) {
+                                                        echo "<option value=\"$candidate['pa_state']\" selected hidden>$candidate['pa_state']</option>";
+                                                    }
+                                                ?>
                                                 <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
                                                   <option value="Andhra Pradesh">Andhra Pradesh</option>
                                                   <option value="Arunachal Pradesh">Arunachal Pradesh</option>
@@ -190,7 +200,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <input type="number" class="form-control" maxlength="6" name="pa_pin" value="<?= set_value('pa_pin'); ?>" placeholder="Enter Pin">
+                                            <input type="number" class="form-control" maxlength="6" name="pa_pin" value="<?= set_value('pa_pin')??$candidate['pa_pin']; ?>" placeholder="Enter Pin">
                                             <?= form_error('pa_pin', '<div class="text-danger">', '</div>'); ?>
                                         </div>
                                     </div>
@@ -233,10 +243,8 @@
 
             $(".btn-primary").on('click', function () {
                 $(this).empty().html(`
-                    <button class="btn btn-primary" type="button" disabled>
-                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                      <span class="sr-only">Loading...</span>
-                    </button>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="sr-only">Loading...</span>
                 `);
             });
         });

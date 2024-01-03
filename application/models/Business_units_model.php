@@ -55,7 +55,9 @@ class Business_units_model extends CI_Model {
 
     public function linkUsersToCompany($company_id='', $user_ids=[], $type='')
     {
-    	if (empty($company_id) || empty($user_ids)) { return false; }
+    	if (empty($company_id) || empty($user_ids)) {
+	        return false;
+	    }
 
 	    $data = array();
 	    foreach ($user_ids as $user_id) {

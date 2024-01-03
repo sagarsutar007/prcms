@@ -201,7 +201,7 @@ class Exams_model extends CI_Model {
 
 	public function getExamCandidates($exam_id = '', $limit = null, $offset = null, $company_id='', $status='', $search_term='', $order_column='', $order_dir='')
 	{
-	    $sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`
+	    $sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`, `u`.`created_at`
 	            FROM `candidates` `u`
 	            LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '".$exam_id."'
 	            WHERE `u`.`company_id` = ".$company_id." AND `u`.`status` = '".$status."'";
@@ -226,6 +226,9 @@ class Exams_model extends CI_Model {
 	                break;
 	            case 'Email':
 	                $sql .= " ORDER BY `u`.`email` " . $order_dir;
+	                break;
+	            case 'Registered':
+	                $sql .= " ORDER BY `u`.`created_at` " . $order_dir;
 	                break;
 	            default:
 	                $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";

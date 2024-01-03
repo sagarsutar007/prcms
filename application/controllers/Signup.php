@@ -120,6 +120,7 @@ class Signup extends CI_Controller {
 			}
 		}
 		$data['app_info'] = $this->login_model->getApplicationInfo();
+		$data['candidate'] = $get_candidate;
 		$this->load->view('candidate-address', $data, FALSE);
 	}
 
@@ -167,6 +168,7 @@ class Signup extends CI_Controller {
 			// }
 		}
 		$data['app_info'] = $this->login_model->getApplicationInfo();
+		$data['candidate'] = $get_candidate;
 		$this->load->view('candidate-bank', $data, FALSE);
 	}
 

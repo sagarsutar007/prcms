@@ -39,19 +39,24 @@
 							<div class="col-md-6 bg-white px-4 py-3 mx-auto">
                                 <?php if (empty($candidate['whatsapp_number'])) { ?>
                                     <div class="form-group">
-                                        <input type="text" class="form-control" name="whatsapp_number" placeholder="Enter WhatsApp" value="<?= set_value('whatsapp_number'); ?>">
+                                        <input type="text" class="form-control" name="whatsapp_number" placeholder="Enter WhatsApp" value="<?= set_value('whatsapp_number')??$candidate['whatsapp_number']; ?>">
                                         <?= form_error('whatsapp_number', '<div class="text-danger">', '</div>'); ?>
                                     </div>
                                 <?php } ?>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="father_name" placeholder="Enter Father Name" value="<?= set_value('father_name'); ?>">
+                                    <input type="text" class="form-control" name="father_name" placeholder="Enter Father Name" value="<?= set_value('father_name')??$candidate['father_name']; ?>">
                                     <?= form_error('father_name', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
                                     <select name="marital_status" class="custom-select d-block w-100">
                                         <option value="" hidden>Select Marital Status</option>
+                                        <?php
+                                            if (isset($candidate['father_name']) && !empty($candidate['father_name'])) {
+                                                echo "<option value=\"$candidate['father_name']\" hidden selected>" . ucfirst($candidate['father_name']) ."</option>";
+                                            }
+                                        ?>
                                         <option value="married">Married</option>
                                         <option value="un-married">Un-married</option>
                                         <option value="divorced">Divorced</option>
@@ -59,7 +64,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" maxlength="12" class="form-control" name="aadhaar_number" placeholder="Enter 12 digit Aadhaar Number" value="<?= set_value('aadhaar_number'); ?>">
+                                    <input type="text" maxlength="12" class="form-control" name="aadhaar_number" placeholder="Enter 12 digit Aadhaar Number" value="<?= set_value('aadhaar_number')??$candidate['aadhaar_number']; ?>">
                                     <?= form_error('aadhaar_number', '<div class="text-danger">', '</div>'); ?>
                                 </div>
                                 <div class="input-group">

@@ -30,17 +30,17 @@
 						<div class="row">
 							<div class="col-md-6 bg-white px-4 py-3 mx-auto">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="bank_name" placeholder="Enter Bank Name" value="<?= set_value('bank_name'); ?>">
+                                    <input type="text" class="form-control" name="bank_name" placeholder="Enter Bank Name" value="<?= set_value('bank_name')??$candidate['bank_name']; ?>">
                                     <?= form_error('bank_name', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="number" class="form-control" name="account_num" placeholder="Enter Account Number" value="<?= set_value('account_num'); ?>">
+                                    <input type="number" class="form-control" name="account_num" placeholder="Enter Account Number" value="<?= set_value('account_num')??$candidate['account_num']; ?>">
                                     <?= form_error('account_num', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="ifsc_code" placeholder="Enter IFSC Code" value="<?= set_value('ifsc_code'); ?>">
+                                    <input type="text" class="form-control" name="ifsc_code" placeholder="Enter IFSC Code" value="<?= set_value('ifsc_code')??$candidate['ifsc_code']; ?>">
                                     <?= form_error('ifsc_code', '<div class="text-danger">', '</div>'); ?>
                                 </div>
 
@@ -63,7 +63,7 @@
 						</div>
                         <div class="row">
                             <div class="col-md-6 text-right mx-auto">
-                                <button class="btn btn-sm btn-primary ">Next</button>
+                                <button class="btn btn-sm btn-primary">Next</button>
                             </div>
                         </div>
                     </form>
@@ -84,10 +84,8 @@
 
             $(".btn-primary").on('click', function () {
                 $(this).empty().html(`
-                    <button class="btn btn-primary" type="button" disabled>
                       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                       <span class="sr-only">Loading...</span>
-                    </button>
                 `);
             });
         });

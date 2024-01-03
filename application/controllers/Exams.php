@@ -315,6 +315,7 @@ class Exams extends CI_Controller {
 				'Name' => ucwords($record['firstname'] . " " . $record['middlename'] . " " . $record['lastname']),
 				'Phone' => $record['phone'],
 				'Email' => $record['email'],
+				'Registered' => date('d-m-Y h:i', strtotime($record['created_at'])),
 				'SMS Sent' => $record['sms_sent'],
 				'Email Sent' => $record['email_sent'],
 				'Action' => '<td class="text-center">' .
@@ -768,7 +769,7 @@ class Exams extends CI_Controller {
 		$post = $this->input->post();
 		
 		$exam = $this->exam_model->get($post['exam_id']);
-		if (!$exam || !isset($post['exam_id'])) { redirect('exams'); }
+		if (!$exam) { redirect('exams'); }
 
 		$config['upload_path']   = './assets/admin/formats/';
 		$config['allowed_types'] = 'csv|CSV|xlsx|XLSX|xls|XLS';
@@ -800,8 +801,7 @@ class Exams extends CI_Controller {
 							$record_exists = $this->exam_model->isExamAndCandidateExists($arr);
 							if (!$record_exists) { $this->exam_model->insertExamCandidate($arr); }
 							$exam_reg[] = $candidate['id'];
-						}
-						
+						}						
 					} else {
 						$firstTwoLetters = substr($row[0], 0, 2);
 						$password = strtolower($firstTwoLetters) . "@12345";
@@ -856,6 +856,7 @@ class Exams extends CI_Controller {
 								'ifsc_code' => $row[23],
 								'marital_status' => (!empty($row[24]))?$row[24]:'un-married'
 							);
+
 							try {
 								$this->candidate_model->insertCandidateInfo($exl_data);
 
@@ -895,7 +896,7 @@ class Exams extends CI_Controller {
 			$this->session->set_flashdata('success', 'Data uploaded successfully!');
 		}
 
-		redirect('exams/'.$post['exam_id'].'/edit-candidates');
+		redirect('exam/'.$post['exam_id'].'/edit-candidates');
 	}
 
 	public function sendNewRegEmail($value=[])

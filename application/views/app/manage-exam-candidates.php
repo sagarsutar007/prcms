@@ -33,7 +33,7 @@
       }
     </style>
   </head>
-  <body class="hold-transition sidebar-mini">
+  <body class="hold-transition sidebar-mini sidebar-collapse">
     <div class="wrapper">
 
       <?php $this->load->view('app/includes/topnavbar'); ?>
@@ -88,7 +88,7 @@
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-8">
-                    <form action="<?= base_url('exams/bulkUpload'); ?>" enctype="multipart/form-data">
+                    <form action="<?= base_url('exams/bulkUpload'); ?>" enctype="multipart/form-data" method="post">
                       <input type="hidden" name="exam_id" value="<?= $exam_id??''; ?>">
                       <div class="row">
                         <div class="col-md-3">
@@ -105,7 +105,7 @@
                           </div>
                         </div>
                         <div class="col-md-2"> 
-                          <button type="button" class="btn btn-primary btn-bulk-upload  btn-block mb-3">Upload</button>
+                          <button type="submit" class="btn btn-primary btn-bulk-upload  btn-block mb-3">Upload</button>
                         </div>
                       </div>
                     </form>
@@ -130,6 +130,7 @@
                           <th>Name</th>
                           <th>Phone</th>
                           <th>Email</th>
+                          <th>Registered</th>
                           <th>SMS Sent</th>
                           <th>Email Sent</th>
                           <th>Action</th>
@@ -191,6 +192,7 @@
               {"data": "Name", "name":"c.firstname"},
               {"data": "Phone", "name":"c.phone"},
               {"data": "Email", "name":"c.email"},
+              {"data": "Registered", "name":"c.created_at"},
               {"data": "SMS Sent"},
               {"data": "Email Sent"},
               {"data": "Action"}
@@ -209,25 +211,25 @@
             {
               extend: 'excel',
               exportOptions: {
-                columns: [1,2,3,4,5,6]
+                columns: [1,2,3,4,5,6,7]
               }
             },
             { 
               extend: 'pdf',
               exportOptions: {
-                columns: [1,2,3,4,5,6]
+                columns: [1,2,3,4,5,6,7]
               }
             }, 
             {
                 extend: 'print',
                 exportOptions: {
-                  columns: [1,2,3,4,5,6]
+                  columns: [1,2,3,4,5,6,7]
                 }
             }
           ],
           "columnDefs": [
               {
-                  "targets": [0, 1, 5, 6, 7],
+                  "targets": [0, 1, 6, 7, 8],
                   "orderable": false
               }
           ],

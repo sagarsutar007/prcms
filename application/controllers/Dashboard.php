@@ -54,7 +54,7 @@ class Dashboard extends CI_Controller {
 			$cand_regs = [['Date', 'Users']];
 			$exam_recs = [['Date', 'Users']];
 
-			for ($i=12; $i>=0; $i--) { 
+			for ($i=6; $i>=0; $i--) { 
 				$date = date('Y-m', strtotime('-' . $i . ' months'));
 				$re_date = date('M y', strtotime($date));
 				$au_count = $this->candidate->countActiveUsers($date);

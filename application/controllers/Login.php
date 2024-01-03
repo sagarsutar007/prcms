@@ -302,7 +302,6 @@ class Login extends CI_Controller {
 		}
 	}
 
-
 	public function logout() {
 		$type = $this->session->userdata('type');
 		$this->session->set_flashdata('success', 'You\'ve been logged out!');

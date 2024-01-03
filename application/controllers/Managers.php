@@ -96,11 +96,6 @@ class Managers extends CI_Controller {
 			            $post['profile_img'] = $this->upload->data('file_name');
 			        }
 		        }
-		        if (!empty($post['password'])) {
-		        	$post['password'] = md5($post['password']);
-		        } else {
-					$post['password'] = $record['password'];
-		        }
 		        
 		        $this->manager_model->update($post, $value);
 			}

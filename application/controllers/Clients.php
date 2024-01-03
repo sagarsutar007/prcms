@@ -62,13 +62,13 @@ class Clients extends CI_Controller {
 	        $config['encrypt_name']  = TRUE;
 
 	        $this->upload->initialize($config);
-
+			$user_id = "";
 	        $post = $this->input->post();
 	        $post['email'] = strtolower($post['email']);
 	        $this->form_validation->set_rules('firstname', 'First name', 'required');
 			$this->form_validation->set_rules('password', 'Password', 'required|min_length[8]|max_length[12]');
-			$this->form_validation->set_rules('phone', 'Phone number', 'integer|exact_length[10]|is_unique[clients.phone]');
-			$this->form_validation->set_rules('email', 'Email', 'valid_email|is_unique[clients.email]');
+			$this->form_validation->set_rules('phone', 'Phone number', 'required|integer|exact_length[10]|is_unique[clients.phone]');
+			$this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[clients.email]');
 
 			if ($this->form_validation->run() == TRUE) {
 		        if (!empty($_FILES['profile_img_file'])) {
@@ -78,32 +78,36 @@ class Clients extends CI_Controller {
 		        }
 		        $user_id = $this->client_model->create($post);
 			}
-			$this->form_validation->reset_validation();
-			$this->form_validation->set_rules('company_name', 'Company name', 'required|is_unique[companies.company_name]');
 
-			if ($this->form_validation->run() == TRUE) {
-				$company = [];
-				$company['company_name'] = trim(strip_tags(addslashes($post['company_name'])));
-		        if (!empty($_FILES['company_logo_file'])) {
-		        	$config = [];
-	        		$config['upload_path']   = './assets/img/companies/';
-			        $config['allowed_types'] = 'gif|jpg|jpeg|png';
-			        $config['max_size']      = 2048;
-			        $config['encrypt_name']  = TRUE;
-			        $this->upload->initialize($config);
-		        	if ($this->upload->do_upload('company_logo_file')) {
-			            $company['company_logo'] = $this->upload->data('file_name');
-			        } 
-		        }
-		        $company_id = $this->business_model->create($company);
-		        if ($company_id) {
-		        	$this->business_model->linkUsersToCompany($company_id, [$user_id], 'client');
-		        	$this->session->set_flashdata('success', 'Client created successfully!');
-		        	redirect('clients');
-		        } else {
-					$this->session->set_flashdata('error', 'Client can\'t be added!');
-		        }
+			if ($user_id) {
+				$this->form_validation->reset_validation();
+				$this->form_validation->set_rules('company_name', 'Company name', 'required|is_unique[companies.company_name]');
+
+				if ($this->form_validation->run() == TRUE) {
+					$company = [];
+					$company['company_name'] = trim(strip_tags(addslashes($post['company_name'])));
+			        if (!empty($_FILES['company_logo_file'])) {
+			        	$config = [];
+		        		$config['upload_path']   = './assets/img/companies/';
+				        $config['allowed_types'] = 'gif|jpg|jpeg|png';
+				        $config['max_size']      = 2048;
+				        $config['encrypt_name']  = TRUE;
+				        $this->upload->initialize($config);
+			        	if ($this->upload->do_upload('company_logo_file')) {
+				            $company['company_logo'] = $this->upload->data('file_name');
+				        } 
+			        }
+			        $company_id = $this->business_model->create($company);
+			        if ($company_id) {
+			        	$this->business_model->linkUsersToCompany($company_id, [$user_id], 'client');
+			        	$this->session->set_flashdata('success', 'Client created successfully!');
+			        	redirect('clients');
+			        } else {
+						$this->session->set_flashdata('error', 'Client can\'t be added!');
+			        }
+				}
 			}
+			
 	    }
 	    if ($_SESSION['type'] == 'admin') {
 			$data['business_units'] = $this->business_model->get();

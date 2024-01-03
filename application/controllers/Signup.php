@@ -114,10 +114,10 @@ class Signup extends CI_Controller {
 			$this->form_validation->set_rules('ca_pin', 'Pincode', 'required');
 			$this->form_validation->set_rules('ca_state', 'State', 'required');
 
-			if ($this->form_validation->run() == TRUE) {
+			// if ($this->form_validation->run() == TRUE) {
 				$aff_rows = $this->candidate_model->updateCandidateInfo($post, $user_id);
 				redirect('candidate-signup/update-bank');
-			}
+			// }
 		}
 		$data['app_info'] = $this->login_model->getApplicationInfo();
 		$data['candidate'] = $get_candidate;
@@ -215,7 +215,7 @@ class Signup extends CI_Controller {
 			// 	$this->form_validation->set_rules('pancard_pic', 'Pancard Photo', 'required');
 			// }
 
-			if ($this->form_validation->run() == TRUE) {	
+			// if ($this->form_validation->run() == TRUE) {	
 				if (!empty($_FILES['aadhaar_card_back_pic'])) {
 					if ($this->upload->do_upload('aadhaar_card_back_pic')) {
 						$post['aadhaar_card_back_pic'] = $this->upload->data('file_name');
@@ -395,7 +395,7 @@ class Signup extends CI_Controller {
 					}
 				}
 				redirect('registration-complete');
-			}
+			// }
 		}
 		$data['app_info'] = $this->login_model->getApplicationInfo();
 		$data['candidate'] = $get_candidate;

@@ -110,7 +110,7 @@
                   }
                 ?>
                 <option value="married">Married</option>
-                <option value="un-married">Un-married</option>
+                <option value="unmarried">Unmarried</option>
                 <option value="divorced">Divorced</option>
               </select>
             </div>

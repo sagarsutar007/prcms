@@ -441,9 +441,10 @@ class Exams extends CI_Controller {
 		$this->isValidCandidate();
 		$data['exam_info'] = $this->exam_model->getFromUrl($value);
 		if (!$data['exam_info']) { redirect('logout'); }
-		// echo "<pre>";
-		// print_r($data);
-		// exit();
+		if ($data['exam_info']['status'] != 'scheduled') {
+			$this->session->set_flashdata('error', 'Exam is not scheduled!');
+			redirect('dashboard');
+		}
 
 		$data['exam_info']['total_question'] = $this->exam_model->countExamQuestion($data['exam_info']['id']);
 
@@ -456,6 +457,10 @@ class Exams extends CI_Controller {
 
 		$data['exam_info'] = $this->exam_model->getFromUrl($value);
 		if (!$data['exam_info']) { redirect('logout'); }
+		if ($data['exam_info']['status'] != 'scheduled') {
+			$this->session->set_flashdata('error', 'This exam is now ' . $data['exam_info']['status']);
+			redirect('dashboard');
+		}
 		if ( time() > strtotime($data['exam_info']['exam_endtime']) ) { 
 			$this->session->set_flashdata('error', 'Exam time has been passed!'); 
 			redirect('dashboard'); 
@@ -463,6 +468,13 @@ class Exams extends CI_Controller {
 		$can['exam_id'] = $data['exam_info']['id'];
 		$can['user_id'] = $this->session->userdata('id');
 		$can['entered_at'] = date('Y-m-d H:i:s');
+
+		$arr = [
+			'candidate_id' => $can['user_id'],
+			'exam_id' => $can['exam_id']
+		];
+		$valid_cand = $this->exam_model->isExamAndCandidateExists($arr);
+		if (!$valid_cand) { $this->session->set_flashdata('error', 'You are not allowed to appear in this exam!'); }
 
 		$exam_appeared = $this->exam_model->checkCandidateExamInfo($can);
 		if (!$exam_appeared) { $this->exam_model->setCandidateExamInfo($can); }

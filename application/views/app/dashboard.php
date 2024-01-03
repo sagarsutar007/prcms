@@ -35,6 +35,32 @@
         </div>
         <section class="content">
           <div class="container-fluid">
+
+            <?php if($this->session->flashdata('error')){ ?>
+            <div class="row">
+              <div class="col-12 mtb-3">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <strong>Error!</strong> <?= $this->session->flashdata('error'); ?>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <?php } ?>
+            <?php if($this->session->flashdata('success')){ ?>
+            <div class="row">
+              <div class="col-12 mtb-3">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  <strong><?= $this->session->flashdata('success'); ?></strong>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <?php } ?>
+
             <?php if ( $this->session->userdata('type') == 'candidate') { ?>
             <div class="row">
                <div class="col-lg-4 d-none d-lg-block">

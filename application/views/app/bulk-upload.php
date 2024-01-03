@@ -97,6 +97,9 @@
                         <div class="col-12 text-center">
                           <a href="<?= base_url('assets/admin/formats/joining-form.xlsx'); ?>" class="btn btn-outline-info "><i class="fas fa-download"></i> Download Format </a>
                           <button type="submit" class="btn btn-primary "><i class="fas fa-check"></i> Submit</button>
+                          <?php if (count($error)) { ?>
+                          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-errors"><i class="fas fa-bug"></i> Show Errors</button>
+                          <?php } ?>
                         </div>
                       </div>
                       

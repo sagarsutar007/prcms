@@ -1031,6 +1031,7 @@ class Candidates extends CI_Controller {
 					}
 	            }
 	            $this->session->set_flashdata('success', 'Data processed successfully!');
+	            @unlink($file_path);
 	        }
 		}
 		$data['error'] = $error;

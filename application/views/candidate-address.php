@@ -67,7 +67,7 @@
                                             <select name="ca_state" class="custom-select d-block w-100">
                                                 <?php 
                                                     if (isset($candidate['ca_state']) && !empty($candidate['ca_state'])) {
-                                                        echo "<option value=\"$candidate['ca_state']\" selected hidden>$candidate['ca_state']</option>";
+                                                        echo "<option value='".$candidate['ca_state']."' selected hidden>".$candidate['ca_state']."</option>";
                                                     }
                                                 ?>
                                                   <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -157,7 +157,7 @@
                                             <select name="pa_state" class="custom-select d-block w-100">
                                                 <?php 
                                                     if (isset($candidate['pa_state']) && !empty($candidate['pa_state'])) {
-                                                        echo "<option value=\"$candidate['pa_state']\" selected hidden>$candidate['pa_state']</option>";
+                                                        echo "<option value='".$candidate['pa_state']."' selected hidden>".$candidate['pa_state']."</option>";
                                                     }
                                                 ?>
                                                 <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>

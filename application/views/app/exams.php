@@ -381,24 +381,24 @@
             {
               extend: 'excel',
               exportOptions: {
-                columns: [1,2,3,4,5,6,7]
+                columns: [1,2,3,4,5,6,7,8]
               }
             },
             { 
               extend: 'pdf',
               exportOptions: {
-                columns: [1,2,3,4,5,6,7]
+                columns: [1,2,3,4,5,6,7,8]
               }
             }, 
             {
                 extend: 'print',
                 exportOptions: {
-                  columns: [1,2,3,4,5,6,7]
+                  columns: [1,2,3,4,5,6,7,8]
                 }
             }
           ],
           "columnDefs": [{
-              "targets": [0,8],
+              "targets": [0,9],
               "orderable": false
           }],
           "order": [[1, 'asc']]

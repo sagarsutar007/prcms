@@ -13,7 +13,11 @@
 
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/adminlte.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/styles.css'); ?>">
-
+    <style>
+      .modal-header {
+          padding: 0.7rem 1rem;
+      }
+    </style>
   </head>
   <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -106,6 +110,42 @@
       </div>
       <?php $this->load->view('app/includes/footer'); ?>
     </div>
+
+    <div class="modal fade" id="modal-errors">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h6 class="modal-title text-white">Check Errors</h6>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="errors-section">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Row No</th>
+                  <th>Error Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php 
+                  if (count($error)) {
+                      foreach ($error as $key => $err) {
+                        echo "<tr><td>Row:<b> ". $err['row'] . "</b></td><td class='text-danger'>".strip_tags($err['message'])."</td></tr>";
+                      }
+                  }
+                ?>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer text-end">
+            <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Scripts -->
     <script src="<?= base_url('assets/admin/plugins/jquery/jquery.min.js'); ?>"></script>
     <script src="<?= base_url('assets/admin/plugins/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
@@ -117,6 +157,7 @@
               var fileName = $(this).val().split('\\').pop();
               $(this).siblings('.custom-file-label').text(fileName);
           });
+          <?php if (count($error)) { ?> $("#modal-errors").modal('show'); <?php } ?>
       });
     </script>
   </body>

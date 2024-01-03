@@ -793,6 +793,7 @@ class Candidates extends CI_Controller {
 		$data['title'] = "Bulk Upload";
 		$app_info = $this->login->getApplicationInfo();
 		$site_data = $this->setting_model->getSiteSetting();
+		$error = [];
 		if ($this->input->post()) {
 			$config['upload_path']   = './assets/admin/formats/';
 	        $config['allowed_types'] = 'csv|CSV|xlsx|XLSX|xls|XLS';
@@ -810,198 +811,229 @@ class Candidates extends CI_Controller {
 	            for ($i = 1; $i < count($excel_data); $i++) {
 	                $row = $excel_data[$i];
 					if (!empty($row[0])) {
-						$firstTwoLetters = substr($row[0], 0, 2); // Extract the first two letters
-						$password = strtolower($firstTwoLetters) . "@12345";
-						if (!empty($row[4])){
-							$company = $this->client_model->searchCompany($row[4]);
-							if (empty($company)) {
-								$company = ['id'=>''];
+						if (!$this->candidate_model->candidateExists($row[6])) {
+							$firstTwoLetters = substr($row[0], 0, 2);
+							$password = strtolower($firstTwoLetters) . "@12345";
+							if (!empty($row[4])){
+								$company = $this->client_model->searchCompany($row[4]);
+								if (empty($company)) { $company = ['id'=>'']; } 
+							} else { $company = ['id'=>'']; }
+
+							$xlx_data = array(
+								'firstname' => $row[0],
+								'middlename' => $row[1],
+								'lastname' => $row[2],
+								'email' => $row[3],
+								'company_id' => $company['id'],
+								'phone' => $row[6],
+								'gender' => $row[20],
+								'status' => 'active',
+								'password' => md5($password),
+							);
+							
+							$last_id = $this->candidate_model->insert($xlx_data);
+							if ($last_id) {
+								$phone_nums[] = $xlx_data['phone'];
+								$exl_data = array(
+									'user_id' => $last_id,
+									'company_id' => (!empty($company))?$company['id']:'',
+									'highest_qualification' => $row[25],
+									'aadhaar_number' => $row[9],
+									'pa_address' => $row[10],
+									'pa_address_landmark' => $row[11],
+									'pa_dist' => $row[13],
+									'pa_state' => $row[14],
+									'pa_pin' => $row[12],
+
+									'ca_address' => $row[15],
+									'ca_address_landmark' => $row[16],
+									'ca_dist' => $row[18],
+									'ca_state' => $row[19],
+									'ca_pin' => $row[17],
+
+									'dob' => (!empty($row[5]))?date('Y-m-d', strtotime($row[5])):'0000-00-00',
+									'whatsapp_number' => $row[7],
+									'father_name' => $row[8],
+									'bank_name' => $row[21],
+									'account_num' => $row[22],
+									'ifsc_code' => $row[23],
+									'marital_status' => (!empty($row[24]))?$row[24]:'un-married'
+								);
+								$this->candidate_model->insertCandidateInfo($exl_data);
+								$business = $this->business_model->get($company['id']);
+								if ($site_data['new_user_mail_notif'] == 'on') {
+									$templateKeys = [
+										'name' => $xlx_data['firstname'] ." " . $xlx_data['middlename'] ." " . $xlx_data['lastname'],
+										'firstname' => $xlx_data['firstname'],
+										'middlename' => $xlx_data['middlename'],
+										'lastname' => $xlx_data['lastname'],
+										'company_name' => $app_info['app_name'],
+										'login_url' => base_url('candidate-login'),
+										'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
+										'exam_date' => '',
+										'exam_time' => '',
+										'exam_datetime' => '',
+										'business_name' => $business['company_name']??$site_data['app_name'],
+										'business_addr' => $business['company_address']??'',
+										'exam_login_url' => '',
+									];
+							
+									$inputString = $app_info['new_user_mail'];
+									$replacementString = $inputString;
+					
+									foreach ($templateKeys as $key => $obj) {
+										$placeholder = '${' . $key . '}';
+										if (!empty($obj)){
+											$replacementString = str_replace($placeholder, $obj, $replacementString);
+										} else {
+											$replacementString = str_replace($placeholder, '', $replacementString);
+										}
+									}
+					
+									$email_html = [];
+									$email_html['data'] = $replacementString;
+									
+									$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
+									
+									// $config_arr=[
+									// 	'api_url' => $site_data['out_smtp'],
+									// 	'sender_address' => $site_data['smtp_email'],
+									// 	'to_address' => $xlx_data['email'],
+									// 	'subject' => 'Account created successfully!',
+									// 	'body' => $htmlContent,
+									// 	'api_key' => $site_data['smtp_pass'],
+									// 	'to_name' => $xlx_data['firstname']
+									// ];
+
+									// $email_response = sendMailViaApi($config_arr);
+
+									$email_data = [
+										'name' => $xlx_data['firstname'],
+										'email' => $xlx_data['email'],
+										'password' => $password,
+										'company_name' => $business['company_name']??$app_info['app_name']
+									];
+
+									$emailContent = $this->load->view('app/mail/bulk-account-template', $email_data, true);
+									
+									$config_arr=[
+										'out_smtp' => $site_data['out_smtp'],
+										'smtp_port' => $site_data['smtp_port'],
+										'smtp_email' => $site_data['smtp_email'],
+										'smtp_pass' => $site_data['smtp_pass'],
+										'app_name' => 'Simrangroups',
+										'subject' => 'Account created successfully!',
+										'body' => $emailContent,
+										'email' => $xlx_data['email'],
+									];
+
+									sendMailViaSMTP($config_arr);
+
+
+									$config_arr = [
+										'out_smtp' => $site_data['out_smtp'],
+										'smtp_port' => $site_data['smtp_port'],
+										'smtp_email' => $site_data['smtp_email'],
+										'smtp_pass' => $site_data['smtp_pass'],
+										'app_name' => 'Simrangroups',
+										'subject' => 'Account created successfully!',
+										'body' => $htmlContent,
+										'email' => $xlx_data['email'],
+									];
+
+									$email_response = sendMailViaSMTP($config_arr);	
+
+
+
+									$n_data['type'] = 'email';
+									$n_data['user_id'] = $last_id;
+									$n_data['notif_type'] = 'New Registration';
+									$n_data['text'] = htmlspecialchars($htmlContent);
+									$n_data['to_recipient'] = $xlx_data['email'];
+									$n_data['created_on'] = date('Y-m-d H:i:s');
+
+									if ($email_response) {
+										$n_data['response'] = 'success';
+										$this->notif_model->insertLog($n_data);
+									} else {
+										$n_data['response'] = 'failed';
+										$n_data['req_response'] = $email_response;
+										$this->notif_model->insertLog($n_data);
+									}
+								}
+								if ($site_data['new_user_sms_notif'] == 'on') {
+									$inputString = $app_info['new_registered'];
+									$replacementString = $inputString;
+							
+									foreach ($templateKeys as $keys => $keyval) {
+										$placeholder = '${' . $keys . '}';
+										if (!empty($keyval)) {
+											$replacementString = str_replace($placeholder, $keyval, $replacementString);
+										} else {
+											$replacementString = str_replace($placeholder, '', $replacementString);
+										}
+									}
+
+									$url = 'http://www.text2india.store/vb/apikey.php';
+
+									$params = [
+										'apikey' => $site_data['sms_api_key'],
+										'senderid' => $site_data['sms_sender_id'],
+										'templateid' => $site_data['newusr_tempid'],
+										'number' => $xlx_data['phone'],
+										'message' => $replacementString,
+									];
+
+									$url .= '?' . http_build_query($params);
+									
+									$curl = curl_init();
+									curl_setopt_array($curl, array(
+										CURLOPT_URL => $url,
+										CURLOPT_RETURNTRANSFER => true,
+									));
+									$response = curl_exec($curl);
+									$sms_resp = json_decode($response, true);
+
+									$s_data['type'] = 'sms';
+									$s_data['user_id'] = $last_id;
+									$s_data['notif_type'] = 'New Registration';
+									$s_data['text'] = $replacementString;
+									$s_data['to_recipient'] = $xlx_data['phone'];
+									$s_data['created_on'] = date('Y-m-d H:i:s');
+
+									if ($sms_resp['status'] == 'Success') {
+										$s_data['response'] = 'success';
+										$this->notif_model->insertLog($s_data);
+									} else {
+										$s_data['response'] = 'failed';
+										$s_data['req_response'] = $sms_resp['description'];
+										$this->notif_model->insertLog($s_data);
+									}
+								}
+							} else {
+								$error[] = [
+									'row' => $i + 1,
+									'message' => 'Please check record for errors!'
+								]; 
 							}
 						} else {
-							$company = ['id'=>''];
+							$error[] = [
+								'row' => $i + 1,
+								'message' => 'Record already exists!'
+							];
 						}
-
-						$xlx_data = array(
-							'firstname' => $row[0],
-							'middlename' => $row[1],
-							'lastname' => $row[2],
-							'email' => $row[3],
-							'company_id' => $company['id'],
-							'phone' => $row[6],
-							
-							'gender' => $row[20],
-							'status' => 'active',
-							'password' => md5($password),
-							
-						);
-					
-						$last_id = $this->candidate_model->insert($xlx_data);
-
-						if ($last_id) {
-							$phone_nums[] = $xlx_data['phone'];
-
-							$exl_data = array(
-								'user_id' => $last_id,
-								'company_id' => (!empty($company))?$company['id']:'',
-								'highest_qualification' => $row[25],
-								'aadhaar_number' => $row[9],
-								'pa_address' => $row[10],
-								'pa_address_landmark' => $row[11],
-								'pa_dist' => $row[13],
-								'pa_state' => $row[14],
-								'pa_pin' => $row[12],
-
-								'ca_address' => $row[15],
-								'ca_address_landmark' => $row[16],
-								'ca_dist' => $row[18],
-								'ca_state' => $row[19],
-								'ca_pin' => $row[17],
-
-								'dob' => (!empty($row[5]))?date('Y-m-d', strtotime($row[5])):'0000-00-00',
-								'whatsapp_number' => $row[7],
-								'father_name' => $row[8],
-								'bank_name' => $row[21],
-								'account_num' => $row[22],
-								'ifsc_code' => $row[23],
-								'marital_status' => (!empty($row[24]))?$row[24]:'un-married'
-							);
-							try {
-								$this->candidate_model->insertCandidateInfo($exl_data);
-							} catch (Exception $e) {
-								
-							}
-
-							$business = $this->business_model->get($company['id']);
-							if ($site_data['new_user_mail_notif'] == 'on') {
-								$templateKeys = [
-									'name' => $xlx_data['firstname'] ." " . $xlx_data['middlename'] ." " . $xlx_data['lastname'],
-									'firstname' => $xlx_data['firstname'],
-									'middlename' => $xlx_data['middlename'],
-									'lastname' => $xlx_data['lastname'],
-									'company_name' => $app_info['app_name'],
-									'login_url' => base_url('candidate-login'),
-									'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
-									'exam_date' => '',
-									'exam_time' => '',
-									'exam_datetime' => '',
-									'business_name' => $business['company_name']??$site_data['app_name'],
-									'business_addr' => $business['company_address']??'',
-									'exam_login_url' => '',
-								];
-						
-								$inputString = $app_info['new_user_mail'];
-								$replacementString = $inputString;
-				
-								foreach ($templateKeys as $key => $obj) {
-									$placeholder = '${' . $key . '}';
-									if (!empty($obj)){
-										$replacementString = str_replace($placeholder, $obj, $replacementString);
-									} else {
-										$replacementString = str_replace($placeholder, '', $replacementString);
-									}
-								}
-				
-								$email_html = [];
-								$email_html['data'] = $replacementString;
-								
-								$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
-								
-								// $config_arr=[
-								// 	'api_url' => $site_data['out_smtp'],
-								// 	'sender_address' => $site_data['smtp_email'],
-								// 	'to_address' => $xlx_data['email'],
-								// 	'subject' => 'Account created successfully!',
-								// 	'body' => $htmlContent,
-								// 	'api_key' => $site_data['smtp_pass'],
-								// 	'to_name' => $xlx_data['firstname']
-								// ];
-
-								// $email_response = sendMailViaApi($config_arr);
-
-								$config_arr=[
-									'out_smtp' => $site_data['out_smtp'],
-									'smtp_port' => $site_data['smtp_port'],
-									'smtp_email' => $site_data['smtp_email'],
-									'smtp_pass' => $site_data['smtp_pass'],
-									'app_name' => 'Simrangroups',
-									'subject' => 'Account created successfully!',
-									'body' => $htmlContent,
-									'email' => $xlx_data['email'],
-								];
-
-								$email_response = sendMailViaSMTP($config_arr);		
-
-								$n_data['type'] = 'email';
-								$n_data['user_id'] = $last_id;
-								$n_data['notif_type'] = 'New Registration';
-								$n_data['text'] = htmlspecialchars($htmlContent);
-								$n_data['to_recipient'] = $xlx_data['email'];
-								$n_data['created_on'] = date('Y-m-d H:i:s');
-
-								if ($email_response) {
-									$n_data['response'] = 'success';
-									$this->notif_model->insertLog($n_data);
-								} else {
-									$n_data['response'] = 'failed';
-									$n_data['req_response'] = $email_response;
-									$this->notif_model->insertLog($n_data);
-								}
-							}
-							if ($site_data['new_user_sms_notif'] == 'on') {
-								$inputString = $app_info['new_registered'];
-								$replacementString = $inputString;
-						
-								foreach ($templateKeys as $keys => $keyval) {
-									$placeholder = '${' . $keys . '}';
-									if (!empty($keyval)) {
-										$replacementString = str_replace($placeholder, $keyval, $replacementString);
-									} else {
-										$replacementString = str_replace($placeholder, '', $replacementString);
-									}
-								}
-
-								$url = 'http://www.text2india.store/vb/apikey.php';
-
-								$params = [
-									'apikey' => $site_data['sms_api_key'],
-									'senderid' => $site_data['sms_sender_id'],
-									'templateid' => $site_data['newusr_tempid'],
-									'number' => $xlx_data['phone'],
-									'message' => $replacementString,
-								];
-
-								$url .= '?' . http_build_query($params);
-								
-								$curl = curl_init();
-								curl_setopt_array($curl, array(
-									CURLOPT_URL => $url,
-									CURLOPT_RETURNTRANSFER => true,
-								));
-								$response = curl_exec($curl);
-								$sms_resp = json_decode($response, true);
-
-								$s_data['type'] = 'sms';
-								$s_data['user_id'] = $last_id;
-								$s_data['notif_type'] = 'New Registration';
-								$s_data['text'] = $replacementString;
-								$s_data['to_recipient'] = $xlx_data['phone'];
-								$s_data['created_on'] = date('Y-m-d H:i:s');
-
-								if ($sms_resp['status'] == 'Success') {
-									$s_data['response'] = 'success';
-									$this->notif_model->insertLog($s_data);
-								} else {
-									$s_data['response'] = 'failed';
-									$s_data['req_response'] = $sms_resp['description'];
-									$this->notif_model->insertLog($s_data);
-								}
-							}
-						} 
+					} else {
+						$error[] = [
+							'row' => $i + 1,
+							'message' => 'End of file or firstname missing. Script terminated!'
+						]; 
+						break;
 					}
 	            }
-	            $this->session->set_flashdata('success', 'Data uploaded successfully!');
+	            $this->session->set_flashdata('success', 'Data processed successfully!');
 	        }
 		}
+		$data['error'] = $error;
 		$this->load->view('app/bulk-upload', $data, FALSE);
 	}
 

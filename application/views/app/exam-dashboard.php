@@ -272,6 +272,7 @@
                                     <tr>
                                         <td>SNo.</td>
                                         <td>Candidate Name</td>
+                                        <td>Aadhaar</td>
                                         <td>Score</td>
                                         <td>Status</td>
                                         <td>Time</td>
@@ -287,8 +288,15 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <img src="<?= $record['profile_img']; ?>" class="mr-2" width="30px" alt="">
-                                                <?= ucfirst($record['name']); ?>
+                                                <div>
+                                                    <?= ucfirst($record['name']); ?> 
+                                                    <br> 
+                                                    <span class="text-sm"><?= $record['empid']; ?></span>
+                                                </div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <?= $record['aadhaar_number']; ?>
                                         </td>
                                         <td>
                                             <?= $record['score']; ?>

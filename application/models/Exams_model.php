@@ -676,7 +676,7 @@ class Exams_model extends CI_Model {
 
 	public function getCandidateWithStats($exam_id='')
 	{
-		$sql = "SELECT c.id, CONCAT_WS( ' ', c.firstname, c.middlename, c.lastname ) AS name, c.profile_img FROM `candidates` c INNER JOIN `exam_candidates` ec ON c.id = ec.candidate_id WHERE ec.exam_id = $exam_id";
+		$sql = "SELECT c.id, CONCAT_WS( ' ', c.firstname, c.middlename, c.lastname ) AS name, c.empid, cd.aadhaar_number, c.profile_img FROM `candidates` c INNER JOIN candidate_details cd ON c.id = cd.user_id INNER JOIN `exam_candidates` ec ON c.id = ec.candidate_id WHERE ec.exam_id = $exam_id";
 
 		$q = $this->db->query($sql);
 		return $q->result_array();

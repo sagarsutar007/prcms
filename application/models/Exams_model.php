@@ -201,7 +201,7 @@ class Exams_model extends CI_Model {
 
 	public function getExamCandidates($exam_id = '', $limit = null, $offset = null, $company_id='', $status='', $search_term='', $order_column='', $order_dir='')
 	{
-	    $sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`, `u`.`created_at`
+	    $sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`, `u`.`created_at`, `u`.`empid`
 	            FROM `candidates` `u`
 	            LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '".$exam_id."'
 	            WHERE `u`.`company_id` = ".$company_id." AND `u`.`status` = '".$status."'";

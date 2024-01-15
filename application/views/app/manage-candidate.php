@@ -209,7 +209,7 @@
                           <div class="col-md-4">
                             <div class="form-group">
                               <label for="empid">Employee ID</label>
-                              <input type="text" id="empid" class="form-control" name="empid" value="<?= isset($record['empid'])?date('d-m-Y', strtotime($record['empid'])):set_value('empid'); ?>" placeholder="Enter Employee Id">
+                              <input type="text" id="empid" class="form-control" name="empid" value="<?= isset($record['empid'])?$record['empid']:set_value('empid'); ?>" placeholder="Enter Employee Id">
                             </div>
                           </div>
                         </div>

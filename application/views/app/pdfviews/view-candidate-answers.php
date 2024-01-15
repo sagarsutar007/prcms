@@ -74,6 +74,9 @@
       <h2 style="text-align:center;margin-bottom:0;">
         <?= $clients; ?>
       </h2>
+      <h3 style="text-align:center;margin-bottom:0;">
+        <?= $exam['name']; ?>
+      </h3>
       <p style="text-align:center;margin: 0;">
         <?= "Exam conducted by <strong>" . $business['company_name'] . "</strong>"; ?>
       </p>
@@ -100,6 +103,7 @@
       <?= "Email : " . $user['email']; ?> <br/>
       <?= "Phone :  +91" . $user['phone']; ?> <br/>
       <?= "Aadhaar: " . $user['aadhaar_number']; ?> <br/>
+      <?= "Employee ID: " . $user['empid']; ?> <br/>
       <?= "Gender: " . $user['gender']; ?> <br/>
       <?= "Exam Started at: " .$exam_entry; ?> <br/>
       <?= "Exam Ended at: " .$exam_exit; ?> <br/>
@@ -111,7 +115,6 @@
     <?php 
       $i= 1; 
       foreach ($result as $key => $obj) { 
-        if (!empty($obj['question_en'])) { 
     ?>
       <div style="display:block; width:100%; margin-bottom: 15px;">
         <?php if ($exam['lang'] == "both" || $exam['lang'] == "eng") { ?> 
@@ -172,5 +175,5 @@
         <?php } ?>
         <div style="clear:both;"></div>
       </div>
-    <?php } $i++; } ?>
+    <?php $i++; } ?>
 </div>

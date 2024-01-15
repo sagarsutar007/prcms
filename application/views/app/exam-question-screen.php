@@ -398,6 +398,8 @@
 					$.each(question['answers'], function (ind, obj) { 
 						if (ansVal == obj.id) {
 							_questionsArr[arrIndex]['answers'][ind]['checked'] = true;
+						} else {
+							_questionsArr[arrIndex]['answers'][ind]['checked'] = false;
 						}
 					});
 					submitAnswer(question['question_id'], ansVal);
@@ -411,6 +413,8 @@
 				$.each(question['answers'], function (ind, obj) { 
 					if (ansVal == obj.id) {
 						_questionsArr[arrIndex]['answers'][ind]['checked'] = checkedStat;
+					} else {
+						_questionsArr[arrIndex]['answers'][ind]['checked'] = false;
 					}
 				});
 				submitAnswer(question['question_id'], ansVal);
@@ -431,14 +435,16 @@
 			        url: '<?= base_url('exams/submitAnswer'); ?>',
 			        method: 'POST',
 			        data: {
-						"answerId" : answer_id,
-						"examId" : examId,
-						"currentQuestionId" : currentQuestionId,
-					},
-			        success: function(response) {
+									"answerId" : answer_id,
+									"examId" : examId,
+									"currentQuestionId" : currentQuestionId,
+							},
+			    success: function(response) {
 						const parsedResponse = JSON.parse(response);
-						if (parsedResponse.status == 'SUCCESS') {}
-			        }
+						if (parsedResponse.status == 'SUCCESS') {
+
+						}
+			    }
 				});
 			}
 	    });

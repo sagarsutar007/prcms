@@ -108,7 +108,7 @@
                                                 <img class="profile-user-img img-fluid img-circle" style="width: 70px;" src="<?= $company_pic; ?>" alt="User profile picture">
                                             </div>
                                             <div class="col-9">
-                                                <h3 class="profile-username"><?= $business['company_name']??'Not Available'; ?></h3>
+                                                <h3 class="profile-username"><?= !empty($business['company_name'])?$business['company_name']:'Not Available'; ?></h3>
                                                 <p class="text-muted text-sm">
                                                     <?php 
                                                         if (isset($business['company_address']) && strlen($business['company_address']) > 25) {
@@ -287,9 +287,8 @@
                                     <tr>
                                         <td><?= $i; ?></td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="<?= $record['profile_img']; ?>" class="mr-2" width="30px" alt="">
-                                                <?= ucfirst($record['name']); ?> 
+                                            <div class="">
+                                                <?= ucfirst(str_replace(".", "", $record['name'])); ?>
                                             </div>
                                         </td>
                                         <td>
@@ -302,10 +301,19 @@
                                             <?= $record['score']; ?>
                                         </td>
                                         <td>
-                                            <?= $record['status']; ?>
+                                            <?php 
+                                            $now = time();
+                                            $exm_time = strtotime($exam['exam_endtime']);
+                                            if ($record['status'] == "Appearing" && $now > $exm_time ) {
+                                                echo "Submitted";
+                                            } else {
+                                                echo $record['status']; 
+                                            }
+                                            
+                                            ?>
                                         </td>
                                         <td>
-                                            <?= $record['time']; ?>
+                                            <?php echo $record['time']; ?>
                                         </td>
                                         <td><?= number_format($record['percentage'], 2); ?>%</td>
                                         <td><?= $record['result']; ?></td>
@@ -316,6 +324,7 @@
                                             <a href="<?= base_url('exams/enable-rentry?examid='.$exam_id.'&userid='.$record['id']); ?>" class="btn btn-link">
                                                 <i class="fas fa-pen"></i>
                                             </a>
+                                            <a target="_blank" href="<?= base_url('candidate/generate-candidate-result?examid='.$exam_id.'&userid='.$record['id']); ?>"><i class="fas fa-download"></i></a>
                                         </td>
                                     </tr>
                                     <?php $i++; } ?>
@@ -377,24 +386,24 @@
                     {
                       extend: 'excel',
                       exportOptions: {
-                        columns: [0,1,2,3,4,5,6]
+                        columns: [0,1,2,3,4,5,6,7,8]
                       }
                     },
                     { 
                       extend: 'pdf',
                       exportOptions: {
-                        columns: [0,1,2,3,4,5,6]
+                        columns: [0,1,2,3,4,5,6,7,8]
                       }
                     }, 
                     {
                         extend: 'print',
                         exportOptions: {
-                          columns: [0,1,2,3,4,5,6]
+                          columns: [0,1,2,3,4,5,6,7,8]
                         }
                     }
                 ],
                 "columnDefs": [{
-                  "targets": [0,7],
+                  "targets": [0,9],
                   "orderable": false
                 }]
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
@@ -448,7 +457,7 @@
                 ['Status', 'Count'],
                 ['Appearing', <?= $appearing; ?>],
                 ['Not Joined', <?= $absent; ?>],
-                ['Submitted', <?= $submitted; ?>]
+                ['Submitted', <?= $appearing + $submitted; ?>]
             ]);
             
             var chart = new google.visualization.PieChart(document.getElementById('pieChart'));

@@ -130,6 +130,7 @@
                           <th>Name</th>
                           <th>Phone</th>
                           <th>Email</th>
+                          <th>Employee Id</th>
                           <th>Registered</th>
                           <th>SMS Sent</th>
                           <th>Email Sent</th>
@@ -192,6 +193,7 @@
               {"data": "Name", "name":"c.firstname"},
               {"data": "Phone", "name":"c.phone"},
               {"data": "Email", "name":"c.email"},
+              {"data": "Employee Id", "name":"c.empid"},
               {"data": "Registered", "name":"c.created_at"},
               {"data": "SMS Sent"},
               {"data": "Email Sent"},

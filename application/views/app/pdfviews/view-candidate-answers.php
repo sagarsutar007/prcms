@@ -84,8 +84,8 @@
     </div>
     <div style="width: 44%; float:left; text-align: right; padding-top: 15px;">
       <?php
-          if (isset($user['profile_img']) && !empty($user['profile_img']) && file_exists('assets/img/' . $user['profile_img']) ) {
-            $prof_img = base_url('assets/img/' . $user['profile_img']);
+          if (isset($user['profile_img']) && !empty($user['profile_img']) && file_exists('assets/img/thumbnails/' . $user['profile_img']) ) {
+            $prof_img = base_url('assets/img/thumbnails/' . $user['profile_img']);
           }else {
             if ($user['gender'] == "male") {
               $prof_img = base_url('assets/admin/img/avatar.png');

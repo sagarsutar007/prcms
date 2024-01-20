@@ -34,7 +34,6 @@
             </div>
           </div>
         </div>
-
         
         <div class="content">
           <div class="container-fluid">
@@ -79,6 +78,21 @@
                             <label for="tr_api">Translate API Key</label>
                             <input type="text" id="tr_api" class="form-control" name="translate_api_key" value="<?= stripslashes($record['translate_api_key']??set_value('translate_api_key')); ?>">
                             <?= form_error('translate_api_key', '<div class="text-danger">', '</div>'); ?>
+                          </div>
+                        </div>
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label for="smv">Send Emails Via</label>
+                            <div class="form-group mb-0">
+                              <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="smtp" name="mail_type" value="smtp" class="custom-control-input" <?= $record['mail_type']=='smtp'?'checked':''; ?>>
+                                <label class="custom-control-label" for="smtp">SMTP</label>
+                              </div>
+                              <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="api" name="mail_type" value="api" class="custom-control-input" <?= $record['mail_type']=='api'?'checked':''; ?>>
+                                <label class="custom-control-label" for="api">API</label>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         <div class="col-md-12">

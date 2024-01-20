@@ -398,30 +398,33 @@ class Settings extends CI_Controller {
 			'company_address' => $business['company_address']
 		];
 		$htmlContent = $this->load->view('app/mail/otp-mail-template', $email_html, true);
-		// $config_arr=[
-		// 	'api_url' => $site_data['out_smtp'],
-		// 	'sender_address' => $site_data['smtp_email'],
-		// 	'to_address' => $user['email'],
-		// 	'subject' => 'Verify OTP to update your profile!',
-		// 	'body' => $htmlContent,
-		// 	'api_key' => $site_data['smtp_pass'],
-		// 	'to_name' => $user['firstname']??'Simran Group'
-		// ];
+		if ($site_data['mail_type'] == 'api') {
+			$config_arr=[
+				'api_url' => $site_data['out_smtp'],
+				'sender_address' => $site_data['smtp_email'],
+				'to_address' => $user['email'],
+				'subject' => 'Verify OTP to update your profile!',
+				'body' => $htmlContent,
+				'api_key' => $site_data['smtp_pass'],
+				'to_name' => $user['firstname']??'Simran Group'
+			];
 
-		// $email_response = sendMailViaApi($config_arr);
+			$email_response = sendMailViaApi($config_arr);
+		} else {
+			$config_arr=[
+				'out_smtp' => $site_data['out_smtp'],
+				'smtp_port' => $site_data['smtp_port'],
+				'smtp_email' => $site_data['smtp_email'],
+				'smtp_pass' => $site_data['smtp_pass'],
+				'app_name' => 'Simrangroups',
+				'subject' => 'Use this OTP to update your profile!',
+				'body' => $htmlContent,
+				'email' => $user['email'],
+			];
 
-		$config_arr=[
-			'out_smtp' => $site_data['out_smtp'],
-			'smtp_port' => $site_data['smtp_port'],
-			'smtp_email' => $site_data['smtp_email'],
-			'smtp_pass' => $site_data['smtp_pass'],
-			'app_name' => 'Simrangroups',
-			'subject' => 'Use this OTP to update your profile!',
-			'body' => $htmlContent,
-			'email' => $user['email'],
-		];
-
-		$email_response = sendMailViaSMTP($config_arr);
+			$email_response = sendMailViaSMTP($config_arr);
+		}
+		
 	}
 
 	public function sendOTPSms($user_id=[], $otp='')

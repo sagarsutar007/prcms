@@ -84,6 +84,11 @@ class Candidates_model extends CI_Model {
 		return $this->db->insert_id();
 	}
 
+	public function updateFilename ($userid='', $newFilename=''){
+		$this->db->update('candidates', ['profile_img' => $newFilename], ['id'=>$userid]);
+		return $this->db->affected_rows();
+	}
+
 	public function get($value='')
 	{
 		$this->db->select('c.*');

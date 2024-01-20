@@ -182,29 +182,29 @@
     <script src="<?= base_url('assets/admin/js/adminlte.min.js'); ?>"></script>
     <script>
       $(document).ready(function() {
-		  		const examQuestions = <?= json_encode($queIds); ?>;
-		      const examStartTime = new Date('<?= $exam_info['exam_datetime']; ?>').getTime();
-		      const examDuration = <?= $exam_info['duration']; ?> * 60;
-		      const timerElement = document.getElementById('countdown');
-					const _questionsArr = <?= json_encode($questions); ?>;
-					let arrIndex = 0;
-					var serverTime = <?= $now = time() * 1000; ?>;
-					
-					function updateTimer() {
-						serverTime += 1000;
-		        var now = serverTime; 
-						const timeRemaining = examStartTime + examDuration * 1000 - now;
-						if (timeRemaining < 0) {
-							timerElement.innerText = 'Time is up!';
-							window.location.href = "<?= base_url('exams/'. $exam_info['id'] .'/view-result'); ?>";
-						} else {
-							const minutes = Math.floor(timeRemaining / (1000 * 60));
-							const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-							timerElement.innerText = minutes + 'm ' + seconds + 's';
-						}
-					}
-	        updateTimer();
-	        setInterval(updateTimer, 1000);
+			const examQuestions = <?= json_encode($queIds); ?>;
+			const examStartTime = new Date('<?= $exam_info['exam_datetime']; ?>').getTime();
+			const examDuration = <?= $exam_info['duration']; ?> * 60;
+			const timerElement = document.getElementById('countdown');
+			const _questionsArr = <?= json_encode($questions); ?>;
+			let arrIndex = 0;
+			var serverTime = <?= $now = time() * 1000; ?>;
+
+			function updateTimer() {
+				serverTime += 1000;
+				var now = serverTime; 
+				const timeRemaining = examStartTime + examDuration * 1000 - now;
+				if (timeRemaining < 0) {
+					timerElement.innerText = 'Time is up!';
+					window.location.href = "<?= base_url('exams/'. $exam_info['id'] .'/view-result'); ?>";
+				} else {
+					const minutes = Math.floor(timeRemaining / (1000 * 60));
+					const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+					timerElement.innerText = minutes + 'm ' + seconds + 's';
+				}
+			}
+			updateTimer();
+			setInterval(updateTimer, 1000);
 
 			function setSameHeight() {
 				var height1 = $('#column1 .card').height();
@@ -435,16 +435,16 @@
 			        url: '<?= base_url('exams/submitAnswer'); ?>',
 			        method: 'POST',
 			        data: {
-									"answerId" : answer_id,
-									"examId" : examId,
-									"currentQuestionId" : currentQuestionId,
-							},
-			    success: function(response) {
+						"answerId" : answer_id,
+						"examId" : examId,
+						"currentQuestionId" : currentQuestionId,
+					},
+					success: function(response) {
 						const parsedResponse = JSON.parse(response);
-						if (parsedResponse.status == 'SUCCESS') {
-
+						if (parsedResponse.status == 'ERROR') {
+							window.location.href = "<?= base_url('exams/'. $exam_info['id'] .'/view-result'); ?>";
 						}
-			    }
+					}
 				});
 			}
 	    });
@@ -454,10 +454,10 @@
 			//     window.location.href = '<?= base_url("exams/" . $exam_info["id"] . "/view-result"); ?>';
 			//   }
 			// });
-				window.onbeforeunload = function() {
-            var confirmationMessage = "Are you sure you want to reload?";
-            return confirmationMessage;
-        };
+		// window.onbeforeunload = function() {
+		// 	var confirmationMessage = "Are you sure you want to reload?";
+		// 	return confirmationMessage;
+		// };
 
         // JavaScript to prevent right-click context menu
         document.addEventListener('contextmenu', function (e) {

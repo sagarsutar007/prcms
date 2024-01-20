@@ -25,6 +25,18 @@ class Exams extends CI_Controller {
 		$this->load->model('Managers_model', 'manager_model');
 	}
 
+	public function updateAnonymous(){
+		$candidates = $this->candidate_model->get();
+		foreach ($candidates as $key => $obj) {
+			if (!empty($obj['profile_img'])) {
+				$originalFilename = $obj['profile_img'];
+				$newFilename = str_replace('_thumb', '', $originalFilename);
+				
+				createThumbnail($newFilename);
+			}
+		}
+	}
+
 	public function isValidUser($value='')
 	{
 		if (!$this->session->has_userdata('id')) {
@@ -228,6 +240,152 @@ class Exams extends CI_Controller {
 		$this->load->view('app/manage-exam', $data);
 	}
 
+	public function editSettings($value='') {
+		$this->isAdminOrManager();
+		$data['exam'] = $this->exam_model->get($value);
+		if (!$data['exam']) {
+			$this->session->set_flashdata('error', 'Exam does not exists in our portal!'); 
+			redirect('/exams'); 
+		}
+		$data['title'] = 'Edit Exam Settings';
+
+		$this->load->view('app/manage-exam-settings', $data);
+	}
+
+	public function changeCandidatesPassword($value='') {
+		$this->isAdminOrManager();
+		$exam = $this->exam_model->get($value);
+		if (!$exam) {
+			$this->session->set_flashdata('warning', 'Exam does not exists in our portal!'); 
+			redirect('/exams'); 
+		}
+
+		if ($this->input->method() != 'post') {
+			$this->session->set_flashdata('warning', 'Invalid request!'); 
+			redirect('/exams'); 
+		}
+
+		$post = $this->input->post();
+		$examTimestamp = strtotime($exam['exam_datetime']);
+		$currentTimestamp = time();
+
+		if ($currentTimestamp > $examTimestamp && $exam['status'] == 'scheduled') {
+			$this->session->set_flashdata('warning', 'Passwords did not change because exam has been conducted!'); 
+			redirect('/exam/'.$value.'/exam-settings');
+		}
+
+		$this->form_validation->set_rules('password', 'Password', 'required');
+		$this->form_validation->set_rules('conf_pass', 'Confirm Password', 'required|matches[password]');
+
+		if ($this->form_validation->run() == TRUE) { 
+			$res = $this->exam_model->updateExamCandidatesPassword($value, $post['password']);
+			if ($res) {
+				$this->session->set_flashdata('success', 'Passwords changed of exam candidates!'); 
+			} else {
+				$this->session->set_flashdata('error', 'Passwords changing failed of exam candidates! Same password is already there.'); 
+			}
+			redirect('/exam/'.$value.'/exam-settings');
+		} else {
+			$this->session->set_flashdata('warning', 'Passwords did not match!'); 
+			redirect('/exam/'.$value.'/exam-settings');
+		}
+	}
+
+	public function stopExam($value='') {
+		$this->isAdminOrManager();
+		$exam = $this->exam_model->get($value);
+		if (!$exam) {
+			$this->session->set_flashdata('warning', 'Exam does not exists in our portal!'); 
+			redirect('/exams'); 
+		}
+
+		if ($this->input->method() != 'post') {
+			$this->session->set_flashdata('warning', 'Invalid request!'); 
+			redirect('/exams'); 
+		}
+
+		$post = $this->input->post();
+		$examStartTimestamp = strtotime($exam['exam_datetime']);
+		$examEndTimestamp = strtotime($exam['exam_endtime']);
+		$currentTimestamp = time();
+		
+		if (
+			$currentTimestamp > $examStartTimestamp && 
+			$currentTimestamp < $examEndTimestamp && $exam['status'] == 'scheduled'
+		) {
+			// Exam is currently running. Stop it.
+			$this->form_validation->set_rules('confirm_stop', 'STOP textbox', 'required');
+
+			if ($this->form_validation->run() == TRUE) { 
+				if ($post['confirm_stop'] == 'STOP') {
+					$arr = [
+						'left_at' => date('Y-m-d h:i:s')
+					];
+					$res = $this->exam_model->updateCandidatesExamInfo($arr, $value);
+					$this->session->set_flashdata('success', 'Exam is stopped, all candidates will leave exam automatically!'); 
+					redirect('/exam/'.$value.'/exam-settings');
+				} else {
+					$this->session->set_flashdata('warning', 'Please write STOP in the textbox!'); 
+					redirect('/exam/'.$value.'/exam-settings');
+				}
+			} else {
+				$this->session->set_flashdata('warning', 'Please enter STOP in the textbox!'); 
+				redirect('/exam/'.$value.'/exam-settings');
+			}
+		} else {
+			$this->session->set_flashdata('warning', 'Can not stop exam!'); 
+			redirect('/exam/'.$value.'/exam-settings');
+		}
+		
+	}
+
+	public function startExamRepair($value='') {
+		$this->isAdminOrManager();
+		$data = [];
+		$exam = $this->exam_model->get($value);
+		if (!$exam) {
+			$data = ['status' => 'ERROR', 'message' => 'Exam does not exists in our portal!']; 
+			echo json_encode($data);
+			return;
+		}
+
+		$examStartTimestamp = strtotime($exam['exam_datetime']);
+		$examEndTimestamp = strtotime($exam['exam_endtime']);
+		$currentTimestamp = time();
+
+		if ($currentTimestamp > $examEndTimestamp && $exam['status'] == 'scheduled') {
+			$data = ['status' => 'SUCCESS', 'message' => 'Exam is over!']; 
+		} else {
+			$data = ['status' => 'ERROR', 'message' => 'Exam is either not stopped or over!'];
+		}
+
+		echo json_encode($data);
+	}
+
+	public function RepairExamCandidates($value='') {
+		$this->isAdminOrManager();
+		$data = [];
+		$exam = $this->exam_model->get($value);
+		if (!$exam) {
+			$data = ['status' => 'ERROR', 'message' => 'Exam does not exists in our portal!']; 
+			echo json_encode($data);
+			return;
+		}
+		$arr = [
+			'left_at' => $exam['exam_endtime']
+		];
+
+		$res = $this->exam_model->updateCandidatesExamLeftInfo($arr, $value);
+
+		if ($res) {
+			$data = ['status' => 'SUCCESS', 'message' => 'Successfully updated exam information!']; 
+		} else {
+			$data = ['status' => 'ERROR', 'message' => 'Nothing to update!'];
+		}
+
+		echo json_encode($data);
+	}
+
 	public function addQuestions($value='')
 	{
 		$this->isAdminOrManager();
@@ -302,10 +460,8 @@ class Exams extends CI_Controller {
 	    $columnName = $this->input->post('columns')[$columnIndex]['data'];
 	    $columnSortOrder = $order[0]['dir'];
 		$exams = $this->exam_model->get($exam_id);
-
-		$recordsTotal =  $this->candidate_model->count($exams['company_id']);
 		$data = $this->exam_model->getExamCandidates($exam_id, $length, $start, $exams['company_id'], 'active', $search, $columnName, $columnSortOrder);
-		// var_dump($data); exit();
+		$recordsTotal =  count($data);
 		$result = array();
 		$i = 1 + $start;
 		foreach ($data as $record) {
@@ -315,6 +471,7 @@ class Exams extends CI_Controller {
 				'Name' => ucwords($record['firstname'] . " " . $record['middlename'] . " " . $record['lastname']),
 				'Phone' => $record['phone'],
 				'Email' => $record['email'],
+				'Employee Id' => $record['empid'],
 				'Registered' => date('d-m-Y h:i', strtotime($record['created_at'])),
 				'SMS Sent' => $record['sms_sent'],
 				'Email Sent' => $record['email_sent'],
@@ -454,21 +611,27 @@ class Exams extends CI_Controller {
 	public function showQuestionScreen($value='')
 	{
 		$this->isValidCandidate();
-
+		//Check if exam exists
 		$data['exam_info'] = $this->exam_model->getFromUrl($value);
 		if (!$data['exam_info']) { redirect('logout'); }
+		//Check if exam is scheduled or not
 		if ($data['exam_info']['status'] != 'scheduled') {
 			$this->session->set_flashdata('error', 'This exam is now ' . $data['exam_info']['status']);
 			redirect('dashboard');
 		}
+		//Check if exam is over or not
 		if ( time() > strtotime($data['exam_info']['exam_endtime']) ) { 
 			$this->session->set_flashdata('error', 'Exam time has been passed!'); 
 			redirect('dashboard'); 
 		}
+
+		$token = uniqid();
+		
 		$can['exam_id'] = $data['exam_info']['id'];
 		$can['user_id'] = $this->session->userdata('id');
 		$can['entered_at'] = date('Y-m-d H:i:s');
-
+		
+		//Check if exam candidate is assigned to that exam
 		$arr = [
 			'candidate_id' => $can['user_id'],
 			'exam_id' => $can['exam_id']
@@ -476,10 +639,33 @@ class Exams extends CI_Controller {
 		$valid_cand = $this->exam_model->isExamAndCandidateExists($arr);
 		if (!$valid_cand) { $this->session->set_flashdata('error', 'You are not allowed to appear in this exam!'); }
 
+		//Set first time entry
 		$exam_appeared = $this->exam_model->checkCandidateExamInfo($can);
-		if (!$exam_appeared) { $this->exam_model->setCandidateExamInfo($can); }
-		if (!empty($exam_appeared['left_at']) && $exam_appeared['re_entry'] == "false") {
-			redirect('exams/'.$data['exam_info']['id'].'/view-result');
+		if (!$exam_appeared) { 
+			$cookie_data = array(
+				'name'   => 'exam_entry',
+				'value'  => $token,
+				'expire' => $data['exam_info']['duration'] * 60,  
+				'path'   => '/', 
+				'secure' => TRUE,
+				'httponly' => TRUE
+			);
+
+			set_cookie($cookie_data);
+			$can['exam_token'] = $token;
+			$this->exam_model->setCandidateExamInfo($can); 
+		} else {
+			$exam_token = $this->input->cookie('exam_entry', TRUE);
+			if (!empty($exam_appeared['left_at']) && $exam_appeared['re_entry'] == "false") {
+				redirect('exams/'.$data['exam_info']['id'].'/view-result');
+			} else if ($exam_appeared['exam_token'] != $exam_token) {
+				$this->session->set_flashdata('error', 'Exam is going on in another device!');
+				redirect('exams/ongoing');
+			} else {
+				$userarr['left_at'] = null;
+				$userarr['re_entry'] = 'false';
+				$this->exam_model->updateCandidateExamInfo($userarr, $exam_appeared['id']); 
+			}
 		}
 		
 		$questions = [];
@@ -612,50 +798,55 @@ class Exams extends CI_Controller {
 			$temp['status'] = 'unknown';
 			$data['ans_type'] = 'not answered';
 
-			if (isset($post['answerId'])) {
-				$temp['answer_id'] = $post['answerId'];
-				$data['ans_type'] = 'answered';
+			$exam_appeared = $this->exam_model->checkCandidateExamInfo($temp);
+			if (!empty($exam_appeared['left_at']) && $exam_appeared['re_entry'] == "false") {
+				$data['status'] = "ERROR";
+				$data['message'] = "Show result page!";
+			} else {
+				if (isset($post['answerId'])) {
+					$temp['answer_id'] = $post['answerId'];
+					$data['ans_type'] = 'answered';
 
-				$question = $this->question_model->getQuestion($temp['question_id']);
-				
-				if ($question['question_type'] == 'mcq') {
-					$ans = $this->answer_model->theCorrectAnswer($temp['question_id']);
-					$temp['status'] = ($ans['id'] == $post['answerId'])?'correct':'incorrect';
-					$this->exam_model->deleteAnswer($temp);
-					$last_id = $this->exam_model->submitAnswer($temp);
-				} else if ($question['question_type'] == 'multi-select') {
-					$ansExists = $this->exam_model->checkAnswerExists($temp);
-					if ($ansExists) {
-						$this->exam_model->deleteAnswerById($ansExists['id']);
-						$last_id = $ansExists['id'];
-					} else {
-						$answers = $this->answer_model->theCorrectAnswers($temp['question_id']);
-						$ansIdArr = [];
-						foreach ($answers as $answersKey => $answerObj) {
-							$ansIdArr[] = $answerObj['id'];
-						}
-						if (in_array($post['answerId'], $ansIdArr)) {
-							$temp['status']='correct';
+					$question = $this->question_model->getQuestion($temp['question_id']);
+					
+					if ($question['question_type'] == 'mcq') {
+						$ans = $this->answer_model->theCorrectAnswer($temp['question_id']);
+						$temp['status'] = ($ans['id'] == $post['answerId'])?'correct':'incorrect';
+						$this->exam_model->deleteAnswer($temp);
+						$last_id = $this->exam_model->submitAnswer($temp);
+					} else if ($question['question_type'] == 'multi-select') {
+						$ansExists = $this->exam_model->checkAnswerExists($temp);
+						if ($ansExists) {
+							$this->exam_model->deleteAnswerById($ansExists['id']);
+							$last_id = $ansExists['id'];
 						} else {
-							$temp['status']='incorrect';
+							$answers = $this->answer_model->theCorrectAnswers($temp['question_id']);
+							$ansIdArr = [];
+							foreach ($answers as $answersKey => $answerObj) {
+								$ansIdArr[] = $answerObj['id'];
+							}
+							if (in_array($post['answerId'], $ansIdArr)) {
+								$temp['status']='correct';
+							} else {
+								$temp['status']='incorrect';
+							}
+							
+							$last_id = $this->exam_model->submitAnswer($temp);
 						}
-						
+					} else {
+						$temp['answer_id'] = addslashes(strip_tags(trim($post['answerId'])));
 						$last_id = $this->exam_model->submitAnswer($temp);
 					}
+				}
+				
+				if ($last_id) {
+					$data['status'] = "SUCCESS";
+					$data['message'] = "Answer stored successfully!";
 				} else {
-					$temp['answer_id'] = addslashes(strip_tags(trim($post['answerId'])));
-					$last_id = $this->exam_model->submitAnswer($temp);
+					$data['status'] = "ERROR";
+					$data['message'] = "Something went wrong!";
 				}
 			}
-			
-			if ($last_id) {
-				$data['status'] = "SUCCESS";
-				$data['message'] = "Answer stored successfully!";
-			} else {
-				$data['status'] = "ERROR";
-				$data['message'] = "Something went wrong!";
-			}
-
 		} else {
 			$data['status'] = "ERROR";
 			$data['message'] = "Something went wrong!";
@@ -977,9 +1168,8 @@ class Exams extends CI_Controller {
 						'business_name' => $business['company_name']??$site_data['app_name'],
 						'business_addr' => $business['company_address']??'',
 						'exam_login_url' => base_url('e/'.$exam_details['url']),
-					];
-			
-					$inputString = $site_data['candidate_login_mail'];
+					];			
+					$inputString = $site_data['scheduled_exam_mail'];
 					$replacementString = $inputString;
 	
 					foreach ($templateKeys as $key => $obj) {
@@ -998,31 +1188,34 @@ class Exams extends CI_Controller {
 					$email_html['data'] = $replacementString;
 					
 					$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
-					// $config_arr=[
-					// 	'api_url' => $site_data['out_smtp'],
-					// 	'sender_address' => $site_data['smtp_email'],
-					// 	'to_address' => $user_info['email'],
-					// 	'subject' => 'Account created successfully!',
-					// 	'body' => $htmlContent,
-					// 	'api_key' => $site_data['smtp_pass'],
-					// 	'to_name' => $user_info['firstname']
-					// ];
+					
+					if ($site_data['mail_type'] == 'api') {
+						$config_arr=[
+							'api_url' => $site_data['out_smtp'],
+							'sender_address' => $site_data['smtp_email'],
+							'to_address' => $user_info['email'],
+							'subject' => 'Scheduled Exam Remainder!',
+							'body' => $htmlContent,
+							'api_key' => $site_data['smtp_pass'],
+							'to_name' => $user_info['firstname']
+						];
 
-					// $email_response = sendMailViaApi($config_arr);
+						$email_response = sendMailViaApi($config_arr);
+					} else {
+						$config_arr=[
+							'out_smtp' => $site_data['out_smtp'],
+							'smtp_port' => $site_data['smtp_port'],
+							'smtp_email' => $site_data['smtp_email'],
+							'smtp_pass' => $site_data['smtp_pass'],
+							'app_name' => 'Simrangroups',
+							'subject' => 'Scheduled Exam Remainder!',
+							'body' => $htmlContent,
+							'email' => $user_info['email'],
+						];
 
-					$config_arr=[
-						'out_smtp' => $site_data['out_smtp'],
-						'smtp_port' => $site_data['smtp_port'],
-						'smtp_email' => $site_data['smtp_email'],
-						'smtp_pass' => $site_data['smtp_pass'],
-						'app_name' => 'Simrangroups',
-						'subject' => 'Scheduled Exam Remainder!',
-						'body' => $htmlContent,
-						'email' => $user_info['email'],
-					];
-
-					$email_response = sendMailViaSMTP($config_arr);
-	
+						$email_response = sendMailViaSMTP($config_arr);
+					}
+					
 					$n_data['type'] = 'email';
 					$n_data['user_id'] = $user_info['id'];
 					$n_data['notif_type'] = 'Exam Schedule';
@@ -1365,8 +1558,8 @@ class Exams extends CI_Controller {
 		$candArr = [];
 		foreach ($candidates as $key => $obj) {
 			$temp = $obj;
-			if (!empty($obj['profile_img']) && file_exists('./assets/img/'.$obj['profile_img'])) {
-				$temp['profile_img'] = base_url('assets/img/'.$obj['profile_img']);
+			if (!empty($obj['profile_img']) && file_exists('./assets/img/thumbnails/'.$obj['profile_img'])) {
+				$temp['profile_img'] = base_url('assets/img/thumbnails/'.$obj['profile_img']);
 			} else {
 				$temp['profile_img'] = base_url('assets/img/letter-p.png');
 			}
@@ -1434,10 +1627,7 @@ class Exams extends CI_Controller {
 		$data['absent'] = $absent;
 		$data['appearing'] = $appearing;
 		$data['submitted'] = $submitted;
-
-		// echo "<pre>";
-		// print_r($data);
-		// exit();
+		
 		$this->load->view('app/exam-dashboard', $data);
 	}
 
@@ -1499,12 +1689,35 @@ class Exams extends CI_Controller {
         $writer->save('php://output');
 	}
 
+	private function generateName($user_id='', $exam_id=''){
+		$candidate = $this->candidate_model->get($user_id);
+		$filename = $candidate['firstname'];
+		if(!empty($candidate['middlename'])) {
+			$filename .= " " . $candidate['middlename'];
+		}
+
+		if(!empty($candidate['lastname'])) {
+			$filename .= " " . $candidate['lastname'];
+		}
+
+		if(!empty($candidate['empid'])) {
+			$filename .= "-" . $candidate['empid'];
+		}
+		return strtolower(str_replace(" ", "_", $filename)) . '-' . $exam_id . ".pdf";
+	}
+
 	public function generateDetailedResult($exam_id='', $user_id='')
 	{
 		$this->isNotACandidate();
 		if (!isset($exam_id) || !isset($user_id)){ redirect('logout'); }
-		$filename = $user_id . '-' . $exam_id . '.pdf';
+		$filename = $this->generateName($user_id, $exam_id);
 	    $filepath = FCPATH . 'assets/admin/exams/' . $filename;
+		$arr = [
+			'exam_id'=> $exam_id,
+			'candidate_id'=> $user_id,
+		];
+		$val = $this->exam_model->isExamAndCandidateExists($arr);
+		if (!$val) { return false; }
 	    if (file_exists($filepath)) {
 	        return $filepath;
 	    } else {
@@ -1583,17 +1796,11 @@ class Exams extends CI_Controller {
 			$data['clients'] = rtrim($cli, ',');
 
 			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id'=>$exam_id, 'user_id'=>$user_id]);
-			
-			// $options = new Options();
-			// $options->set('isRemoteEnabled', true);
-			// $dompdf = new Dompdf($options);
 
 			$html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 			$mpdf->WriteHTML($html);
 			$output = $mpdf->Output('', 'S');
-			$filename = $data['user']['id'] . "-" . $data['exam']['id'] . ".pdf";
-			$filepath = FCPATH . 'assets/admin/exams/' . $filename;
 			file_put_contents($filepath, $output);
 
 		    $this->clearOlderFiles();
@@ -1604,35 +1811,39 @@ class Exams extends CI_Controller {
 	public function downloadResult($exam_id='')
 	{
 		$this->isAdminOrManager(true);
-		$data=[];
-		$outputPdf = 'assets/admin/exams/'.$exam_id.'.pdf';
+		$data = [];
+		$outputPdf = 'assets/admin/exams/' . $exam_id . '.pdf';
 		try {
 			$files = [];
 			if (!file_exists($outputPdf)) {
-
 				$pdf = new \Clegginabox\PDFMerger\PDFMerger;
 				$candidates = $this->exam_model->fetchExamCandidates($exam_id);
-				foreach ($candidates as $candidate => $cnd) {
-					$pdf_file = $this->generateDetailedResult($exam_id, $cnd['candidate_id']);
-					$pdf->addPDF($pdf_file, 'all');
-
-					$files[] = $pdf_file;
+				$batchSize = 10;
+				
+				foreach (array_chunk($candidates, $batchSize) as $batch) {
+					foreach ($batch as $candidate => $cnd) {
+						$pdf_file = $this->generateDetailedResult($exam_id, $cnd['candidate_id']);
+						$pdf->addPDF($pdf_file, 'all');
+						$files[] = $pdf_file;
+					}
 				}
 
-	            $pdf->merge('file', $outputPdf);
+				$pdf->merge('file', $outputPdf);
+				$pdf->newPDF();
+
+				$this->clearOlderFiles();
 			}
 
-			$this->clearOlderFiles();
-
-            $data['status'] = 'SUCCESS';
-            $data['message'] = 'Download Successfull!';
-            $data['file'] = base_url($outputPdf);
-            $data['files'] = $files;
+			$data['status'] = 'SUCCESS';
+			$data['message'] = 'Download Successful!';
+			$data['file'] = base_url($outputPdf);
+			$data['files'] = $files;
 		} catch (Exception $e) {
 			$data['error'] = $e->getMessage();
 		}
 		echo json_encode($data);
 	}
+
 
 	public function clearOlderFiles($value='')
 	{
@@ -1710,6 +1921,8 @@ class Exams extends CI_Controller {
 
 	    $this->clearOlderFiles();
 	}
+
+	
 }
 
 /* End of file Exams.php */

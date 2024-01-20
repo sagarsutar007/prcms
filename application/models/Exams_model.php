@@ -244,7 +244,6 @@ class Exams_model extends CI_Model {
 	    return $q->result_array();
 	}
 
-
 	public function getExamScheduledCandidates($exam_id='')
 	{
 		$sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`
@@ -534,7 +533,7 @@ class Exams_model extends CI_Model {
 			'user_id' => $data['user_id'],
 			'exam_id' => $data['exam_id']
 		];
-		$this->db->update('candidate_exam_records', ['re_entry' => 'true'], $arr);
+		$this->db->update('candidate_exam_records', ['re_entry' => 'true', 'left_at' => null], $arr);
 		return $this->db->affected_rows();
 	}
 
@@ -547,6 +546,18 @@ class Exams_model extends CI_Model {
 	public function updateCandidateExamInfo($data='', $id='')
 	{
 		$this->db->update('candidate_exam_records', $data, ['id'=>$id]);
+		return $this->db->affected_rows();
+	}
+
+	public function updateCandidatesExamInfo($data='', $id='')
+	{
+		$this->db->update('candidate_exam_records', $data, ['exam_id'=>$id]);
+		return $this->db->affected_rows();
+	}
+
+	public function updateCandidatesExamLeftInfo($data='', $id='')
+	{
+		$this->db->update('candidate_exam_records', $data, ['exam_id'=>$id, 'left_at'=>NULL]);
 		return $this->db->affected_rows();
 	}
 
@@ -728,6 +739,12 @@ class Exams_model extends CI_Model {
 		
 		$q = $this->db->get();
 		return $q->result_array();
+	}
+
+	public function updateExamCandidatesPassword($examid='', $password=''){
+		$sql = "UPDATE `candidates` SET `password`='".md5($password)."' WHERE id IN (SELECT candidate_id FROM `exam_candidates` WHERE exam_id = ".$examid.")";
+		$q = $this->db->query($sql);
+		return $this->db->affected_rows();
 	}
 }
 

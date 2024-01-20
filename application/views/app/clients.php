@@ -130,7 +130,7 @@
                           <?= $record['phone']; ?>
                       </td>
                       <td class="text-center">
-                        <a href="<?= base_url('client/view/').$record['id']; ?>" class="btn btn-link btn-sm " data-toggle="tooltip" data-placement="top" title="View"> <i class="fas fa-eye"></i> </a> / <a href="<?= base_url('client/edit/').$record['id']; ?>" class="btn btn-link btn-sm " data-toggle="tooltip" data-placement="top" title="Edit"> <i class="fas fa-edit"></i> </a> / <a href="<?= base_url('client/delete/').$record['id']; ?>" onClick="return confirm('This client will be deleted and can\'t be recovered. Are you sure to delete?');" class="btn btn-link btn-sm " data-toggle="tooltip" data-placement="top" title="Delete"> <i class="fas fa-trash"></i> </a>
+                        <a href="<?= base_url('client/view/').$record['id']; ?>" class="btn btn-link btn-sm" data-toggle="tooltip" data-placement="top" title="View"> <i class="fas fa-eye"></i> </a> / <a href="<?= base_url('client/edit/').$record['id']; ?>" class="btn btn-link btn-sm " data-toggle="tooltip" data-placement="top" title="Edit"> <i class="fas fa-edit"></i> </a> / <a href="<?= base_url('client/delete/').$record['id']; ?>" onClick="return confirm('This client will be deleted and can\'t be recovered. Are you sure to delete?');" class="btn btn-link btn-sm " data-toggle="tooltip" data-placement="top" title="Delete"> <i class="fas fa-trash"></i> </a>
                       </td>
                     </tr>
                     <?php $i++; } ?>

@@ -277,6 +277,10 @@ class Login extends CI_Controller {
 							$record['type'] = $type;
 							$this->session->set_userdata($record);
 							if ($value) {
+								$app_info = $this->Login_model->getApplicationInfo();
+
+								$this->session->set_userdata('app_name', $app_info['app_name']);
+								$this->session->set_userdata('app_icon', $app_info['app_icon']);
 								redirect('exams/'.$value.'/begin');
 							} else {
 								$logs_arr = [
@@ -284,6 +288,7 @@ class Login extends CI_Controller {
 									"user_id" => $record['id'],
 									"datetime" => date('Y-m-d H:i:s'),
 									"ip_address" => $this->getIpAddress(),
+									"mac_address" => $this->getMacAddress(),
 									"client" => $this->getBrowserInfo()
 								];
 								
@@ -336,10 +341,11 @@ class Login extends CI_Controller {
 		}
     }
 
-	public function forgotPassword($value='') {
+	public function forgotPassword($type='') {
 		$data['title'] = 'Forgot Password';
 		$data['app_info'] = $this->Login_model->getApplicationInfo();
-		$value = ($value=='business')?'business unit':$value;
+		$type = ($type=='business')?'business unit':$type;
+
 		if ($this->input->post()) {
 			$post = $this->input->post();
 			$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
@@ -347,48 +353,103 @@ class Login extends CI_Controller {
 				$post['email'] = strtolower($post['email']);
 				$data['email'] = $post['email'];
 
-				$record = $this->user_model->getByEmail($post['email'], $value);
+				$record = $this->user_model->getByEmail($post['email'], $type);
 
 				if (!$record) {
 					$this->session->set_flashdata('error', 'Email is not registered!');
-					redirect('candidate/forgot-password');
+					redirect($type . '/forgot-password');
 				}
 
 				$token = uniqid();
 				$indata['authtoken'] = $token;
-				$this->candidate_model->updateCandidate($indata, $record['id']);
-				$post['link'] = base_url($value.'/reset-password?token='.$token);
+				$this->user_model->updateUserData($indata, $record['id'], $type);
+				$post['link'] = base_url($type.'/reset-password?token='.$token);
+				$short_url = shortenLink($post['link']);
+				$surl_arr = json_decode($short_url, true);				
+				$post['short_url'] = ($surl_arr=='SUCCESS')?$surl_arr['link']:'';
 				$post['firstname'] = $record['firstname'];
 				$htmlContent = $this->load->view('app/mail/reset-password', $post, true);
-				// $config_arr=[
-				// 	'api_url' => $data['app_info']['out_smtp'],
-				// 	'sender_address' => $data['app_info']['smtp_email'],
-				// 	'to_address' => $post['email'],
-				// 	'subject' => 'Reset Password Link!',
-				// 	'body' => $htmlContent,
-				// 	'api_key' => $data['app_info']['smtp_pass'],
-				// 	'to_name' => $post['firstname']??'Simran Group'
-				// ];
 
-				// $email_response = sendMailViaApi($config_arr);
+				if ($data['app_info']['mail_type'] == 'api') {
+					$config_arr=[
+						'api_url' => $data['app_info']['out_smtp'],
+						'sender_address' => $data['app_info']['smtp_email'],
+						'to_address' => $post['email'],
+						'subject' => 'Reset Password Link!',
+						'body' => $htmlContent,
+						'api_key' => $data['app_info']['smtp_pass'],
+						'to_name' => $post['firstname']??'Simran Group'
+					];
 
-				$config_arr=[
-					'out_smtp' => $data['app_info']['out_smtp'],
-					'smtp_port' => $data['app_info']['smtp_port'],
-					'smtp_email' => $data['app_info']['smtp_email'],
-					'smtp_pass' => $data['app_info']['smtp_pass'],
-					'app_name' => 'Simrangroups',
-					'subject' => 'Reset Password Link!',
-					'body' => $htmlContent,
-					'email' => $post['email'],
+					$email_response = sendMailViaApi($config_arr);
+				} else {
+					$config_arr=[
+						'out_smtp' => $data['app_info']['out_smtp'],
+						'smtp_port' => $data['app_info']['smtp_port'],
+						'smtp_email' => $data['app_info']['smtp_email'],
+						'smtp_pass' => $data['app_info']['smtp_pass'],
+						'app_name' => 'Simrangroups',
+						'subject' => 'Reset Password Link!',
+						'body' => $htmlContent,
+						'email' => $post['email'],
+					];
+
+					$email_response = sendMailViaSMTP($config_arr);	
+				}
+				
+				$templateKeys = [
+					'name' => $record['firstname'] ." " . $record['middlename'] ." " . $record['lastname'],
+					'firstname' => $record['firstname'],
+					'middlename' => $record['middlename'],
+					'lastname' => $record['lastname'],
+					'company_name' => $data['app_info']['app_name'],
+					'login_url' => $data['app_info']['cl_shortlink'],
+					'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
+					'exam_date' => '',
+					'exam_time' => '',
+					'exam_datetime' => '',
+					'business_name' => $business['company_name']??$data['app_info']['app_name'],
+					'business_addr' => $business['company_address']??'',
+					'exam_login_url' => '',
+					'reset_password_url' => $post['short_url']
 				];
 
-				$email_response = sendMailViaSMTP($config_arr);	
+				$inputString = $data['app_info']['fp_sms'];
+				$replacementString = $inputString;
 
-				$this->session->set_flashdata('success', 'Reset link has been sent to your email!');
+				foreach ($templateKeys as $key => $obj) {
+					$placeholder = '${' . $key . '}';
+					if (!empty($obj)){
+						$replacementString = str_replace($placeholder, $obj, $replacementString);
+					} else {
+						$replacementString = str_replace($placeholder, '', $replacementString);
+					}
+				}
+
+				$url = 'http://www.text2india.store/vb/apikey.php';
+
+				$params = [
+					'apikey' => $data['app_info']['sms_api_key'],
+					'senderid' => $data['app_info']['sms_sender_id'],
+					'templateid' => $data['app_info']['fp_sms_tempid'],
+					'number' => $record['phone'],
+					'message' => $replacementString,
+				];
+
+				$url .= '?' . http_build_query($params);
+				
+				$curl = curl_init();
+				curl_setopt_array($curl, array(
+					CURLOPT_URL => $url,
+					CURLOPT_RETURNTRANSFER => true,
+				));
+				$response = curl_exec($curl);
+
+				$this->session->set_flashdata('success', 'Reset link has been sent to you!');
 				redirect('candidate-login');
 			}
 		}
+
 		$this->load->view('forgot-password', $data);
 	}
 
@@ -437,6 +498,14 @@ class Login extends CI_Controller {
 		return $deviceType;
 	}
 
+	public function getMacAddress() {
+		ob_start();
+		system('getmac');
+		$Content = ob_get_contents();
+		ob_clean();
+		return substr($Content, strpos($Content,'\\')-20, 17);
+	}
+
 	public function updateProfilePhoto($value='') {
 		if (!$this->session->has_userdata('id')) { redirect('logout'); }
 		$data['candidate'] = $this->candidate_model->get($this->session->userdata('id'));
@@ -472,6 +541,7 @@ class Login extends CI_Controller {
 
 		$this->load->view('candidate-profile-img', $data);
 	}
+
 }
 
 /* End of file Login.php */

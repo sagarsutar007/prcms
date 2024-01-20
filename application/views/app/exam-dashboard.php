@@ -287,7 +287,8 @@
                                     <tr>
                                         <td><?= $i; ?></td>
                                         <td>
-                                            <div class="">
+                                            <div class="d-flex align-items-center">
+                                                <img src="<?= $record['profile_img']; ?>" class="mr-2" width="30px" height="30px" alt="">
                                                 <?= ucfirst(str_replace(".", "", $record['name'])); ?>
                                             </div>
                                         </td>
@@ -302,14 +303,13 @@
                                         </td>
                                         <td>
                                             <?php 
-                                            $now = time();
-                                            $exm_time = strtotime($exam['exam_endtime']);
-                                            if ($record['status'] == "Appearing" && $now > $exm_time ) {
-                                                echo "Submitted";
-                                            } else {
-                                                echo $record['status']; 
-                                            }
-                                            
+                                                $now = time();
+                                                $exm_time = strtotime($exam['exam_endtime']);
+                                                if ($record['status'] == "Appearing" && $now > $exm_time ) {
+                                                    echo "Submitted";
+                                                } else {
+                                                    echo $record['status']; 
+                                                }
                                             ?>
                                         </td>
                                         <td>
@@ -318,13 +318,13 @@
                                         <td><?= number_format($record['percentage'], 2); ?>%</td>
                                         <td><?= $record['result']; ?></td>
                                         <td>
-                                            <a href="<?= base_url('candidate/view-exam-result?examid='.$exam_id.'&userid='.$record['id']); ?>" class="btn btn-link">
+                                            <a href="<?= base_url('candidate/view-exam-result?examid='.$exam_id.'&userid='.$record['id']); ?>" data-toggle="tooltip" data-placement="top" title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="<?= base_url('exams/enable-rentry?examid='.$exam_id.'&userid='.$record['id']); ?>" class="btn btn-link">
+                                            <a href="<?= base_url('exams/enable-rentry?examid='.$exam_id.'&userid='.$record['id']); ?>" data-toggle="tooltip" data-placement="top" title="Enable Re-entry">
                                                 <i class="fas fa-pen"></i>
                                             </a>
-                                            <a target="_blank" href="<?= base_url('candidate/generate-candidate-result?examid='.$exam_id.'&userid='.$record['id']); ?>"><i class="fas fa-download"></i></a>
+                                            <a target="_blank" href="<?= base_url('candidate/generate-candidate-result?examid='.$exam_id.'&userid='.$record['id']); ?>"  data-toggle="tooltip" data-placement="top" title="Download PDF"><i class="fas fa-download"></i></a>
                                         </td>
                                     </tr>
                                     <?php $i++; } ?>
@@ -376,8 +376,14 @@
         setTimeout(reloadPage, 300000);
 
         $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+            
             $("#data-table").DataTable({
-               "responsive": true, "lengthChange": true, "autoWidth": false, "paging": true,
+               "responsive": true, 
+               "lengthChange": false, 
+               "autoWidth": false, 
+               "paging": false,
+               "scrollY": 400,
                "lengthMenu": [
                     [ 10, 25, 50, 100, 500, 1000,  -1 ],
                     [ '10', '25',  '50', '100', '500', '1000', 'All' ]

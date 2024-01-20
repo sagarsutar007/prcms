@@ -46,7 +46,13 @@ class Signup extends CI_Controller {
 
 			        $this->upload->initialize($config);
 					if ($this->upload->do_upload('profile_img')) {
-			            $post['profile_img'] = $this->upload->data('file_name');
+			            $image = $this->upload->data('file_name');
+						$thumb = createThumbnail($image);
+						if ($thumb) {
+							$post['profile_img'] = $thumb;
+						} else {
+							$post['profile_img'] = $image;
+						}
 			        }
 		        }
 
@@ -283,30 +289,32 @@ class Signup extends CI_Controller {
 
 					$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
 
-					// $config_arr=[
-					// 	'api_url' => $app_info['out_smtp'],
-					// 	'sender_address' => $app_info['smtp_email'],
-					// 	'to_address' => $get_candidate['email'],
-					// 	'subject' => 'Account created successfully!',
-					// 	'body' => $htmlContent,
-					// 	'api_key' => $app_info['smtp_pass'],
-					// 	'to_name' => $get_candidate['firstname']??'Simran Group'
-					// ];
+					if ($app_info['mail_type'] == 'api') {
+						$config_arr=[
+							'api_url' => $app_info['out_smtp'],
+							'sender_address' => $app_info['smtp_email'],
+							'to_address' => $get_candidate['email'],
+							'subject' => 'Your account is now created!',
+							'body' => $htmlContent,
+							'api_key' => $app_info['smtp_pass'],
+							'to_name' => $get_candidate['firstname']??'Simran Group'
+						];
 
-					// $email_response = sendMailViaApi($config_arr);
+						$email_response = sendMailViaApi($config_arr);
+					} else {
+						$config_arr=[
+							'out_smtp' => $app_info['out_smtp'],
+							'smtp_port' => $app_info['smtp_port'],
+							'smtp_email' => $app_info['smtp_email'],
+							'smtp_pass' => $app_info['smtp_pass'],
+							'app_name' => 'Simrangroups',
+							'subject' => 'Your account is now created!',
+							'body' => $htmlContent,
+							'email' => $get_candidate['email'],
+						];
 
-					$config_arr=[
-						'out_smtp' => $app_info['out_smtp'],
-						'smtp_port' => $app_info['smtp_port'],
-						'smtp_email' => $app_info['smtp_email'],
-						'smtp_pass' => $app_info['smtp_pass'],
-						'app_name' => 'Simrangroups',
-						'subject' => 'Account created successfully!',
-						'body' => $htmlContent,
-						'email' => $get_candidate['email'],
-					];
-
-					$email_response = sendMailViaSMTP($config_arr);
+						$email_response = sendMailViaSMTP($config_arr);
+					}
 
 					$n_data['type'] = 'email';
 					$n_data['user_id'] = $user_id;
@@ -469,9 +477,7 @@ class Signup extends CI_Controller {
 
 		$this->load->view('signup-client', $data, FALSE);
 	}
-
 	
-
 }
 
 /* End of file  */

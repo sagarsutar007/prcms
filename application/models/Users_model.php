@@ -205,6 +205,21 @@ class Users_model extends CI_Model {
 
 		return $query->row_array();
 	}
+
+	public function updateUserData($data=[], $userid='', $type='') {
+		
+		if ($type=='admin') {
+			$table = 'users';
+		} else if ($type=='business unit') {
+			$table = 'business_units';
+		} else if ($type=='client') {
+			$table = 'clients';
+		} else {
+			$table = 'candidates';
+		}
+		$this->db->update($table, $data, ['id' => $userid]);
+		return $this->db->affected_rows();
+	}
 }
 
 /* End of file Users_model.php */

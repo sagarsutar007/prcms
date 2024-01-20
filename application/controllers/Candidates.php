@@ -138,7 +138,13 @@ class Candidates extends CI_Controller {
 
 		        if (!empty($_FILES['profile_img_file'])) {
 					if ($this->upload->do_upload('profile_img_file')) {
-			            $userInfo['profile_img'] = $this->upload->data('file_name');
+			            $image = $this->upload->data('file_name');
+						$thumb = createThumbnail($image);
+						if ($thumb) {
+							$userInfo['profile_img'] = $thumb;
+						} else {
+							$userInfo['profile_img'] = $image;
+						}
 			        }
 		        }
 
@@ -262,30 +268,33 @@ class Candidates extends CI_Controller {
 
 							$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
 
-							// $config_arr=[
-							// 	'api_url' => $site_data['out_smtp'],
-							// 	'sender_address' => $site_data['smtp_email'],
-							// 	'to_address' => $userInfo['email'],
-							// 	'subject' => 'Account created successfully!',
-							// 	'body' => $htmlContent,
-							// 	'api_key' => $site_data['smtp_pass'],
-							// 	'to_name' => $userInfo['firstname']
-							// ];
+							if ($site_data['mail_type'] == 'api') {
+								$config_arr=[
+									'api_url' => $site_data['out_smtp'],
+									'sender_address' => $site_data['smtp_email'],
+									'to_address' => $userInfo['email'],
+									'subject' => 'Account created successfully!',
+									'body' => $htmlContent,
+									'api_key' => $site_data['smtp_pass'],
+									'to_name' => $userInfo['firstname']
+								];
 
-							// $email_response = sendMailViaApi($config_arr);
+								$email_response = sendMailViaApi($config_arr);
+							} else {
+								$config_arr=[
+									'out_smtp' => $site_data['out_smtp'],
+									'smtp_port' => $site_data['smtp_port'],
+									'smtp_email' => $site_data['smtp_email'],
+									'smtp_pass' => $site_data['smtp_pass'],
+									'app_name' => 'Simrangroups',
+									'subject' => 'Account created successfully!',
+									'body' => $htmlContent,
+									'email' => $userInfo['email'],
+								];
 
-							$config_arr=[
-								'out_smtp' => $site_data['out_smtp'],
-								'smtp_port' => $site_data['smtp_port'],
-								'smtp_email' => $site_data['smtp_email'],
-								'smtp_pass' => $site_data['smtp_pass'],
-								'app_name' => 'Simrangroups',
-								'subject' => 'Account created successfully!',
-								'body' => $htmlContent,
-								'email' => $userInfo['email'],
-							];
-
-							$email_response = sendMailViaSMTP($config_arr);
+								$email_response = sendMailViaSMTP($config_arr);
+							}
+							
 
 							$n_data['type'] = 'email';
 							$n_data['text'] = htmlspecialchars($htmlContent);
@@ -418,7 +427,13 @@ class Candidates extends CI_Controller {
 				$userInfo['password'] = $this->input->post('password');
 		        if (!empty($_FILES['profile_img_file'])) {
 					if ($this->upload->do_upload('profile_img_file')) {
-			            $userInfo['profile_img'] = $this->upload->data('file_name');
+			            $image = $this->upload->data('file_name');
+						$thumb = createThumbnail($image);
+						if ($thumb) {
+							$userInfo['profile_img'] = $thumb;
+						} else {
+							$userInfo['profile_img'] = $image;
+						}
 			        }
 		        }
 
@@ -666,17 +681,43 @@ class Candidates extends CI_Controller {
 		$this->load->view('app/view-candidate-exam-details', $data);
 	}
 
+	private function generateName($user_id='', $exam_id=''){
+		$candidate = $this->candidate_model->get($user_id);
+		$filename = $candidate['firstname'];
+		if(!empty($candidate['middlename'])) {
+			$filename .= " " . $candidate['middlename'];
+		}
+
+		if(!empty($candidate['lastname'])) {
+			$filename .= " " . $candidate['lastname'];
+		}
+
+		if(!empty($candidate['empid'])) {
+			$filename .= "-" . $candidate['empid'];
+		}
+		return strtolower(str_replace(" ", "_", $filename)) . '-' . $exam_id . ".pdf";
+	}
+
 	public function generateDetailedResult($return_val=false)
 	{
 		$this->isNotCandidate();
 		if (!isset($_GET['userid']) || !isset($_GET['examid'])){ redirect('logout'); }
 		$exam_id = $this->input->get('examid', true);
 		$user_id = $this->input->get('userid', true);
-		$filename = $user_id . '-' . $exam_id . '.pdf';
+		$filename = $this->generateName($user_id, $exam_id);
 	    $filepath = FCPATH . 'assets/admin/exams/' . $filename;
-
+		$arr = [
+			'exam_id'=> $exam_id,
+			'candidate_id'=> $user_id,
+		];
+		$val = $this->exam_model->isExamAndCandidateExists($arr);
+		if (!$val) { 
+			$this->session->set_flashdata('error', 'Not a valid exam candidate!');
+			redirect('exams'); 
+		}
+		$this->load->helper('download');
 	    if (file_exists($filepath)) {
-	        $this->load->helper('download');
+	        
 	        if ($return_val) {
 	        	return $filepath;
 	        } else {
@@ -757,32 +798,18 @@ class Candidates extends CI_Controller {
 				$cli .= $obj['company_name'] . ",";
 			}
 			$data['clients'] = rtrim($cli, ',');
-
 			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id'=>$exam_id, 'user_id'=>$user_id]);
-			
-			// $options = new Options();
-			// $options->set('isRemoteEnabled', true);
-			// $dompdf = new Dompdf($options);
-
 			$html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
-			// $dompdf->loadHtml($html);
-			// $dompdf->setPaper('A4', 'Portrait');
-			// $dompdf->render();
-
-			// $output = $dompdf->output();
 
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 			$mpdf->WriteHTML($html);
-			$output = $mpdf->Output();
-			$filename = $data['user']['id'] . "-" . $data['exam']['id'] . ".pdf";
-			$filepath = FCPATH . 'assets/admin/exams/' . $filename;
-			file_put_contents($filepath, $output);
+			$output = $mpdf->Output($filepath, 'F');
 
-			if ($return_val) {
-	        	return $filepath;
-	        } else {
-	        	$dompdf->stream($filename, array("Attachment" => false));
-	        }
+			if ($return_val) { 
+				return $filepath; 
+			} else {
+				force_download($filename, file_get_contents($filepath));
+			}
 	        
 	    }
 	    $this->clearOlderFiles();
@@ -896,56 +923,40 @@ class Candidates extends CI_Controller {
 									$email_html['data'] = $replacementString;
 									
 									$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
-									
-									// $config_arr=[
-									// 	'api_url' => $site_data['out_smtp'],
-									// 	'sender_address' => $site_data['smtp_email'],
-									// 	'to_address' => $xlx_data['email'],
-									// 	'subject' => 'Account created successfully!',
-									// 	'body' => $htmlContent,
-									// 	'api_key' => $site_data['smtp_pass'],
-									// 	'to_name' => $xlx_data['firstname']
+									if ($site_data['mail_type'] == 'api') {
+										$config_arr=[
+											'api_url' => $site_data['out_smtp'],
+											'sender_address' => $site_data['smtp_email'],
+											'to_address' => $xlx_data['email'],
+											'subject' => 'Your account is now created!',
+											'body' => $htmlContent,
+											'api_key' => $site_data['smtp_pass'],
+											'to_name' => $xlx_data['firstname']
+										];
+
+										$email_response = sendMailViaApi($config_arr);
+									} else {
+										$config_arr=[
+											'out_smtp' => $site_data['out_smtp'],
+											'smtp_port' => $site_data['smtp_port'],
+											'smtp_email' => $site_data['smtp_email'],
+											'smtp_pass' => $site_data['smtp_pass'],
+											'app_name' => 'Simrangroups',
+											'subject' => 'Your account is now created!',
+											'body' => $emailContent,
+											'email' => $xlx_data['email'],
+										];
+
+										sendMailViaSMTP($config_arr);
+									}
+									// $email_data = [
+									// 	'name' => $xlx_data['firstname'],
+									// 	'email' => $xlx_data['email'],
+									// 	'password' => $password,
+									// 	'company_name' => $business['company_name']??$app_info['app_name']
 									// ];
 
-									// $email_response = sendMailViaApi($config_arr);
-
-									$email_data = [
-										'name' => $xlx_data['firstname'],
-										'email' => $xlx_data['email'],
-										'password' => $password,
-										'company_name' => $business['company_name']??$app_info['app_name']
-									];
-
-									$emailContent = $this->load->view('app/mail/bulk-account-template', $email_data, true);
-									
-									$config_arr=[
-										'out_smtp' => $site_data['out_smtp'],
-										'smtp_port' => $site_data['smtp_port'],
-										'smtp_email' => $site_data['smtp_email'],
-										'smtp_pass' => $site_data['smtp_pass'],
-										'app_name' => 'Simrangroups',
-										'subject' => 'Account created successfully!',
-										'body' => $emailContent,
-										'email' => $xlx_data['email'],
-									];
-
-									sendMailViaSMTP($config_arr);
-
-
-									$config_arr = [
-										'out_smtp' => $site_data['out_smtp'],
-										'smtp_port' => $site_data['smtp_port'],
-										'smtp_email' => $site_data['smtp_email'],
-										'smtp_pass' => $site_data['smtp_pass'],
-										'app_name' => 'Simrangroups',
-										'subject' => 'Account created successfully!',
-										'body' => $htmlContent,
-										'email' => $xlx_data['email'],
-									];
-
-									$email_response = sendMailViaSMTP($config_arr);	
-
-
+									// $emailContent = $this->load->view('app/mail/bulk-account-template', $email_data, true);
 
 									$n_data['type'] = 'email';
 									$n_data['user_id'] = $last_id;
@@ -1093,31 +1104,33 @@ class Candidates extends CI_Controller {
 				
 				$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
 
-				// $config_arr=[
-				// 	'api_url' => $site_data['out_smtp'],
-				// 	'sender_address' => $site_data['smtp_email'],
-				// 	'to_address' => $get_candidate['email'],
-				// 	'subject' => 'QR code to login into your dashboard',
-				// 	'body' => $htmlContent,
-				// 	'api_key' => $site_data['smtp_pass'],
-				// 	'to_name' => $get_candidate['firstname']
-				// ];
+				if ($site_data['mail_type'] == 'api') {
+					$config_arr=[
+						'api_url' => $site_data['out_smtp'],
+						'sender_address' => $site_data['smtp_email'],
+						'to_address' => $get_candidate['email'],
+						'subject' => 'QR code to login into your dashboard',
+						'body' => $htmlContent,
+						'api_key' => $site_data['smtp_pass'],
+						'to_name' => $get_candidate['firstname']
+					];
 
-				// $email_response = sendMailViaApi($config_arr);
+					$email_response = sendMailViaApi($config_arr);
+				} else {
+					$config_arr=[
+						'out_smtp' => $site_data['out_smtp'],
+						'smtp_port' => $site_data['smtp_port'],
+						'smtp_email' => $site_data['smtp_email'],
+						'smtp_pass' => $site_data['smtp_pass'],
+						'app_name' => 'Simrangroups',
+						'subject' => 'Link login into your dashboard!',
+						'body' => $htmlContent,
+						'email' => $get_candidate['email'],
+					];
 
-				$config_arr=[
-					'out_smtp' => $site_data['out_smtp'],
-					'smtp_port' => $site_data['smtp_port'],
-					'smtp_email' => $site_data['smtp_email'],
-					'smtp_pass' => $site_data['smtp_pass'],
-					'app_name' => 'Simrangroups',
-					'subject' => 'Link login into your dashboard!',
-					'body' => $htmlContent,
-					'email' => $get_candidate['email'],
-				];
-
-				$email_response = sendMailViaSMTP($config_arr);	
-
+					$email_response = sendMailViaSMTP($config_arr);	
+				}
+				
 				$n_data['type'] = 'email';
 				$n_data['user_id'] = $get_candidate['id'];
 				$n_data['notif_type'] = 'Login';

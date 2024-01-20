@@ -209,116 +209,119 @@
                 </div>
               </div>
             <?php } else { ?>
-            <div class="card">
-              <div class="card-body" id="example1_wrapper">
-                <table id="data-table" class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th><input type="checkbox" id="check-all" class="check-all"> </th>
-                      <th>SNo.</th>
-                      <th>Exam Name</th>
-                      <?php if ($this->session->userdata('type') == 'admin') { ?>
-                      <th>Business Unit</th>
-                      <?php } ?>
-                      <th>Date Time</th>
-                      <th>Questions</th>
-                      <th>Candidates</th>
-                      <th>Clients</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php $i=1; foreach ($results as $records => $record) { ?>
-                    <tr>
-                      <td>
-                        <input type="checkbox" name="recs[]" class="check" value="<?= $record['id']; ?>">
-                      </td>
-                      <td><?= $i; ?></td>
-                      <td>
-                        <?= $record['name']; ?>
-                      </td>
-                      <?php if ($this->session->userdata('type') == 'admin') { ?>
-                      <td><?= $record['company_name']; ?></td>
-                      <?php } ?>
-                      <td class="text-sm">
-                        <?= ($record['exam_datetime'] == '0000-00-00 00:00:00' || empty($record['exam_datetime']))?'':date('d-m-Y h:ia', strtotime($record['exam_datetime'])); ?>
-                      </td>
-                      <td class="text-sm">
-                          <?= $record['total_questions'] ?>
-                      </td>
-                      <td>
-                        <?= $record['total_candidates']; ?>
-                      </td>
-                      <td>
-                        <?= $record['total']; ?>
-                      </td>
-                      <td>
-                        <?php if (empty($record['exam_datetime'])) { ?>
-                          <span class="badge badge-pill badge-warning">Draft</span> 
-                        <?php } else { ?>
-                        <?php if ($record['status'] == 'scheduled' && strtotime($record['exam_datetime']) < strtotime(date('Y-m-d H:i:s')) ) { 
-                            $currentDateTime = strtotime(date('Y-m-d H:i:s'));
-                            $examStartTime = strtotime($record['exam_datetime']);
-                            $examEndTime = strtotime($record['exam_endtime']);
-                          if ($currentDateTime > $examStartTime && $currentDateTime < $examEndTime) {
-                            echo "<span class='badge badge-pill badge-success'>In progress</span>";
-                          } else {
-                            echo "<span class='badge badge-pill badge-primary'>Conducted</span>";
-                          }
-                          
-                         } else if ($record['status'] == 'scheduled') { ?>
-                          <span class="badge badge-pill badge-success">Scheduled</span>
-                        <?php } else if ($record['status'] == 'draft') { ?>
-                          <span class="badge badge-pill badge-warning">Draft</span> 
-                        <?php } else { ?>
-                          <span class="badge badge-pill badge-danger">Cancelled</span> 
-                        <?php } } ?>
-                      </td>
-                      <td class="text-left">
-                        <?php 
-                          $show = false;
-                          if ($record['status'] == 'scheduled') { 
-                            if (empty($record['exam_datetime'])) {
-                              $show = true;
-                            } else if (strtotime($record['exam_datetime']) > strtotime(date('Y-m-d H:i:s'))) {
+              <div class="card">
+                <div class="card-body" id="example1_wrapper">
+                  <table id="data-table" class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th><input type="checkbox" id="check-all" class="check-all"> </th>
+                        <th>SNo.</th>
+                        <th>Exam Name</th>
+                        <?php if ($this->session->userdata('type') == 'admin') { ?>
+                        <th>Business Unit</th>
+                        <?php } ?>
+                        <th>Date Time</th>
+                        <th>Questions</th>
+                        <th>Candidates</th>
+                        <th>Clients</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php $i=1; foreach ($results as $records => $record) { ?>
+                      <tr>
+                        <td>
+                          <input type="checkbox" name="recs[]" class="check" value="<?= $record['id']; ?>">
+                        </td>
+                        <td><?= $i; ?></td>
+                        <td>
+                          <?= $record['name']; ?>
+                        </td>
+                        <?php if ($this->session->userdata('type') == 'admin') { ?>
+                        <td><?= $record['company_name']; ?></td>
+                        <?php } ?>
+                        <td class="text-sm">
+                          <?= ($record['exam_datetime'] == '0000-00-00 00:00:00' || empty($record['exam_datetime']))?'':date('d-m-Y h:ia', strtotime($record['exam_datetime'])); ?>
+                        </td>
+                        <td class="text-sm">
+                            <?= $record['total_questions'] ?>
+                        </td>
+                        <td>
+                          <?= $record['total_candidates']; ?>
+                        </td>
+                        <td>
+                          <?= $record['total']; ?>
+                        </td>
+                        <td>
+                          <?php if (empty($record['exam_datetime'])) { ?>
+                            <span class="badge badge-pill badge-warning">Draft</span> 
+                          <?php } else { ?>
+                          <?php if ($record['status'] == 'scheduled' && strtotime($record['exam_datetime']) < strtotime(date('Y-m-d H:i:s')) ) { 
+                              $currentDateTime = strtotime(date('Y-m-d H:i:s'));
+                              $examStartTime = strtotime($record['exam_datetime']);
+                              $examEndTime = strtotime($record['exam_endtime']);
+                            if ($currentDateTime > $examStartTime && $currentDateTime < $examEndTime) {
+                              echo "<span class='badge badge-pill badge-success'>In progress</span>";
+                            } else {
+                              echo "<span class='badge badge-pill badge-primary'>Conducted</span>";
+                            }
+                            
+                          } else if ($record['status'] == 'scheduled') { ?>
+                            <span class="badge badge-pill badge-success">Scheduled</span>
+                          <?php } else if ($record['status'] == 'draft') { ?>
+                            <span class="badge badge-pill badge-warning">Draft</span> 
+                          <?php } else if ($record['status'] == 'stopped') { ?>
+                            <span class="badge badge-pill badge-danger">Stopped</span> 
+                          <?php } else { ?>
+                            <span class="badge badge-pill badge-danger">Cancelled</span> 
+                          <?php }} ?>
+                        </td>
+                        <td class="text-left">
+                          <?php 
+                            $show = false;
+                            if ($record['status'] == 'scheduled') { 
+                              if (empty($record['exam_datetime'])) {
+                                $show = true;
+                              } else if (strtotime($record['exam_datetime']) > strtotime(date('Y-m-d H:i:s'))) {
+                                $show = true;
+                              }
+                            } else if ($record['status'] == 'draft') {
                               $show = true;
                             }
-                          } else if ($record['status'] == 'draft') {
-                            $show = true;
-                          }
 
-                          if ($show) {
-                        ?>
-                        <div class="btn-group">
-                            <?php if ($record['status'] == 'draft') { ?>
-                            <a href="<?= base_url('exams/'.$record['id'].'/schedule-exam'); ?>" type="button" class="btn btn-default btn-loader">Schedule</a>
-                            <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
-                            <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <?php } else { ?>
-                            <button type="button" class="btn btn-default  dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
-                              Action
-                            </button>
-                            <?php }  ?>
-                            <div class="dropdown-menu" role="menu" style="">
-                                <a class="dropdown-item btn-loader" href="<?= base_url('exam/clone/').$record['id']; ?>">Clone Exam</a>
-                                <a class="dropdown-item btn-loader" href="<?= base_url('exam/edit/').$record['id']; ?>">Edit Exam</a>
-                                <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/edit-questions'); ?>">Edit Question</a>
-                                <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/edit-candidates'); ?>">Edit Candidate</a>
-                                <a class="dropdown-item btn-loader" href="<?= base_url('exam/delete/').$record['id']; ?>" onClick="return confirm('This exam along with its details will be deleted and can\'t be recovered. Are you sure to delete?');">Delete</a>
-                            </div>
-                        </div>
-                        <?php } else {?> 
-                        <a href="<?= base_url('exams/'.$record['id'].'/view-exam-dashboard'); ?>" class="btn btn-link btn-sm " data-toggle="tooltip" data-placement="top" title="View"> <i class="fas fa-eye"></i> </a> / <a class="btn btn-link btn-sm" href="<?= base_url('exam/clone/').$record['id']; ?>"  data-toggle="tooltip" data-placement="top" title="Clone"><i class="fas fa-copy"></i></a> / <a class="btn btn-link btn-sm" href="<?= base_url('exam/edit/').$record['id']; ?>"><i class="fas fa-pen"></i></a>
-                        <?php } ?>
-                      </td>
-                    </tr>
-                    <?php $i++; } ?>
-                  </tbody>
-                </table>
-              </div>
-            </div>  
+                            if ($show) {
+                          ?>
+                          <div class="btn-group">
+                              <?php if ($record['status'] == 'draft') { ?>
+                              <a href="<?= base_url('exams/'.$record['id'].'/schedule-exam'); ?>" type="button" class="btn btn-default btn-loader">Schedule</a>
+                              <button type="button" class="btn btn-default dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                              <span class="sr-only">Toggle Dropdown</span>
+                              </button>
+                              <?php } else { ?>
+                              <button type="button" class="btn btn-default  dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                                Action
+                              </button>
+                              <?php }  ?>
+                              <div class="dropdown-menu" role="menu" style="">
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/clone/').$record['id']; ?>">Clone Exam</a>
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/edit/').$record['id']; ?>">Edit Exam</a>
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/edit-questions'); ?>">Edit Question</a>
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/edit-candidates'); ?>">Edit Candidate</a>
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/exam-settings'); ?>" target="_blank">Exam Settings</a>
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/delete/').$record['id']; ?>" onClick="return confirm('This exam along with its details will be deleted and can\'t be recovered. Are you sure to delete?');">Delete</a>
+                              </div>
+                          </div>
+                          <?php } else {?> 
+                          <a href="<?= base_url('exams/'.$record['id'].'/view-exam-dashboard'); ?>" data-toggle="tooltip" data-placement="top" title="View"> <i class="fas fa-eye"></i> </a>/<a href="<?= base_url('exam/clone/').$record['id']; ?>"  data-toggle="tooltip" data-placement="top" title="Clone"> <i class="fas fa-copy"></i> </a>/<a href="<?= base_url('exam/edit/').$record['id']; ?>" data-toggle="tooltip" data-placement="top" title="Edit"> <i class="fas fa-pen"></i> </a>/<a href="<?= base_url('exam/'.$record['id'].'/exam-settings'); ?>" target="_blank" data-toggle="tooltip" data-placement="top" title="Settings"> <i class="fas fa-cog"></i> </a>
+                          <?php } ?>
+                        </td>
+                      </tr>
+                      <?php $i++; } ?>
+                    </tbody>
+                  </table>
+                </div>
+              </div>  
             <?php } ?>
           </div>
         </div>

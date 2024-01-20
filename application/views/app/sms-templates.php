@@ -84,6 +84,15 @@
                                 <textarea name="candidate_login" id="candidate_login" class="form-control"><?= $site_data['candidate_login']; ?></textarea>
                             </div>
                         </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="fp_sms">Forget Password SMS</label>
+                                <br>
+                                  <input type="text" class="form-control" name="fp_sms_tempid" value="<?= $site_data['fp_sms_tempid']; ?>" placeholder="Template ID"> 
+                                <br>
+                                <textarea name="fp_sms" id="fp_sms" class="form-control"><?= $site_data['fp_sms']; ?></textarea>
+                            </div>
+                        </div>
                       </div>
                       <div class="row">
                         <div class="col">
@@ -121,6 +130,7 @@
                                 <strong>${business_addr}</strong> :- Business Unit Address<br>
                                 <strong>${login_url}</strong> :- Candidate login link<br>
                                 <strong>${exam_login_url}</strong> :- Exam login link<br>
+                                <strong>${reset_password_url}</strong> :- Reset Account Password Link
                             </p>
                         </div>
                     </div>

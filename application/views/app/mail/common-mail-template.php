@@ -1,9 +1,7 @@
-<table align="center" width="600" cellspacing="0" cellpadding="0" border="0">
-    <tr>
-        <td>
-            <div style="width: 100%;padding: 40px;">
-            <?= html_entity_decode($data); ?>
-            </div>
-        </td>
-    </tr>
-</table>
+
+<div style="width: 80%;padding: 40px; font-size: 16px;margin: 0px auto; padding: 20px; background: #d8d8d8;">
+    <div style="width: 700px; margin: 0px auto; background: #ffffff; border-radius: 15px; padding: 30px 20px;">
+        <?= html_entity_decode($data); ?>
+    </div>
+</div>
+        

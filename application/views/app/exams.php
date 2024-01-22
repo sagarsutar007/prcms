@@ -217,9 +217,7 @@
                         <th><input type="checkbox" id="check-all" class="check-all"> </th>
                         <th>SNo.</th>
                         <th>Exam Name</th>
-                        <?php if ($this->session->userdata('type') == 'admin') { ?>
                         <th>Business Unit</th>
-                        <?php } ?>
                         <th>Date Time</th>
                         <th>Questions</th>
                         <th>Candidates</th>
@@ -238,9 +236,7 @@
                         <td>
                           <?= $record['name']; ?>
                         </td>
-                        <?php if ($this->session->userdata('type') == 'admin') { ?>
                         <td><?= $record['company_name']; ?></td>
-                        <?php } ?>
                         <td class="text-sm">
                           <?= ($record['exam_datetime'] == '0000-00-00 00:00:00' || empty($record['exam_datetime']))?'':date('d-m-Y h:ia', strtotime($record['exam_datetime'])); ?>
                         </td>
@@ -370,9 +366,7 @@
 
           updateCountdown();
           var countdownInterval = setInterval(updateCountdown, 1000);
-      });
-
-      $(function () {
+      
         <?php if($this->session->userdata('type') == 'candidate' || $this->session->userdata('type') == 'client'){ ?>
         $("#data-table").DataTable({
           "responsive": true, "lengthChange": true, "autoWidth": false, "paging": true, "searching": false

@@ -701,6 +701,7 @@ class Candidates extends CI_Controller {
 	public function generateDetailedResult($return_val=false)
 	{
 		$this->isNotCandidate();
+		$jsonResponse = (isset($_GET['return']) && $_GET['return']=='json');
 		if (!isset($_GET['userid']) || !isset($_GET['examid'])){ redirect('logout'); }
 		$exam_id = $this->input->get('examid', true);
 		$user_id = $this->input->get('userid', true);
@@ -720,10 +721,12 @@ class Candidates extends CI_Controller {
 	        
 	        if ($return_val) {
 	        	return $filepath;
+	        } else if ($jsonResponse){
+	        	$res = [ 'status' => 'SUCCESS' ];
+	        	echo json_encode($res);
 	        } else {
 	        	force_download($filename, file_get_contents($filepath));
-	        }
-	        
+	        }  
 	    } else {
 			$result = [];
 			$questions = $this->exam_model->getExamQuestions($exam_id);
@@ -807,10 +810,12 @@ class Candidates extends CI_Controller {
 
 			if ($return_val) { 
 				return $filepath; 
-			} else {
+			} else if ($jsonResponse) {
+	        	$res = [ 'status' => 'SUCCESS'];
+	        	echo json_encode($res);
+	        } else {
 				force_download($filename, file_get_contents($filepath));
-			}
-	        
+			}  
 	    }
 	    $this->clearOlderFiles();
 	}

@@ -36,7 +36,7 @@
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-12">
-                <h1 class="m-0"><?= $title; ?></h1>
+                <h1 class="m-0"><?= $exam['name']??$title; ?></h1>
                 <ol class="breadcrumb">
                   <li class="breadcrumb-item"><a href="<?= base_url('dashboard'); ?>">Dashboard</a></li>
                   <li class="breadcrumb-item"><a href="<?= base_url('exams'); ?>">Exams</a></li>
@@ -269,6 +269,10 @@
                   method: 'GET',
               });
           }
+
+          $("button[type='submit']").on('click', function() {
+            $(this).html(`<i class="fas fa-sync-alt"></i> Processing...`);
+          });
           
       });
     </script>

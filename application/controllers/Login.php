@@ -367,7 +367,7 @@ class Login extends CI_Controller {
 				$short_url = shortenLink($post['link']);
 				$surl_arr = json_decode($short_url, true);				
 				$post['short_url'] = ($surl_arr=='SUCCESS')?$surl_arr['link']:'';
-				$post['firstname'] = $record['firstname'];
+				$post['firstname'] = trim($record['firstname']. " " .$record['lastname']);
 				$htmlContent = $this->load->view('app/mail/reset-password', $post, true);
 
 				if ($data['app_info']['mail_type'] == 'api') {
@@ -378,7 +378,7 @@ class Login extends CI_Controller {
 						'subject' => 'Reset Password Link!',
 						'body' => $htmlContent,
 						'api_key' => $data['app_info']['smtp_pass'],
-						'to_name' => $post['firstname']??'Simran Group'
+						'to_name' => $post['firstname']
 					];
 
 					$email_response = sendMailViaApi($config_arr);
@@ -388,7 +388,7 @@ class Login extends CI_Controller {
 						'smtp_port' => $data['app_info']['smtp_port'],
 						'smtp_email' => $data['app_info']['smtp_email'],
 						'smtp_pass' => $data['app_info']['smtp_pass'],
-						'app_name' => 'Simrangroups',
+						'app_name' => $data['app_info']['app_name'],
 						'subject' => 'Reset Password Link!',
 						'body' => $htmlContent,
 						'email' => $post['email'],
@@ -526,6 +526,7 @@ class Login extends CI_Controller {
 		        $this->upload->initialize($config);
 				if ($this->upload->do_upload('profile_img')) {
 		            $updateData['profile_img'] = $this->upload->data('file_name');
+		            // createThumbnail($updateData['profile_img'])
 		            $row_aff = $this->candidate_model->updateCandidate($updateData, $post['userid']);
 		            if ($row_aff) {
 		            	redirect('dashboard');

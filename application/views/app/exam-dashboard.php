@@ -256,7 +256,7 @@
                 </h3>
 
                 <div class="card-tools">
-                  <button type="button" class="btn bg-default btn-sm" id="download-result"><i class="fas fa-download"></i>&nbsp;Result PDF</button>
+                  <a href="<?= base_url('exams/'.$exam_id.'/download-results-pdf'); ?>" class="btn bg-default btn-sm"><i class="fas fa-download"></i>&nbsp;Result PDF</a>
                   <button type="button" class="btn bg-default btn-sm" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
                   </button>

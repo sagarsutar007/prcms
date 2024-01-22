@@ -80,7 +80,7 @@
       <p style="text-align:center;margin: 0;">
         <?= "Exam conducted by <strong>" . $business['company_name'] . "</strong>"; ?>
       </p>
-      <p style="text-align:center;margin: 0;"><?= "Exam Time: " . date( 'h:i a ', strtotime($exam['exam_datetime'])) . " to " . date( 'h:i a ', strtotime($exam['exam_endtime'])) . " on " . date('d/m/Y', strtotime($exam['exam_datetime'])); ?></p>
+      <p style="text-align:center;margin: 0;"><?= "Exam Time: " . date( 'h:i a ', strtotime($exam['exam_datetime']??time())) . " to " . date( 'h:i a ', strtotime($exam['exam_endtime']??time())) . " on " . date('d/m/Y', strtotime($exam['exam_datetime']??time())); ?></p>
     </div>
     <div style="width: 44%; float:left; text-align: right; padding-top: 15px;">
       <?php

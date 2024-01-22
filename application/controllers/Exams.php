@@ -1673,7 +1673,8 @@ class Exams extends CI_Controller {
 		return $arr;
 	}
 
-	public function downloadExcel($exam_id=''){
+	public function downloadExcel($exam_id='')
+	{
 		$this->isAdminOrManager();
 		$exam = $this->exam_model->get($exam_id);
 		if (!$exam) { redirect('/exams'); }
@@ -1689,7 +1690,8 @@ class Exams extends CI_Controller {
         $writer->save('php://output');
 	}
 
-	private function generateName($user_id='', $exam_id=''){
+	private function generateName($user_id='', $exam_id='')
+	{
 		$candidate = $this->candidate_model->get($user_id);
 		$filename = $candidate['firstname'];
 		if(!empty($candidate['middlename'])) {
@@ -1829,7 +1831,7 @@ class Exams extends CI_Controller {
 				}
 
 				$pdf->merge('file', $outputPdf);
-				$pdf->newPDF();
+				// $pdf->newPDF();
 
 				$this->clearOlderFiles();
 			}
@@ -1837,13 +1839,29 @@ class Exams extends CI_Controller {
 			$data['status'] = 'SUCCESS';
 			$data['message'] = 'Download Successful!';
 			$data['file'] = base_url($outputPdf);
-			$data['files'] = $files;
+			// $data['files'] = $files;
 		} catch (Exception $e) {
 			$data['error'] = $e->getMessage();
 		}
 		echo json_encode($data);
 	}
 
+	public function checkResult($exam_id='')
+	{
+		$this->isAdminOrManager(true);
+		$data = [];
+		$outputPdf = 'assets/admin/exams/' . $exam_id . '.pdf';
+		if (file_exists($outputPdf)) {
+			$data['status'] = 'SUCCESS';
+			$data['message'] = 'File found!';
+			$data['file'] = base_url($outputPdf);
+		}else {
+			$data['status'] = 'ERROR';
+			$data['message'] = 'File not found!';
+		}
+		$this->clearOlderFiles();
+		echo json_encode($data);
+	}
 
 	public function clearOlderFiles($value='')
 	{
@@ -1922,7 +1940,28 @@ class Exams extends CI_Controller {
 	    $this->clearOlderFiles();
 	}
 
-	
+	public function downloadResults($exam_id='')
+	{
+		$this->isAdminOrManager();
+		$exam = $this->exam_model->get($exam_id);
+		if (!$exam) { redirect('/exams'); }
+
+		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
+
+		$arr_candidates = [];
+		foreach ($candidates as $candidate => $cnd) {
+			$temp['id'] = $cnd['candidate_id'];
+			$cdt = $this->candidate_model->get($cnd['candidate_id']);
+			$temp['name'] = trim($cdt['firstname'] . " " . $cdt['lastname']);
+			$arr_candidates[] = $temp;
+		}
+
+		$data['exam'] = $exam;
+		$data['title'] = "Download Exam Results PDF";
+		$data['candidates'] = $arr_candidates;
+		
+		$this->load->view('app/exam-result-pdf', $data);
+	}
 }
 
 /* End of file Exams.php */

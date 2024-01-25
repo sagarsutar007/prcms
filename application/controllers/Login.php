@@ -12,6 +12,7 @@ class Login extends CI_Controller {
 		$this->load->model('Users_model', 'user_model');
 		$this->load->model('Candidates_model', 'candidate_model');
 		$this->load->model('Business_units_model', 'business_model');
+		$this->load->model('Notification_model', 'notif_model');
 	}
 
 	public function admin() {
@@ -276,6 +277,18 @@ class Login extends CI_Controller {
 							$record['companies'] = $this->business_model->getUserCompanies(null, 'admin');
 							$record['type'] = $type;
 							$this->session->set_userdata($record);
+
+							$logs_arr = [
+								"type" => 'candidate',
+								"user_id" => $record['id'],
+								"datetime" => date('Y-m-d H:i:s'),
+								"ip_address" => $this->getIpAddress(),
+								"mac_address" => $this->getMacAddress(),
+								"client" => $this->getBrowserInfo()
+							];
+							
+							$this->Login_model->captureLog($logs_arr);
+
 							if ($value) {
 								$app_info = $this->Login_model->getApplicationInfo();
 
@@ -283,17 +296,6 @@ class Login extends CI_Controller {
 								$this->session->set_userdata('app_icon', $app_info['app_icon']);
 								redirect('exams/'.$value.'/begin');
 							} else {
-								$logs_arr = [
-									"type" => 'candidate',
-									"user_id" => $record['id'],
-									"datetime" => date('Y-m-d H:i:s'),
-									"ip_address" => $this->getIpAddress(),
-									"mac_address" => $this->getMacAddress(),
-									"client" => $this->getBrowserInfo()
-								];
-								
-								$this->Login_model->captureLog($logs_arr);
-
 								if (empty($record['profile_img']) && $record['source'] == 'bulk') {
 									redirect('update-profile-image');
 								} else {
@@ -366,7 +368,7 @@ class Login extends CI_Controller {
 				$post['link'] = base_url($type.'/reset-password?token='.$token);
 				$short_url = shortenLink($post['link']);
 				$surl_arr = json_decode($short_url, true);				
-				$post['short_url'] = ($surl_arr=='SUCCESS')?$surl_arr['link']:'';
+				$post['short_url'] = ($surl_arr['status']=='SUCCESS')?$surl_arr['link']:'';
 				$post['firstname'] = trim($record['firstname']. " " .$record['lastname']);
 				$htmlContent = $this->load->view('app/mail/reset-password', $post, true);
 
@@ -395,6 +397,24 @@ class Login extends CI_Controller {
 					];
 
 					$email_response = sendMailViaSMTP($config_arr);	
+				}
+
+				$n_data['type'] = 'email';
+				$n_data['user_id'] = $record['id'];
+				$n_data['notif_type'] = 'Forgot Password';
+				$n_data['text'] = htmlspecialchars($htmlContent);
+				$n_data['to_recipient'] = $record['email'];
+				$n_data['created_on'] = date('Y-m-d H:i:s');
+
+				if ($email_response) {
+					$n_data['response'] = 'success';
+					$this->notif_model->insertLog($n_data);
+					$success[] = $record['id'];
+				} else {
+					$n_data['response'] = 'failed';
+					$n_data['req_response'] = $email_response;
+					$this->notif_model->insertLog($n_data);
+					$error[] = $record['id'];
 				}
 				
 				$templateKeys = [
@@ -444,6 +464,22 @@ class Login extends CI_Controller {
 					CURLOPT_RETURNTRANSFER => true,
 				));
 				$response = curl_exec($curl);
+
+				$s_data['type'] = 'sms';
+				$s_data['user_id'] = $record['id'];
+				$s_data['notif_type'] = 'Forgot Password';
+				$s_data['text'] = $replacementString;
+				$s_data['to_recipient'] = $record['phone'];
+				$s_data['created_on'] = date('Y-m-d H:i:s');
+				$sms_resp = json_decode($response, true);
+				if ($sms_resp['status'] == 'Success') {
+					$s_data['response'] = 'success';
+					$this->notif_model->insertLog($s_data);
+				} else {
+					$s_data['response'] = 'failed';
+					$s_data['req_response'] = $sms_resp['description'];
+					$this->notif_model->insertLog($s_data);
+				}
 
 				$this->session->set_flashdata('success', 'Reset link has been sent to you!');
 				redirect('candidate-login');

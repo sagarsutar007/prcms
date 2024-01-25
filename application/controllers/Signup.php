@@ -35,6 +35,8 @@ class Signup extends CI_Controller {
                 'is_unique'     => 'This %s already registered.'
 	        ));
 	        if (empty($_FILES['profile_img']['name'])) { $this->form_validation->set_rules('profile_img', 'Passport Size Photo', 'required'); }
+
+	        // $this->form_validation->set_rules('same_wa_num','same_wa','trim|xss_clean');
 			
 			if ($this->form_validation->run() == TRUE) {
 

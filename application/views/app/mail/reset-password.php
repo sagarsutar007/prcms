@@ -18,7 +18,7 @@
                 <p>We received a request to reset your password. If you did not initiate this request, please disregard this email.</p>
                 <p>To reset your password, please click on the following link:</p>
                 <a href="<?= $link; ?>"><?= $link; ?></a>
-                <p>Please note that this link is valid for a limited time. If you don't reset your password within 15 mins, you will need to request another password reset. </p>
+                <p>Please note that this link is valid for a limited time. </p>
                 <p>If you have any questions or need assistance, please contact our support team.</p>
             </td>
         </tr>

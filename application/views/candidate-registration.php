@@ -142,6 +142,7 @@
 											<div class="custom-file mb-3">
 											    <input type="file" name="profile_img" class="custom-file-input" id="profile">
 											    <label class="custom-file-label" for="profile">Passport Size Photo</label>
+											    <?= form_error('profile_img', '<div class="text-danger">', '</div>'); ?>
 											</div>
 										</div>
 										<div class="col-md-6">

@@ -59,9 +59,9 @@
                   <div class="card-body box-profile">
                     <div class="row">
                       <div class="col-md-2">
-                        <?php if (!empty($record['profile_img']) && file_exists('./assets/img/'.$record['profile_img'])) { ?>
+                        <?php if (!empty($record['profile_img']) && file_exists('./assets/img/thumbnails/'.$record['profile_img'])) { ?>
                         <div class="box-profile">
-                          <img class="profile-user-img img-circle" height="100px" src="<?= base_url('./assets/img/'.$record['profile_img']); ?>" alt="">
+                          <img class="profile-user-img img-circle" height="100px" src="<?= base_url('./assets/img/thumbnails/'.$record['profile_img']); ?>" alt="">
                         </div>
                         <?php } else { ?>
                         <div class="box-profile">

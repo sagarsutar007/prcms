@@ -425,6 +425,24 @@ class Settings extends CI_Controller {
 			$email_response = sendMailViaSMTP($config_arr);
 		}
 		
+		$n_data['type'] = 'email';
+		$n_data['user_id'] = $user['id'];
+		$n_data['notif_type'] = 'OTP';
+		$n_data['text'] = htmlspecialchars($htmlContent);
+		$n_data['to_recipient'] = $user['email'];
+		$n_data['created_on'] = date('Y-m-d H:i:s');
+
+		if ($email_response) {
+			$n_data['response'] = 'success';
+			$this->notif_model->insertLog($n_data);
+			$success[] = $user['id'];
+		} else {
+			$n_data['response'] = 'failed';
+			$n_data['req_response'] = $email_response;
+			$this->notif_model->insertLog($n_data);
+			$error[] = $user['id'];
+		}
+				
 	}
 
 	public function sendOTPSms($user_id=[], $otp='')
@@ -464,6 +482,21 @@ class Settings extends CI_Controller {
 			CURLOPT_RETURNTRANSFER => true,
 		));
 		$response = curl_exec($curl);
+		$s_data['type'] = 'sms';
+		$s_data['user_id'] = $user['id'];
+		$s_data['notif_type'] = 'OTP';
+		$s_data['text'] = $replacementString;
+		$s_data['to_recipient'] = $user['phone'];
+		$s_data['created_on'] = date('Y-m-d H:i:s');
+		$sms_resp = json_decode($response, true);
+		if ($sms_resp['status'] == 'Success') {
+			$s_data['response'] = 'success';
+			$this->notif_model->insertLog($s_data);
+		} else {
+			$s_data['response'] = 'failed';
+			$s_data['req_response'] = $sms_resp['description'];
+			$this->notif_model->insertLog($s_data);
+		}
 	}
 }
 

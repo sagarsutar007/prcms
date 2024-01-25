@@ -662,6 +662,18 @@ class Exams extends CI_Controller {
 				$this->session->set_flashdata('error', 'Exam is going on in another device!');
 				redirect('exams/ongoing');
 			} else {
+				$cookie_data = array(
+					'name'   => 'exam_entry',
+					'value'  => $token,
+					'expire' => $data['exam_info']['duration'] * 60,  
+					'path'   => '/', 
+					'secure' => TRUE,
+					'httponly' => TRUE
+				);
+
+				set_cookie($cookie_data);
+				
+				$userarr['exam_token'] = $token;
 				$userarr['left_at'] = null;
 				$userarr['re_entry'] = 'false';
 				$this->exam_model->updateCandidateExamInfo($userarr, $exam_appeared['id']); 

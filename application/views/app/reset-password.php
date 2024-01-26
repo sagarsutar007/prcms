@@ -68,11 +68,17 @@
                     <form class="loginForm" action="" method="POST">
                         <?= form_error('password', '<div class="text-danger text-left">', '</div>'); ?>
                       <div class="form-group">
-                        <input type="password" class="form-control password" name="password" value="<?= $password??strtolower(set_value('password')); ?>" placeholder="Enter Password">
+                        <div class="pwdMask">
+                          <input type="password" class="form-control password" name="password" value="" placeholder="Password">
+                          <span class="fa fa-eye-slash pwd-toggle"></span>
+                        </div>
                       </div>
                       <?= form_error('passconf', '<div class="text-danger text-left">', '</div>'); ?>
                       <div class="form-group">
-                        <input type="passconf" class="form-control passconf" name="passconf" value="<?= $passconf??strtolower(set_value('passconf')); ?>" placeholder="Enter Confirm Password">
+                        <div class="pwdMask">
+                          <input type="password" class="form-control password" name="passconf" value="" placeholder="Confirm Password">
+                          <span class="fa fa-eye-slash pwd-toggle"></span>
+                        </div>
                       </div>
                       <?php if($this->session->flashdata('error')){ ?>
                         <div class="row">
@@ -103,21 +109,29 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
   
     <!-- Custom js-->
-    <script >
-    ! function(a) {
-        "use strict";
-        a("html, body");
-        var e = a(".pwdMask > .form-control"),
-            t = a(".pwd-toggle");
-        a(t).on("click", function(t) {
-            t.preventDefault(), a(this).toggleClass("fa-eye-slash fa-eye"), a(this).hasClass("fa-eye") ? a(e).attr("type", "text") : a(e).attr("type", "password")
-        }), 
-        a(window).on("load", function() {
-            a(".square-block").fadeOut(), a("#preload-block").fadeOut("slow", function() {
-                a(this).remove()
-            })
-        })
-    }(jQuery); </script>
+    <script>
+      $(document).ready(function() {
+
+        $(".pwd-toggle").on('click', function(event) {
+          $(this).toggleClass("fa-eye-slash fa-eye");
+          if ($(this).hasClass("fa-eye")) {
+              $(this).siblings('input').attr("type", "text");
+          } else {
+              $(this).siblings('input').attr("type", "password");
+          }
+        });
+
+
+
+      });
+
+      $(window).on("load", function () {
+          $(".square-block").fadeOut();
+          $("#preload-block").fadeOut("slow", function () {
+              $(this).remove();
+          });
+      });
+    </script>
   
   </body>	
 </html>

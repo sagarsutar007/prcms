@@ -15,9 +15,9 @@
         <div class="card-body box-profile">
           <div class="row">
             <div class="col-md-2">
-              <?php if (!empty($record['profile_img']) && file_exists('./assets/img/'.$record['profile_img'])) { ?>
+              <?php if (!empty($record['profile_img']) && file_exists('./assets/img/thumbnails/'.$record['profile_img'])) { ?>
               <div class="box-profile">
-                <img class="profile-user-img img-circle" height="100px" src="<?= base_url('./assets/img/'.$record['profile_img']); ?>" alt="">
+                <img class="profile-user-img img-circle" height="100px" src="<?= base_url('./assets/img/thumbnails/'.$record['profile_img']); ?>" alt="">
               </div>
               <?php } else { ?>
               <div class="box-profile">
@@ -330,7 +330,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <?php $i=1; foreach ($sms_records as $sms_recs => $sms_rec) { ?>
+                  <?php $i=1; if (isset($sms_records)) { foreach ($sms_records as $sms_recs => $sms_rec) { ?>
                   <tr>
                     <td><?= $i; ?></td>
                     <td>
@@ -343,10 +343,10 @@
                         <?= $sms_rec['response']; ?>
                     </td>
                     <td>
-                        <?= $email_rec['req_response']; ?>
+                        <?= $sms_rec['req_response']; ?>
                     </td>
                   </tr>
-                  <?php $i++; } ?>
+                  <?php $i++; } } ?>
                 </tbody>
               </table>
             </div>

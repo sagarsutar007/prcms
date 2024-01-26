@@ -368,6 +368,7 @@ class Candidates extends CI_Controller {
 							
 							if ($sms_resp['status'] == 'Success') {
 								$s_data['response'] = 'success';
+$s_data['req_response'] = $sms_resp['description'];
 								$this->notif_model->insertLog($s_data);
 							} else {
 								$s_data['response'] = 'failed';
@@ -1021,6 +1022,7 @@ class Candidates extends CI_Controller {
 
 									if ($sms_resp['status'] == 'Success') {
 										$s_data['response'] = 'success';
+$s_data['req_response'] = $sms_resp['description'];
 										$this->notif_model->insertLog($s_data);
 									} else {
 										$s_data['response'] = 'failed';
@@ -1239,6 +1241,7 @@ class Candidates extends CI_Controller {
 
 			if ($sms_resp['status'] == 'Success') {
 				$s_data['response'] = 'success';
+$s_data['req_response'] = $sms_resp['description'];
 				$this->notif_model->insertLog($s_data);
 			} else {
 				$s_data['response'] = 'failed';

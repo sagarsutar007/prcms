@@ -167,17 +167,38 @@
                             <div class="col-md-4">
                               <div class="form-group">
                                 <label>Language</label>
+                                <?php 
+                                  if (isset($record) && isset($record['lang'])) {
+                                    if ($record['lang']=='eng') {
+                                      $eng = 'checked';
+                                      $hin = '';
+                                      $both = '';
+                                    } else if ($record['lang']=='hindi') {
+                                      $eng = '';
+                                      $hin = 'checked';
+                                      $both = '';
+                                    } else{
+                                      $eng = '';
+                                      $hin = '';
+                                      $both = 'checked';
+                                    }
+                                  } else {
+                                    $eng = '';
+                                    $hin = '';
+                                    $both = 'checked';
+                                  }
+                                ?>
                                 <div class="d-flex align-items-center">
                                   <div class="custom-control custom-radio">
-                                    <input class="custom-control-input" type="radio" id="lang-eng" name="lang" value="eng" <?= (isset($record) && $record['lang']=='eng')?'checked':''; ?>>
+                                    <input class="custom-control-input" type="radio" id="lang-eng" name="lang" value="eng" <?= $eng; ?>>
                                     <label for="lang-eng" class="custom-control-label fw-4">English</label>
                                   </div>
                                   <div class="custom-control custom-radio ml-4">
-                                    <input class="custom-control-input" type="radio" id="lang-hin" name="lang" value="hindi" <?= (isset($record) && $record['lang']=='hindi')?'checked':''; ?>>
+                                    <input class="custom-control-input" type="radio" id="lang-hin" name="lang" value="hindi" <?= $hin; ?>>
                                     <label for="lang-hin" class="custom-control-label fw-4">Hindi</label>
                                   </div>
                                   <div class="custom-control custom-radio ml-4">
-                                    <input class="custom-control-input" type="radio" id="lang-both" name="lang" value="both" <?= (isset($record) && $record['lang']=='both')?'checked':''; ?>>
+                                    <input class="custom-control-input" type="radio" id="lang-both" name="lang" value="both" <?= $both; ?>>
                                     <label for="lang-both" class="custom-control-label fw-4">Both</label>
                                   </div>
                                 </div>

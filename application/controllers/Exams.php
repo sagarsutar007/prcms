@@ -1326,7 +1326,7 @@ class Exams extends CI_Controller {
 	
 					if ($sms_resp['status'] == 'Success') {
 						$s_data['response'] = 'success';
-$s_data['req_response'] = $sms_resp['description'];
+						$s_data['req_response'] = $sms_resp['description'];
 						$this->notif_model->insertLog($s_data);
 					} else {
 						$s_data['response'] = 'failed';
@@ -1581,15 +1581,23 @@ $s_data['req_response'] = $sms_resp['description'];
 			$checkArr = ['user_id' => $obj['id'], 'exam_id' => $exam['id']];
 			$candidateInfo = $this->exam_model->checkCandidateExamInfo($checkArr);
 			if(!empty($candidateInfo)){
-				if ($candidateInfo['left_at'] == '0000-00-00 00:00:00' || empty($candidateInfo['left_at'])) {
-					$from_time = strtotime($candidateInfo['entered_at']); 
-					$to_time = time(); 
+
+				$from_time = strtotime($candidateInfo['entered_at']); 
+				$exam_time = strtotime($exam['exam_datetime']);
+				if ($from_time <= $exam_time) { $from_time = $exam_time; }
+
+				if ($candidateInfo['left_at'] == '0000-00-00 00:00:00' || empty($candidateInfo['left_at'])) 
+				{
+					$currentTimestamp = time();
+					$exam_endtime = strtotime($exam['exam_endtime']);
+					$to_time = $exam_endtime; 
+					if ($currentTimestamp <= $exam_endtime) { $to_time = $currentTimestamp; }
+					
 					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
 					$temp['time'] = $diff_minutes;
 					$temp['status'] = "Appearing";
 					$appearing++;
-				} else {					
-					$from_time = strtotime($candidateInfo['entered_at']); 
+				} else {
 					$to_time = strtotime($candidateInfo['left_at']); 
 					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
 					$temp['time'] = $diff_minutes;
@@ -1615,7 +1623,7 @@ $s_data['req_response'] = $sms_resp['description'];
 		}
 
 		function customSort($a, $b) {
-			$scoreComparison = strcmp($b['score'], $a['score']);
+			$scoreComparison = (floatval($b['score']) - floatval($a['score']));
 			if ($scoreComparison === 0) {
 				$timeA = intval($a['time']);
 				$timeB = intval($b['time']);
@@ -1625,8 +1633,10 @@ $s_data['req_response'] = $sms_resp['description'];
 				if (strpos($b['time'], 'Mins') !== false) {
 					$timeB *= 1;
 				}
+				// Sort by time in ascending order
 				return $timeA - $timeB;
 			}
+			// Sort by score in descending order
 			return $scoreComparison;
 		}
 
@@ -1638,7 +1648,14 @@ $s_data['req_response'] = $sms_resp['description'];
 		$data['title'] = "Exam Dashboard";
 		$data['exam_id'] = $exam_id;
 		$data['absent'] = $absent;
-		$data['appearing'] = $appearing;
+
+		$time = time();
+		$exam_time = strtotime($exam['exam_datetime']);
+		if ($time > $exam_time) {
+			$data['appearing'] = 0;
+		} else {
+			$data['appearing'] = $appearing;
+		}
 		$data['submitted'] = $submitted;
 		
 		$this->load->view('app/exam-dashboard', $data);
@@ -1958,22 +1975,47 @@ $s_data['req_response'] = $sms_resp['description'];
 		$this->isAdminOrManager();
 		$exam = $this->exam_model->get($exam_id);
 		if (!$exam) { redirect('/exams'); }
-
 		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
-
 		$arr_candidates = [];
 		foreach ($candidates as $candidate => $cnd) {
 			$temp['id'] = $cnd['candidate_id'];
 			$cdt = $this->candidate_model->get($cnd['candidate_id']);
-			$temp['name'] = trim($cdt['firstname'] . " " . $cdt['lastname']);
-			$arr_candidates[] = $temp;
+			if ($cdt) {
+				$temp['name'] = trim($cdt['firstname'] . " " . $cdt['lastname']);
+				$arr_candidates[] = $temp;
+			}
 		}
-
 		$data['exam'] = $exam;
 		$data['title'] = "Download Exam Results PDF";
 		$data['candidates'] = $arr_candidates;
 		
 		$this->load->view('app/exam-result-pdf', $data);
+	}
+
+	public function clearResults($exam_id='')
+	{
+		$this->isAdminOrManager();
+		$exam = $this->exam_model->get($exam_id);
+		if (!$exam) { redirect('/exams'); }
+		@unlink('assets/admin/exams/' . $exam_id . ".pdf");
+		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
+		$arr_candidates = [];
+		foreach ($candidates as $candidate => $cnd) {
+			$user_id = $cnd['candidate_id'];
+			$filename = $this->generateName($user_id, $exam_id);
+		    $filepath = FCPATH . 'assets/admin/exams/' . $filename;
+		    if (file_exists($filepath)) {
+		        @unlink($filepath);
+		    }
+		}
+
+		$this->session->set_flashdata('success', 'All generated pdfs are cleared!');
+		if (isset($_GET['ret'])) {
+			redirect('exams/'.$exam_id.'/download-results-pdf');
+		} else {
+			redirect('exams/'.$exam_id.'/view-exam-dashboard');
+		}
+		
 	}
 }
 

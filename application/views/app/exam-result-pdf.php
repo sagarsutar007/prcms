@@ -104,6 +104,9 @@
                     
                   </div>
                   <div class="card-footer text-center">
+                    <a href="<?= base_url('exams/'.$exam['id'].'/clear-results-pdf?ret=true'); ?>" class="btn bg-danger">
+                      <i class="fas fa-trash"></i>&nbsp;Clear PDFs
+                    </a>
                     <button class="btn btn-primary btn-generate-pdfs">Start Generating PDFs</button>
                   </div>
                 </div>

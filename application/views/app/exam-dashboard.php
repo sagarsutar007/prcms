@@ -256,6 +256,7 @@
                 </h3>
 
                 <div class="card-tools">
+                  <a href="<?= base_url('exams/'.$exam_id.'/clear-results-pdf'); ?>" class="btn bg-default btn-sm"><i class="fas fa-trash"></i>&nbsp;Clear PDFs</a>
                   <a href="<?= base_url('exams/'.$exam_id.'/download-results-pdf'); ?>" class="btn bg-default btn-sm"><i class="fas fa-download"></i>&nbsp;Result PDF</a>
                   <button type="button" class="btn bg-default btn-sm" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
@@ -369,6 +370,8 @@
 
     <script src="<?= base_url('assets/admin/js/adminlte.min.js'); ?>"></script>
     <script>
+
+
         function reloadPage() {
             location.reload();
         }
@@ -409,7 +412,7 @@
                     }
                 ],
                 "columnDefs": [{
-                  "targets": [0,9],
+                  "targets": [9],
                   "orderable": false
                 }]
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
@@ -422,7 +425,7 @@
                 ],
                 datasets: [
                     {
-                        data: [<?= $exam['appeared_candidates']; ?>, <?= $exam['candidates'] - $exam['appeared_candidates']; ?>],
+                        data: [<?= $exam['appeared_candidates']; ?>, <?= $absent; ?>],
                         backgroundColor : ['#00c0ef', '#d2d6de'],
                     }
                 ]
@@ -437,7 +440,11 @@
                 data: donutData,
                 options: donutOptions
             })
-
+            <?php
+                $num1 = $exam['appeared_candidates'] - $absent;
+                $num2 = $absent - $exam['appeared_candidates'];
+                $num = ($num1>$num2)?$num1:$num2;
+            ?>
             Chart.pluginService.register({
                 beforeDraw: function(chart) {
                     var width = chart.chart.width,
@@ -447,7 +454,7 @@
                     var fontSize = (height / 180).toFixed(2);
                     ctx.font = fontSize + "em sans-serif";
                     ctx.textBaseline = "middle";
-                    var text = "<?= $exam['appeared_candidates'] . "/" . $exam['candidates']; ?>",
+                    var text = "<?= $num . "/" . $exam['candidates']; ?>",
                         textX = Math.round((width - ctx.measureText(text).width) / 2),
                         textY = (height / 2)+15;
                     ctx.fillText(text, textX, textY);
@@ -505,7 +512,7 @@
                 `);
             });
         });
-
+        //<?= $absent; ?>
     </script>
   </body>
 </html>

@@ -244,6 +244,51 @@ class Exams_model extends CI_Model {
 	    return $q->result_array();
 	}
 
+	public function countExamCandidatesData($exam_id = '', $company_id='', $status='', $search_term='', $order_column='', $order_dir='')
+	{
+	    $sql = "SELECT count(*) AS total, `u`.`id` AS `user_id` FROM `candidates` `u` LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '".$exam_id."'
+	            WHERE `u`.`company_id` = ".$company_id." AND `u`.`status` = '".$status."'";
+
+	    if (!empty($search_term)) {
+	        $sql .= " AND (";
+	        $sql .= "`u`.`firstname` LIKE '%" . $search_term . "%' OR ";
+	        $sql .= "`u`.`middlename` LIKE '%" . $search_term . "%' OR ";
+	        $sql .= "`u`.`lastname` LIKE '%" . $search_term . "%' OR ";
+	        $sql .= "`u`.`phone` LIKE '%" . $search_term . "%' OR ";
+	        $sql .= "`u`.`email` LIKE '%" . $search_term . "%'";
+	        $sql .= ")";
+	    }
+
+	    if (!empty($order_column) && !empty($order_dir)) {
+	        switch ($order_column) {
+	            case 'Name':
+	                $sql .= " ORDER BY `u`.`firstname` " . $order_dir . ", `u`.`middlename` " . $order_dir . ", `u`.`lastname` " . $order_dir;
+	                break;
+	            case 'Phone':
+	                $sql .= " ORDER BY `u`.`phone` " . $order_dir;
+	                break;
+	            case 'Email':
+	                $sql .= " ORDER BY `u`.`email` " . $order_dir;
+	                break;
+	            case 'Registered':
+	                $sql .= " ORDER BY `u`.`created_at` " . $order_dir;
+	                break;
+	            default:
+	                $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
+	        }
+	    } else {
+	        $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
+	    }
+		
+	    $q = $this->db->query($sql);
+		$resp = $q->row_array();
+	    if ($resp) {
+			return $resp['total'];
+		} else {
+			return 0;
+		}
+	}
+
 	public function getExamScheduledCandidates($exam_id='')
 	{
 		$sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`

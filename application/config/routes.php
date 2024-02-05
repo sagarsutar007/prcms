@@ -122,6 +122,7 @@ $route['exams/(:num)/view-result'] = 'Exams/viewResult/$1';
 $route['exams/(:num)/view-detailed-result'] = 'Exams/viewDetailedResult/$1';
 $route['exams/(:num)/view-exam-dashboard'] = 'Exams/viewExamDashboard/$1';
 $route['exams/(:num)/schedule-exam'] = 'Exams/scheduleExam/$1';
+$route['exams/(:num)/send-notifications'] = 'Exams/sendNotifications/$1';
 $route['exams/(:num)/download-excel-format'] = 'Exams/downloadExcel/$1';
 $route['exams/(:num)/download-results-pdf'] = 'Exams/downloadResults/$1';
 $route['exams/(:num)/clear-results-pdf'] = 'Exams/clearResults/$1';

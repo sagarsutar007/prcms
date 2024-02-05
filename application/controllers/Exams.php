@@ -461,7 +461,7 @@ class Exams extends CI_Controller {
 	    $columnSortOrder = $order[0]['dir'];
 		$exams = $this->exam_model->get($exam_id);
 		$data = $this->exam_model->getExamCandidates($exam_id, $length, $start, $exams['company_id'], 'active', $search, $columnName, $columnSortOrder);
-		$recordsTotal =  count($data);
+		$recordsTotal =  $this->exam_model->countExamCandidatesData($exam_id, $exams['company_id'], 'active', $search, $columnName, $columnSortOrder);
 		$result = array();
 		$i = 1 + $start;
 		foreach ($data as $record) {
@@ -656,9 +656,9 @@ class Exams extends CI_Controller {
 			$this->exam_model->setCandidateExamInfo($can); 
 		} else {
 			$exam_token = $this->input->cookie('exam_entry', TRUE);
-			if (!empty($exam_appeared['left_at']) && $exam_appeared['re_entry'] == "false") {
+			if (!empty($exam_appeared['left_at'])) {
 				redirect('exams/'.$data['exam_info']['id'].'/view-result');
-			} else if ($exam_appeared['exam_token'] != $exam_token) {
+			} else if ($exam_appeared['exam_token'] != $exam_token && $exam_appeared['left_at'] != "") {
 				$this->session->set_flashdata('error', 'Exam is going on in another device!');
 				redirect('exams/ongoing');
 			} else {
@@ -675,7 +675,8 @@ class Exams extends CI_Controller {
 				
 				$userarr['exam_token'] = $token;
 				$userarr['left_at'] = null;
-				$userarr['re_entry'] = 'false';
+				$userarr['re_entry'] = 'true';
+				$userarr['re_entry_timestamp'] = date('Y-m-d h:i:s');
 				$this->exam_model->updateCandidateExamInfo($userarr, $exam_appeared['id']); 
 			}
 		}
@@ -1359,28 +1360,263 @@ class Exams extends CI_Controller {
 
 			$arr = ['status'=>'scheduled'];
 			$this->exam_model->updateOnly($arr, $value);
-
-			$candidates = $this->exam_model->getExamScheduledCandidates($value);
-			$ids = [];
-			$nums = [];
-			foreach ($candidates as $key => $obj) {
-				$ids[]= $obj['user_id'];
-				$nums[]= $obj['phone'];
-			}
-
-			// $command = "php ".FCPATH."index.php exams sendExamEmail " . implode(' ', $ids) . " $value > /dev/null &";
-        	// exec($command);
-
-        	// $command2 = "php ".FCPATH."index.php exams sendExamSMS " . implode(' ', $nums) . " $value > /dev/null &";
-        	// exec($command2);
-			$this->sendExamEmail($ids, $value);
-			$this->sendExamSMS($nums, $value);
+			
 			$this->session->set_flashdata('success', 'Exam scheduled successfully!'); 
+
+			redirect('exams/'.$value.'/send-notifications');
 		}else {
-			$this->session->set_flashdata('error', 'You can not schedule exam on past dates!'); 
+			$this->session->set_flashdata('error', 'You can not schedule exam on past datetime!'); 
 		}
 		
 		redirect('exams');
+	}
+
+	public function sendNotifications($exam_id)
+	{
+		$this->isAdminOrManager();
+		$exam = $this->exam_model->get($exam_id);
+		if ( !$exam || $exam['status'] != 'scheduled' ) { 
+			$this->session->set_flashdata('error', 'Please check exam details before sending exam notification!');  
+			redirect('exams'); 
+		}
+
+		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
+		$arr_candidates = [];
+		foreach ($candidates as $candidate => $cnd) {
+			$temp['id'] = $cnd['candidate_id'];
+			$cdt = $this->candidate_model->get($cnd['candidate_id']);
+			if ($cdt) {
+				$temp['name'] = trim($cdt['firstname'] . " " . $cdt['lastname']);
+				$arr_candidates[] = $temp;
+			}
+		}
+		
+		$data = [
+			'title' => 'Send Exam SMS & Email Notification',
+			'exam' => $exam,
+			'candidates' => $arr_candidates
+		];
+		
+		$this->load->view('app/send-notifications', $data);
+	}
+
+	public function notifyCandidate() {
+		$this->isAdminOrManager();
+		$exam_id = $this->input->get('examid');
+		$candidate_id = $this->input->get('userid');
+		if (empty($exam_id) || empty($candidate_id) || $this->input->method != 'post') {
+			$data['status'] = 'ERROR';
+			$data['message'] = "Invalid request or missing required fields.";
+		}
+
+		$exam = $this->exam_model->get($exam_id);
+		if (empty($exam)) { 
+			$data['status'] = 'ERROR';
+			$data['message'] = "Exam does not exists!"; 
+		}
+
+		if (strtotime($exam['exam_endtime']) > time()) {
+			$data['status'] = 'ERROR';
+			$data['message'] = "Exam time has been over!"; 
+		}
+
+		$candidate = $this->candidate_model->get($candidate_id);
+		if (empty($candidate)) { 
+			$data['status'] = 'ERROR';
+			$data['message'] = "Candidate does not exists!"; 
+		}
+
+		$cond = [
+			'exam_id' => $exam_id,
+			'candidate_id' => $candidate_id,
+		];
+		$exists = $this->exam_model->isExamAndCandidateExists($cond);
+		if (empty($exists)) {
+			$data['status'] = 'ERROR';
+			$data['message'] = "Candidate is not assisgned to this exam!"; 
+		}
+
+		$data['status'] = 'SUCCESS';
+		// $data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id);
+		// $data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id);
+
+		echo json_encode($data);
+	}
+
+	protected function sendExamEmailNotification($user_id='', $exam_id='')
+	{
+		$exam_details = $this->exam_model->get($exam_id);
+		$site_data = $this->setting_model->getSiteSetting();
+		$business = $this->business_model->get($exam_details['company_id']);
+		$user_info = $this->candidate_model->get($user_id);
+
+		$templateKeys = [
+			'name' => $user_info['firstname'] ." " . $user_info['middlename'] ." " . $user_info['lastname'],
+			'firstname' => $user_info['firstname'],
+			'middlename' => $user_info['middlename'],
+			'lastname' => $user_info['lastname'],
+			'company_name' => $site_data['app_name'],
+			'exam_name' => $exam_details['name'],
+			'exam_time' => date('H:i: a', strtotime($exam_details['exam_datetime'])),
+			'exam_date' => date('d-m-Y', strtotime($exam_details['exam_datetime'])),
+			'login_url' => base_url('candidate-login'),
+			'login_qr' => base_url('assets/admin/img/qrcodes/candidate-login.png'),
+			'business_name' => $business['company_name']??$site_data['app_name'],
+			'business_addr' => $business['company_address']??'',
+			'exam_login_url' => base_url('e/'.$exam_details['url']),
+		];			
+		$inputString = $site_data['scheduled_exam_mail'];
+		$replacementString = $inputString;
+
+		foreach ($templateKeys as $key => $obj) {
+			$placeholder = '${' . $key . '}';
+			if($key == 'login_qr'){
+				$obj = htmlspecialchars('<div style="text-align:center;"><img src="'.$obj.'" height="300px"></div>');
+			}
+			if (!empty($obj)){
+				$replacementString = str_replace($placeholder, $obj, $replacementString);
+			} else {
+				$replacementString = str_replace($placeholder, '', $replacementString);
+			}
+		}
+
+		$email_html = [];
+		$email_html['data'] = $replacementString;
+		
+		$htmlContent = $this->load->view('app/mail/common-mail-template', $email_html, true);
+		
+		if ($site_data['mail_type'] == 'api') {
+			$config_arr=[
+				'api_url' => $site_data['out_smtp'],
+				'sender_address' => $site_data['smtp_email'],
+				'to_address' => $user_info['email'],
+				'subject' => 'Scheduled Exam Remainder!',
+				'body' => $htmlContent,
+				'api_key' => $site_data['smtp_pass'],
+				'to_name' => $user_info['firstname']
+			];
+
+			$email_response = sendMailViaApi($config_arr);
+		} else {
+			$config_arr=[
+				'out_smtp' => $site_data['out_smtp'],
+				'smtp_port' => $site_data['smtp_port'],
+				'smtp_email' => $site_data['smtp_email'],
+				'smtp_pass' => $site_data['smtp_pass'],
+				'app_name' => 'Simrangroups',
+				'subject' => 'Scheduled Exam Remainder!',
+				'body' => $htmlContent,
+				'email' => $user_info['email'],
+			];
+
+			$email_response = sendMailViaSMTP($config_arr);
+		}
+		
+		$n_data['type'] = 'email';
+		$n_data['user_id'] = $user_info['id'];
+		$n_data['notif_type'] = 'Exam Schedule';
+		$n_data['text'] = htmlspecialchars($htmlContent);
+		$n_data['to_recipient'] = $user_info['email'];
+		$n_data['created_on'] = date('Y-m-d H:i:s');
+
+		if ($email_response) {
+			$n_data['response'] = 'success';
+			$this->notif_model->insertLog($n_data);
+		} else {
+			$n_data['response'] = 'failed';
+			$n_data['req_response'] = $email_response;
+			$this->notif_model->insertLog($n_data);
+		}
+
+		$up_data = ['email_sent' => $n_data['response']];
+		$con_data = [
+			'candidate_id' => $user_info['id'],
+			'exam_id' => $exam_id,
+		];
+		$this->exam_model->updateExamCandidate($up_data, $con_data);
+
+		return $n_data['response'];
+	}
+
+	protected function sendExamSMSNotification($user_id='', $exam_id='')
+	{
+		$site_data = $this->setting_model->getSiteSetting();
+		$exam_details = $this->exam_model->get($exam_id);
+		$business = $this->business_model->get($exam_details['company_id']);
+		$get_candidate = $this->candidate_model->get($user_id);
+		$databaseValues = [
+			'name' => $get_candidate['firstname'] ." " . $get_candidate['middlename'] ." " . $get_candidate['lastname'],
+			'firstname' => $get_candidate['firstname'],
+			'middlename' => $get_candidate['middlename'],
+			'lastname' => $get_candidate['lastname'],
+			'company_name' => $site_data['app_name'],
+			'exam_date' => date('d-m-Y', strtotime($exam_details['exam_datetime'])),
+			'exam_time' => date('H:i a', strtotime($exam_details['exam_datetime'])),
+			'exam_datetime' => date('d-m-Y h:ia', strtotime($exam_details['exam_datetime'])),
+			'login_url' => base_url('candidate-login'),
+			'login_qr' => '',
+			'business_name' => $business['company_name']??$site_data['app_name'],
+			'business_addr' => $business['company_address']??'',
+			'exam_login_url' => $exam_details['short_url']??'',
+		];
+
+		$inputString = $site_data['scheduled_exam'];
+		$replacementString = $inputString;
+
+		foreach ($databaseValues as $keys => $keyval) {
+			$placeholder = '${' . $keys . '}';
+			if (!empty($keyval)) {
+				$replacementString = str_replace($placeholder, $keyval, $replacementString);
+			} else {
+				$replacementString = str_replace($placeholder, '', $replacementString);
+			}
+		}
+
+		$url = 'http://www.text2india.store/vb/apikey.php';
+		
+		$params = [
+			'apikey' => $site_data['sms_api_key'],
+			'senderid' => $site_data['sms_sender_id'],
+			'templateid' => $site_data['schexm_tempid'],
+			'number' => $get_candidate['phone'],
+			'message' => $replacementString,
+		];
+
+		$url .= '?' . http_build_query($params);
+		
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => $url,
+			CURLOPT_RETURNTRANSFER => true,
+		));
+		$response = curl_exec($curl);
+		$sms_resp = json_decode($response, true);
+
+		$s_data['type'] = 'sms';
+		$s_data['user_id'] = $get_candidate['id'];
+		$s_data['notif_type'] = 'Exam Schedule';
+		$s_data['text'] = $replacementString;
+		$s_data['to_recipient'] = $get_candidate['phone'];
+		$s_data['created_on'] = date('Y-m-d H:i:s');
+
+		if ($sms_resp['status'] == 'Success') {
+			$s_data['response'] = 'success';
+			$s_data['req_response'] = $sms_resp['description'];
+			$this->notif_model->insertLog($s_data);
+		} else {
+			$s_data['response'] = 'failed';
+			$s_data['req_response'] = $sms_resp['description'];
+			$this->notif_model->insertLog($s_data);
+		}
+
+		$up_data = ['sms_sent' => $s_data['response']];
+		$con_data = [
+			'candidate_id' => $get_candidate['id'],
+			'exam_id' => $exam_id,
+		];
+		$this->exam_model->updateExamCandidate($up_data, $con_data);
+
+		return $s_data['response'];
 	}
 
 	public function clone($value='') 

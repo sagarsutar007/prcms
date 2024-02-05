@@ -214,7 +214,7 @@
                               <div class="form-group">
                                 <label for="show_marks" class="mb-3">Show Marks</label>
                                 <?php 
-                                  if (isset($record)) {
+                                  if (isset($record) && isset($record['show_marks']) ) {
                                     if ($record['show_marks']=='on'){
                                       $off = '';
                                       $on = 'checked';
@@ -240,30 +240,58 @@
                               </div>
                             </div>
                             <div class="col-md-2">
+                              <?php 
+                                  if (isset($record) && isset($record['sms_notif']) ) {
+                                    if ($record['sms_notif']=='on'){
+                                      $off = '';
+                                      $on = 'checked';
+                                    } else {
+                                      $off = 'checked';
+                                      $on = '';
+                                    }
+                                  } else {
+                                    $off = 'checked';
+                                    $on = '';
+                                  }
+                              ?>
                               <div class="form-group">
                                 <label for="sms_notif" class="mb-3">SMS Notification</label><br>
                                 <div class="d-flex align-items-center">
                                   <div class="custom-control custom-radio">
-                                    <input class="custom-control-input" type="radio" id="sms_notif_on" name="sms_notif" value="on" <?= (isset($record) && $record['sms_notif']=='on')?'checked':''; ?> />
+                                    <input class="custom-control-input" type="radio" id="sms_notif_on" name="sms_notif" value="on" <?= $on; ?> />
                                     <label for="sms_notif_on" class="custom-control-label fw-4">On</label>
                                   </div>
                                   <div class="custom-control custom-radio ml-4">
-                                    <input class="custom-control-input" type="radio" id="sms_notif_off" name="sms_notif" value="off" <?= (isset($record) && $record['sms_notif']=='off')?'checked':''; ?> />
+                                    <input class="custom-control-input" type="radio" id="sms_notif_off" name="sms_notif" value="off" <?= $off; ?> />
                                     <label for="sms_notif_off" class="custom-control-label fw-4">Off</label>
                                   </div>
                                 </div>
                               </div>
                             </div>
                             <div class="col-md-2">
+                              <?php 
+                                  if (isset($record) && isset($record['email_notif']) ) {
+                                    if ($record['email_notif']=='on'){
+                                      $off = '';
+                                      $on = 'checked';
+                                    } else {
+                                      $off = 'checked';
+                                      $on = '';
+                                    }
+                                  } else {
+                                    $off = 'checked';
+                                    $on = '';
+                                  }
+                              ?>
                               <div class="form-group">
                                 <label for="email_notif" class="mb-3">Email Notification</label><br>
                                 <div class="d-flex align-items-center">
                                   <div class="custom-control custom-radio">
-                                    <input class="custom-control-input" type="radio" id="email_notif_on" name="email_notif" value="on" <?= (isset($record) && $record['email_notif']=='on')?'checked':''; ?> />
+                                    <input class="custom-control-input" type="radio" id="email_notif_on" name="email_notif" value="on" <?= $on; ?> />
                                     <label for="email_notif_on" class="custom-control-label fw-4">On</label>
                                   </div>
                                   <div class="custom-control custom-radio ml-4">
-                                    <input class="custom-control-input" type="radio" id="email_notif_off" name="email_notif" value="off" <?= (isset($record) && $record['email_notif']=='off')?'checked':''; ?> />
+                                    <input class="custom-control-input" type="radio" id="email_notif_off" name="email_notif" value="off" <?= $off; ?> />
                                     <label for="email_notif_off" class="custom-control-label fw-4">Off</label>
                                   </div>
                                 </div>

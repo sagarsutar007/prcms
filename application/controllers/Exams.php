@@ -684,7 +684,6 @@ class Exams extends CI_Controller {
 				set_cookie($cookie_data);
 				
 				$userarr['exam_token'] = $token;
-				$userarr['left_at'] = null;
 				$userarr['re_entry_timestamp'] = date('Y-m-d h:i:s');
 				$this->exam_model->updateCandidateExamInfo($userarr, $exam_appeared['id']); 
 			}

@@ -578,7 +578,12 @@ class Exams_model extends CI_Model {
 			'user_id' => $data['user_id'],
 			'exam_id' => $data['exam_id']
 		];
-		$this->db->update('candidate_exam_records', ['re_entry' => 'true', 'left_at' => null], $arr);
+		$this->db->update('candidate_exam_records', [
+			're_entry' => 'true', 
+			'exam_token' => '', 
+			'left_at' => null,
+			're_entry_timestamp' => null
+		], $arr);
 		return $this->db->affected_rows();
 	}
 

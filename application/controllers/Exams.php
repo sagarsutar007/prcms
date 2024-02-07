@@ -655,13 +655,17 @@ class Exams extends CI_Controller {
 			$can['exam_token'] = $token;
 			$this->exam_model->setCandidateExamInfo($can); 
 		} else {
-			$exam_token = $this->input->cookie('exam_entry', TRUE);
 			if (!empty($exam_appeared['left_at'])) {
 				redirect('exams/'.$data['exam_info']['id'].'/view-result');
-			} else if ($exam_appeared['exam_token'] != $exam_token && $exam_appeared['left_at'] != "") {
+			}
+
+			$exam_token = $this->input->cookie('exam_entry', TRUE);
+			if (!empty($exam_appeared['exam_token']) && $exam_appeared['exam_token'] != $exam_token) {
 				$this->session->set_flashdata('error', 'Exam is going on in another device!');
 				redirect('exams/ongoing');
-			} else {
+			}
+
+			if ($exam_appeared['re_entry'] == 'true' && !empty($exam_appeared['re_entry_timestamp'])) {
 				$cookie_data = array(
 					'name'   => 'exam_entry',
 					'value'  => $token,
@@ -675,10 +679,10 @@ class Exams extends CI_Controller {
 				
 				$userarr['exam_token'] = $token;
 				$userarr['left_at'] = null;
-				$userarr['re_entry'] = 'true';
 				$userarr['re_entry_timestamp'] = date('Y-m-d h:i:s');
 				$this->exam_model->updateCandidateExamInfo($userarr, $exam_appeared['id']); 
 			}
+			
 		}
 		
 		$questions = [];
@@ -1415,7 +1419,7 @@ class Exams extends CI_Controller {
 			$data['message'] = "Exam does not exists!"; 
 		}
 
-		if (strtotime($exam['exam_endtime']) > time()) {
+		if (strtotime($exam['exam_endtime']) < time()) {
 			$data['status'] = 'ERROR';
 			$data['message'] = "Exam time has been over!"; 
 		}
@@ -1437,8 +1441,8 @@ class Exams extends CI_Controller {
 		}
 
 		$data['status'] = 'SUCCESS';
-		// $data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id);
-		// $data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id);
+		$data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id);
+		$data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id);
 
 		echo json_encode($data);
 	}

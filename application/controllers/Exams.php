@@ -625,6 +625,12 @@ class Exams extends CI_Controller {
 			redirect('dashboard'); 
 		}
 
+		//Check if exam time has been started or not
+		if (strtotime($data['exam_info']['exam_datetime']) >  time() ) { 
+			$this->session->set_flashdata('error', 'Exam is yet to start!'); 
+			redirect('dashboard'); 
+		}
+
 		$token = uniqid();
 		
 		$can['exam_id'] = $data['exam_info']['id'];
@@ -665,7 +671,7 @@ class Exams extends CI_Controller {
 				redirect('exams/ongoing');
 			}
 
-			if ($exam_appeared['re_entry'] == 'true' && !empty($exam_appeared['re_entry_timestamp'])) {
+			if ($exam_appeared['re_entry'] == 'true' && empty($exam_appeared['re_entry_timestamp'])) {
 				$cookie_data = array(
 					'name'   => 'exam_entry',
 					'value'  => $token,

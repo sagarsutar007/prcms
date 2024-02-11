@@ -605,10 +605,14 @@ class Exams_model extends CI_Model {
 		return $this->db->affected_rows();
 	}
 
-	public function updateCandidatesExamLeftInfo($data='', $id='')
+	public function updateCandidatesExamLeftInfo($data='', $id='', $specifiedTime = '')
 	{
-		$this->db->update('candidate_exam_records', $data, ['exam_id'=>$id, 'left_at'=>NULL]);
-		return $this->db->affected_rows();
+	    // Assuming $specifiedTime is in seconds
+	    $this->db->where("(left_at IS NULL OR TIMESTAMPDIFF(SECOND, left_at, NOW()) > '".$specifiedTime."')", NULL, FALSE);
+	    $this->db->where('exam_id', $id);
+	    $this->db->update('candidate_exam_records', $data);
+	    
+	    return $this->db->affected_rows();
 	}
 
 	public function insertExamClients($data='', $exam_id ='')

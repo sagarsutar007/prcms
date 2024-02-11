@@ -375,7 +375,7 @@ class Exams extends CI_Controller {
 			'left_at' => $exam['exam_endtime']
 		];
 
-		$res = $this->exam_model->updateCandidatesExamLeftInfo($arr, $value);
+		$res = $this->exam_model->updateCandidatesExamLeftInfo($arr, $value, $exam['exam_endtime']);
 
 		if ($res) {
 			$data = ['status' => 'SUCCESS', 'message' => 'Successfully updated exam information!']; 
@@ -1837,6 +1837,9 @@ class Exams extends CI_Controller {
 					$exam_endtime = strtotime($exam['exam_endtime']);
 					$to_time = $exam_endtime; 
 					if ($currentTimestamp <= $exam_endtime) { $to_time = $currentTimestamp; }
+
+					
+					
 					
 					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
 					$temp['time'] = $diff_minutes;
@@ -1844,6 +1847,7 @@ class Exams extends CI_Controller {
 					$appearing++;
 				} else {
 					$to_time = strtotime($candidateInfo['left_at']); 
+
 					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
 					$temp['time'] = $diff_minutes;
 					$temp['status'] = "Submitted";
@@ -2260,7 +2264,6 @@ class Exams extends CI_Controller {
 		} else {
 			redirect('exams/'.$exam_id.'/view-exam-dashboard');
 		}
-		
 	}
 }
 

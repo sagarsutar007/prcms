@@ -368,7 +368,7 @@ class Candidates extends CI_Controller {
 							
 							if ($sms_resp['status'] == 'Success') {
 								$s_data['response'] = 'success';
-$s_data['req_response'] = $sms_resp['description'];
+								$s_data['req_response'] = $sms_resp['description'];
 								$this->notif_model->insertLog($s_data);
 							} else {
 								$s_data['response'] = 'failed';
@@ -802,7 +802,16 @@ $s_data['req_response'] = $sms_resp['description'];
 				$cli .= $obj['company_name'] . ",";
 			}
 			$data['clients'] = rtrim($cli, ',');
-			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id'=>$exam_id, 'user_id'=>$user_id]);
+			$exam_log = $this->exam_model->checkCandidateExamInfo(['exam_id'=>$exam_id, 'user_id'=>$user_id]);
+
+			if ($exam_log && $exam_log['left_at'] == null) {
+				if (strtotime($data['exam']['exam_endtime']) < time()) {
+					$exam_log['left_at'] = $data['exam']['exam_endtime'];
+				}
+			}
+
+			$data['exam_log'] = $exam_log;
+
 			$html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
 
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
@@ -1022,7 +1031,7 @@ $s_data['req_response'] = $sms_resp['description'];
 
 									if ($sms_resp['status'] == 'Success') {
 										$s_data['response'] = 'success';
-$s_data['req_response'] = $sms_resp['description'];
+										$s_data['req_response'] = $sms_resp['description'];
 										$this->notif_model->insertLog($s_data);
 									} else {
 										$s_data['response'] = 'failed';
@@ -1239,9 +1248,9 @@ $s_data['req_response'] = $sms_resp['description'];
 			$s_data['to_recipient'] = $get_candidate['phone'];
 			$s_data['created_on'] = date('Y-m-d H:i:s');
 
-			if ($sms_resp['status'] == 'Success') {
+			if (strtoupper($sms_resp['status']) == 'SUCCESS') {
 				$s_data['response'] = 'success';
-$s_data['req_response'] = $sms_resp['description'];
+				$s_data['req_response'] = $sms_resp['description'];
 				$this->notif_model->insertLog($s_data);
 			} else {
 				$s_data['response'] = 'failed';

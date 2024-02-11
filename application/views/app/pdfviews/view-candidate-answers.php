@@ -1,7 +1,7 @@
 <?php 
   if (!empty($exam_log)){
-      $exam_entry = date('h:i a d/m/Y', strtotime($exam_log['entered_at']));
-      $exam_exit = date('h:i a d/m/Y', strtotime($exam_log['left_at']));
+      $exam_entry = !empty($exam_log['entered_at'])?date('h:i a d/m/Y', strtotime($exam_log['entered_at'])):'Not Available';
+      $exam_exit = !empty($exam_log['left_at'])?date('h:i a d/m/Y', strtotime($exam_log['left_at'])):'Not Available';
   } else {
       $exam_entry = 'Not Available';
       $exam_exit = 'Not Available';

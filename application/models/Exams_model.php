@@ -1,29 +1,31 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!defined('BASEPATH'))
+	exit('No direct script access allowed');
 
-class Exams_model extends CI_Model {
+class Exams_model extends CI_Model
+{
 
 	public $primary_table = 'exams';
 
 	public function __construct()
 	{
 		parent::__construct();
-		
+
 	}
 
-	public function countExamsConducted($date='')
+	public function countExamsConducted($date = '')
 	{
 		$this->db->from('exams');
 		$this->db->like('created_at', $date);
 		return $this->db->count_all_results();
 	}
 
-	public function count($company_id='')
+	public function count($company_id = '')
 	{
 		$this->db->where('company_id', $company_id);
 		return $this->db->count_all_results($this->primary_table);
 	}
 
-	public function countConductedExams($company_id=[])
+	public function countConductedExams($company_id = [])
 	{
 		if (count($company_id)) {
 			$this->db->where_in('company_id', $company_id);
@@ -33,7 +35,7 @@ class Exams_model extends CI_Model {
 		return $this->db->count_all_results($this->primary_table);
 	}
 
-	public function countUpcomingExams($company_id=[])
+	public function countUpcomingExams($company_id = [])
 	{
 		if (count($company_id)) {
 			$this->db->where_in('company_id', $company_id);
@@ -43,48 +45,48 @@ class Exams_model extends CI_Model {
 		return $this->db->count_all_results($this->primary_table);
 	}
 
-	public function get($value='')
+	public function get($value = '')
 	{
 		$this->db->select('*');
-    	$this->db->select('(SELECT COUNT(*) AS clients FROM `exam_clients` WHERE exam_id = exams.id) AS clients');
-    	$this->db->select('(SELECT COUNT(*) AS candidates FROM `exam_candidates` WHERE exam_id = exams.id) AS candidates');
-    	$this->db->select('(SELECT COUNT(*) AS questions FROM `exam_questions` WHERE exam_id = exams.id) AS questions');
-    	$this->db->select('(SELECT company_name FROM `companies` WHERE id = exams.company_id) AS company_name');
+		$this->db->select('(SELECT COUNT(*) AS clients FROM `exam_clients` WHERE exam_id = exams.id) AS clients');
+		$this->db->select('(SELECT COUNT(*) AS candidates FROM `exam_candidates` WHERE exam_id = exams.id) AS candidates');
+		$this->db->select('(SELECT COUNT(*) AS questions FROM `exam_questions` WHERE exam_id = exams.id) AS questions');
+		$this->db->select('(SELECT company_name FROM `companies` WHERE id = exams.company_id) AS company_name');
 		$this->db->where('id', $value);
 		$this->db->from($this->primary_table);
 		$q = $this->db->get();
 		return $q->row_array();
 	}
 
-	public function get_data($limit, $offset, $order="desc", $company_id='')
-    {
-    	$this->db->select('*');
-    	$this->db->select('(SELECT COUNT(*) AS total FROM `exam_clients` WHERE exam_id = exams.id) AS total');
-    	$this->db->select('(SELECT COUNT(*) AS candidates FROM `exam_candidates` WHERE exam_id = exams.id) AS total_candidates');
-    	$this->db->select('(SELECT COUNT(*) AS questions FROM `exam_questions` WHERE exam_id = exams.id) AS total_questions');
-    	$this->db->select('(SELECT company_name FROM `companies` WHERE id = exams.company_id) AS company_name');
-    	$this->db->order_by('created_at', $order);
-        $this->db->limit($limit, $offset);
-        $this->db->from($this->primary_table);
+	public function get_data($limit, $offset, $order = "desc", $company_id = '')
+	{
+		$this->db->select('*');
+		$this->db->select('(SELECT COUNT(*) AS total FROM `exam_clients` WHERE exam_id = exams.id) AS total');
+		$this->db->select('(SELECT COUNT(*) AS candidates FROM `exam_candidates` WHERE exam_id = exams.id) AS total_candidates');
+		$this->db->select('(SELECT COUNT(*) AS questions FROM `exam_questions` WHERE exam_id = exams.id) AS total_questions');
+		$this->db->select('(SELECT company_name FROM `companies` WHERE id = exams.company_id) AS company_name');
+		$this->db->order_by('created_at', $order);
+		$this->db->limit($limit, $offset);
+		$this->db->from($this->primary_table);
 		if ($company_id) {
 			$this->db->where('company_id', $company_id);
 		}
-        $query = $this->db->get();
-        return $query->result_array();
-    }
+		$query = $this->db->get();
+		return $query->result_array();
+	}
 
-    public function create($data='')
+	public function create($data = '')
 	{
 		$ins_data = [
 			'name' => $data['name'],
-			'company_id' => $data['company_id']??'',
+			'company_id' => $data['company_id'] ?? '',
 			'duration' => $data['duration'],
 			'created_at' => $data['created_at'],
 			'lang' => $data['lang'],
 			'pass_percentage' => $data['pass_percentage'],
 			'url' => $data['url'],
-			'exam_datetime' => $data['exam_datetime']??'',
-			'exam_endtime' => $data['exam_endtime']??'',
+			'exam_datetime' => $data['exam_datetime'] ?? '',
+			'exam_endtime' => $data['exam_endtime'] ?? '',
 			'status' => $data['status'],
 			'created_at' => $data['created_at'],
 			'created_by' => $data['created_by'],
@@ -92,13 +94,13 @@ class Exams_model extends CI_Model {
 			'show_marks' => $data['show_marks'],
 			'sms_notif' => $data['sms_notif'],
 			'email_notif' => $data['email_notif'],
-			'short_url' => $data['short_url']??''
+			'short_url' => $data['short_url'] ?? ''
 		];
 		$this->db->insert($this->primary_table, $ins_data);
 		return $this->db->insert_id();
 	}
 
-	public function update($data='', $id='')
+	public function update($data = '', $id = '')
 	{
 		$ins_data = [
 			'name' => $data['name'],
@@ -112,18 +114,20 @@ class Exams_model extends CI_Model {
 			'sms_notif' => $data['sms_notif'],
 			'email_notif' => $data['email_notif'],
 		];
-		if (isset($data['status'])) { $ins_data['status'] = $data['status']; }
-		$this->db->update($this->primary_table, $ins_data, ['id'=>$id]);
+		if (isset($data['status'])) {
+			$ins_data['status'] = $data['status'];
+		}
+		$this->db->update($this->primary_table, $ins_data, ['id' => $id]);
 		return $this->db->affected_rows();
 	}
 
-	public function updateOnly($data='', $id='')
+	public function updateOnly($data = '', $id = '')
 	{
-		$this->db->update($this->primary_table, $data, ['id'=>$id]);
+		$this->db->update($this->primary_table, $data, ['id' => $id]);
 		return $this->db->affected_rows();
 	}
 
-	public function getExamClients($value='')
+	public function getExamClients($value = '')
 	{
 		$this->db->select('c.id, c.company_name, c.company_logo');
 		$this->db->from('companies c');
@@ -133,177 +137,183 @@ class Exams_model extends CI_Model {
 		return $q->result_array();
 	}
 
-	public function insertExamQuestions($data='')
+	public function insertExamQuestions($data = '')
 	{
 		$this->db->insert_batch('exam_questions', $data);
 		return $this->db->affected_rows();
 	}
 
-	public function insertExamQuestion($data='')
+	public function insertExamQuestion($data = '')
 	{
 		$this->db->insert('exam_questions', $data);
 		return $this->db->affected_rows();
 	}
 
-	public function deleteQuestionFromExam($data='')
+	public function deleteQuestionFromExam($data = '')
 	{
 		$this->db->delete('exam_questions', $data);
 		return $this->db->affected_rows();
 	}
 
-	public function insertExamCandidate($data='')
+	public function insertExamCandidate($data = '')
 	{
 		$this->db->insert('exam_candidates', $data);
 		return $this->db->insert_id();
 	}
 
-	public function updateExamCandidate($data='', $condition='')
+	public function updateExamCandidate($data = '', $condition = '')
 	{
 		$this->db->update('exam_candidates', $data, $condition);
 		return $this->db->affected_rows();
 	}
 
-	public function isExamAndCandidateExists($data='')
+	public function addExamLog($data = [])
+	{
+		$this->db->insert('exam_candidate_logs', $data);
+		return $this->db->insert_id();
+	}
+
+	public function isExamAndCandidateExists($data = '')
 	{
 		$q = $this->db->get_where('exam_candidates', $data);
 		return $q->row_array();
 	}
 
-	public function getExamCandidate($id='')
+	public function getExamCandidate($id = '')
 	{
-		$q = $this->db->get_where('exam_candidates', ['id'=>$id]);
+		$q = $this->db->get_where('exam_candidates', ['id' => $id]);
 		return $q->row_array();
 	}
 
-	public function removeExamCandidate($id='')
+	public function removeExamCandidate($id = '')
 	{
-		$this->db->delete('exam_candidates', ['id'=>$id]);
+		$this->db->delete('exam_candidates', ['id' => $id]);
 		return $this->db->affected_rows();
 	}
 
-	public function removeExamCandidates($exam_id='')
+	public function removeExamCandidates($exam_id = '')
 	{
-		$this->db->delete('exam_candidates', ['exam_id'=>$exam_id]);
+		$this->db->delete('exam_candidates', ['exam_id' => $exam_id]);
 		return $this->db->affected_rows();
 	}
 
-	public function deleteExamCandidates($data=[])
+	public function deleteExamCandidates($data = [])
 	{
 		$this->db->delete('exam_candidates', $data);
 		return $this->db->affected_rows();
 	}
 
-	public function fetchExamCandidates($exam_id='')
+	public function fetchExamCandidates($exam_id = '')
 	{
-		$q = $this->db->get_where('exam_candidates', ['exam_id'=>$exam_id]);
+		$q = $this->db->get_where('exam_candidates', ['exam_id' => $exam_id]);
 		return $q->result_array();
 	}
 
-	public function getExamCandidates($exam_id = '', $limit = null, $offset = null, $company_id='', $status='', $search_term='', $order_column='', $order_dir='')
+	public function getExamCandidates($exam_id = '', $limit = null, $offset = null, $company_id = '', $status = '', $search_term = '', $order_column = '', $order_dir = '')
 	{
-	    $sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`, `u`.`created_at`, `u`.`empid`
+		$sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`, `u`.`created_at`, `u`.`empid`
 	            FROM `candidates` `u`
-	            LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '".$exam_id."'
-	            WHERE `u`.`company_id` = ".$company_id." AND `u`.`status` = '".$status."'";
+	            LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '" . $exam_id . "'
+	            WHERE `u`.`company_id` = " . $company_id . " AND `u`.`status` = '" . $status . "'";
 
-	    if (!empty($search_term)) {
-	        $sql .= " AND (";
-	        $sql .= "`u`.`firstname` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`middlename` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`lastname` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`phone` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`email` LIKE '%" . $search_term . "%'";
-	        $sql .= ")";
-	    }
+		if (!empty($search_term)) {
+			$sql .= " AND (";
+			$sql .= "`u`.`firstname` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`middlename` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`lastname` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`phone` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`email` LIKE '%" . $search_term . "%'";
+			$sql .= ")";
+		}
 
-	    if (!empty($order_column) && !empty($order_dir)) {
-	        switch ($order_column) {
-	            case 'Name':
-	                $sql .= " ORDER BY `u`.`firstname` " . $order_dir . ", `u`.`middlename` " . $order_dir . ", `u`.`lastname` " . $order_dir;
-	                break;
-	            case 'Phone':
-	                $sql .= " ORDER BY `u`.`phone` " . $order_dir;
-	                break;
-	            case 'Email':
-	                $sql .= " ORDER BY `u`.`email` " . $order_dir;
-	                break;
-	            case 'Registered':
-	                $sql .= " ORDER BY `u`.`created_at` " . $order_dir;
-	                break;
-	            default:
-	                $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
-	        }
-	    } else {
-	        $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
-	    }
+		if (!empty($order_column) && !empty($order_dir)) {
+			switch ($order_column) {
+				case 'Name':
+					$sql .= " ORDER BY `u`.`firstname` " . $order_dir . ", `u`.`middlename` " . $order_dir . ", `u`.`lastname` " . $order_dir;
+					break;
+				case 'Phone':
+					$sql .= " ORDER BY `u`.`phone` " . $order_dir;
+					break;
+				case 'Email':
+					$sql .= " ORDER BY `u`.`email` " . $order_dir;
+					break;
+				case 'Registered':
+					$sql .= " ORDER BY `u`.`created_at` " . $order_dir;
+					break;
+				default:
+					$sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '" . $exam_id . "' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
+			}
+		} else {
+			$sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '" . $exam_id . "' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
+		}
 
-	    if ($limit !== null && $offset !== null) {
-	        $sql .= ' LIMIT '.$limit.' OFFSET '.$offset;
-	    }
-	    $q = $this->db->query($sql);
-	    return $q->result_array();
+		if ($limit !== null && $offset !== null) {
+			$sql .= ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		}
+		$q = $this->db->query($sql);
+		return $q->result_array();
 	}
 
-	public function countExamCandidatesData($exam_id = '', $company_id='', $status='', $search_term='', $order_column='', $order_dir='')
+	public function countExamCandidatesData($exam_id = '', $company_id = '', $status = '', $search_term = '', $order_column = '', $order_dir = '')
 	{
-	    $sql = "SELECT count(*) AS total, `u`.`id` AS `user_id` FROM `candidates` `u` LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '".$exam_id."'
-	            WHERE `u`.`company_id` = ".$company_id." AND `u`.`status` = '".$status."'";
+		$sql = "SELECT count(*) AS total, `u`.`id` AS `user_id` FROM `candidates` `u` LEFT JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` AND `ec`.`exam_id` = '" . $exam_id . "'
+	            WHERE `u`.`company_id` = " . $company_id . " AND `u`.`status` = '" . $status . "'";
 
-	    if (!empty($search_term)) {
-	        $sql .= " AND (";
-	        $sql .= "`u`.`firstname` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`middlename` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`lastname` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`phone` LIKE '%" . $search_term . "%' OR ";
-	        $sql .= "`u`.`email` LIKE '%" . $search_term . "%'";
-	        $sql .= ")";
-	    }
+		if (!empty($search_term)) {
+			$sql .= " AND (";
+			$sql .= "`u`.`firstname` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`middlename` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`lastname` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`phone` LIKE '%" . $search_term . "%' OR ";
+			$sql .= "`u`.`email` LIKE '%" . $search_term . "%'";
+			$sql .= ")";
+		}
 
-	    if (!empty($order_column) && !empty($order_dir)) {
-	        switch ($order_column) {
-	            case 'Name':
-	                $sql .= " ORDER BY `u`.`firstname` " . $order_dir . ", `u`.`middlename` " . $order_dir . ", `u`.`lastname` " . $order_dir;
-	                break;
-	            case 'Phone':
-	                $sql .= " ORDER BY `u`.`phone` " . $order_dir;
-	                break;
-	            case 'Email':
-	                $sql .= " ORDER BY `u`.`email` " . $order_dir;
-	                break;
-	            case 'Registered':
-	                $sql .= " ORDER BY `u`.`created_at` " . $order_dir;
-	                break;
-	            default:
-	                $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
-	        }
-	    } else {
-	        $sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '".$exam_id."' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
-	    }
-		
-	    $q = $this->db->query($sql);
+		if (!empty($order_column) && !empty($order_dir)) {
+			switch ($order_column) {
+				case 'Name':
+					$sql .= " ORDER BY `u`.`firstname` " . $order_dir . ", `u`.`middlename` " . $order_dir . ", `u`.`lastname` " . $order_dir;
+					break;
+				case 'Phone':
+					$sql .= " ORDER BY `u`.`phone` " . $order_dir;
+					break;
+				case 'Email':
+					$sql .= " ORDER BY `u`.`email` " . $order_dir;
+					break;
+				case 'Registered':
+					$sql .= " ORDER BY `u`.`created_at` " . $order_dir;
+					break;
+				default:
+					$sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '" . $exam_id . "' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
+			}
+		} else {
+			$sql .= " ORDER BY CASE WHEN `ec`.`exam_id` = '" . $exam_id . "' AND `ec`.`candidate_id` = `u`.`id` THEN 0 ELSE 1 END, `user_id` DESC";
+		}
+
+		$q = $this->db->query($sql);
 		$resp = $q->row_array();
-	    if ($resp) {
+		if ($resp) {
 			return $resp['total'];
 		} else {
 			return 0;
 		}
 	}
 
-	public function getExamScheduledCandidates($exam_id='')
+	public function getExamScheduledCandidates($exam_id = '')
 	{
 		$sql = "SELECT `u`.`firstname`, `u`.`middlename`, `u`.`lastname`, `u`.`phone`, `u`.`email`, `u`.`id` AS `user_id`, `ec`.`id`, `ec`.`sms_sent`, `ec`.`email_sent`
-		FROM `candidates` `u` INNER JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` WHERE `ec`.`exam_id` = '".$exam_id."'";
+		FROM `candidates` `u` INNER JOIN `exam_candidates` `ec` ON `u`.`id` = `ec`.`candidate_id` WHERE `ec`.`exam_id` = '" . $exam_id . "'";
 		$q = $this->db->query($sql);
 		return $q->result_array();
 	}
 
-	public function changeStatus($id='', $status='draft')
+	public function changeStatus($id = '', $status = 'draft')
 	{
-		$this->db->update($this->primary_table, ['status'=>$status], ['id'=>$id]);
+		$this->db->update($this->primary_table, ['status' => $status], ['id' => $id]);
 		return $this->db->affected_rows();
 	}
 
-	public function getExamQuestionCategories($exam_id='')
+	public function getExamQuestionCategories($exam_id = '')
 	{
 		$this->db->select('DISTINCT(q.category_id) as category');
 		$this->db->from('questions q');
@@ -313,7 +323,7 @@ class Exams_model extends CI_Model {
 		return $q->result_array();
 	}
 
-	public function getCandidatesUpcomingExam($limit, $offset, $order="desc", $value='')
+	public function getCandidatesUpcomingExam($limit, $offset, $order = "desc", $value = '')
 	{
 		$currentDatetime = date('Y-m-d H:i:s');
 		$this->db->select('e.*');
@@ -324,12 +334,12 @@ class Exams_model extends CI_Model {
 		$this->db->where('e.status', 'scheduled');
 		$this->db->where('e.exam_datetime >', $currentDatetime);
 		$this->db->order_by('e.created_at', $order);
-        $this->db->limit($limit, $offset);
+		$this->db->limit($limit, $offset);
 		$q = $this->db->get();
 		return $q->result_array();
 	}
 
-	public function getCandidatesTodaysExam($limit, $offset, $order="desc", $value='')
+	public function getCandidatesTodaysExam($limit, $offset, $order = "desc", $value = '')
 	{
 		$currentDatetime = date('Y-m-d H:i:s');
 		$this->db->select('e.*');
@@ -340,12 +350,12 @@ class Exams_model extends CI_Model {
 		$this->db->where('e.status', 'scheduled');
 		$this->db->where('e.exam_endtime >', $currentDatetime);
 		$this->db->order_by('e.created_at', $order);
-        $this->db->limit($limit, $offset);
+		$this->db->limit($limit, $offset);
 		$q = $this->db->get();
 		return $q->result_array();
 	}
 
-	public function countCandidatesUpcomingExam($value='')
+	public function countCandidatesUpcomingExam($value = '')
 	{
 		$currentDatetime = date('Y-m-d H:i:s');
 		$this->db->select('e.*');
@@ -358,17 +368,19 @@ class Exams_model extends CI_Model {
 		return $this->db->count_all_results();
 	}
 
-	public function countClientExams($value='')
+	public function countClientExams($value = '')
 	{
-		if (empty($value)) return null;
+		if (empty($value))
+			return null;
 		$this->db->where('ec.client_id', $value);
 		$this->db->from('exam_clients ec');
 		return $this->db->count_all_results();
 	}
 
-	public function countClientUpcomingExams($value='')
+	public function countClientUpcomingExams($value = '')
 	{
-		if (empty($value)) return null;
+		if (empty($value))
+			return null;
 		$this->db->where('ec.client_id', $value);
 		$this->db->where('e.status', 'scheduled');
 		$this->db->where('e.exam_endtime >', date('Y-m-d H:i:s'));
@@ -377,9 +389,10 @@ class Exams_model extends CI_Model {
 		return $this->db->count_all_results();
 	}
 
-	public function countClientConductedExams($value='')
+	public function countClientConductedExams($value = '')
 	{
-		if (empty($value)) return null;
+		if (empty($value))
+			return null;
 
 		$this->db->where('ec.client_id', $value);
 		$this->db->where('e.status', 'scheduled');
@@ -389,7 +402,7 @@ class Exams_model extends CI_Model {
 		return $this->db->count_all_results();
 	}
 
-	public function countCandidatesCompletedExam($value='')
+	public function countCandidatesCompletedExam($value = '')
 	{
 		$this->db->select('e.*');
 		$this->db->from('exam_candidates ec');
@@ -402,22 +415,22 @@ class Exams_model extends CI_Model {
 	public function getCandidatesExam($candidate_id = '')
 	{
 		$currentDatetime = date('Y-m-d H:i:s');
-	    $tenMinutesBefore = date('Y-m-d H:i:s', strtotime('-10 minutes', strtotime($currentDatetime)));
-	    $tenMinutesAhead = date('Y-m-d H:i:s', strtotime('+10 minutes', strtotime($currentDatetime)));
+		$tenMinutesBefore = date('Y-m-d H:i:s', strtotime('-10 minutes', strtotime($currentDatetime)));
+		$tenMinutesAhead = date('Y-m-d H:i:s', strtotime('+10 minutes', strtotime($currentDatetime)));
 
-	    $this->db->select('e.*');
-	    $this->db->select('(SELECT COUNT(*) AS total FROM `exam_questions` WHERE exam_id = e.id) AS total');
-	    $this->db->from('exam_candidates ec');
-	    $this->db->join('exams e', 'ec.exam_id = e.id');
-	    $this->db->where('ec.candidate_id', $candidate_id);
-	    $this->db->where('e.status', 'scheduled');
-	    $this->db->where("'$currentDatetime' BETWEEN DATE_SUB(e.exam_datetime, INTERVAL 10 MINUTE) AND e.exam_endtime", null, false);
+		$this->db->select('e.*');
+		$this->db->select('(SELECT COUNT(*) AS total FROM `exam_questions` WHERE exam_id = e.id) AS total');
+		$this->db->from('exam_candidates ec');
+		$this->db->join('exams e', 'ec.exam_id = e.id');
+		$this->db->where('ec.candidate_id', $candidate_id);
+		$this->db->where('e.status', 'scheduled');
+		$this->db->where("'$currentDatetime' BETWEEN DATE_SUB(e.exam_datetime, INTERVAL 10 MINUTE) AND e.exam_endtime", null, false);
 
-	    $q = $this->db->get();
-	    return $q->result_array();
+		$q = $this->db->get();
+		return $q->result_array();
 	}
 
-	public function getFromUrl($value='')
+	public function getFromUrl($value = '')
 	{
 		$this->db->where('url', $value);
 		$this->db->from($this->primary_table);
@@ -425,19 +438,19 @@ class Exams_model extends CI_Model {
 		return $q->row_array();
 	}
 
-	public function countExamQuestion($value='')
+	public function countExamQuestion($value = '')
 	{
 		$this->db->where('exam_id', $value);
 		return $this->db->count_all_results('exam_questions');
 	}
 
-	public function countExamCandidates($value='')
+	public function countExamCandidates($value = '')
 	{
 		$this->db->where('exam_id', $value);
 		return $this->db->count_all_results('exam_candidates');
 	}
 
-	public function checkExamAndQuestionExists($data=[])
+	public function checkExamAndQuestionExists($data = [])
 	{
 		$this->db->where($data);
 		$this->db->from('exam_questions');
@@ -445,13 +458,13 @@ class Exams_model extends CI_Model {
 		return $q->row_array();
 	}
 
-	public function removeExamQuestions($exam_id='')
+	public function removeExamQuestions($exam_id = '')
 	{
-		$this->db->delete('exam_questions',['exam_id'=>$exam_id]);
+		$this->db->delete('exam_questions', ['exam_id' => $exam_id]);
 		return $this->db->affected_rows();
 	}
 
-	public function getExamQuestions($exam_id='', $status='')
+	public function getExamQuestions($exam_id = '', $status = '')
 	{
 		$this->db->select('eq.id as eqid, q.*');
 		$this->db->select('(SELECT category_name FROM `categories` WHERE id = q.category_id) AS category_name');
@@ -465,7 +478,7 @@ class Exams_model extends CI_Model {
 		return $q->result_array();
 	}
 
-	public function getLeftQuestions($ids=[])
+	public function getLeftQuestions($ids = [])
 	{
 		$this->db->select('q.*');
 		$this->db->select('(SELECT category_name FROM `categories` WHERE id = q.category_id) AS category_name');
@@ -477,47 +490,48 @@ class Exams_model extends CI_Model {
 		return $q->result_array();
 	}
 
-	public function deleteExamQuestions($value='')
+	public function deleteExamQuestions($value = '')
 	{
-		$this->db->delete('exam_questions', ['exam_id'=>$value]);
+		$this->db->delete('exam_questions', ['exam_id' => $value]);
 		return $this->db->affected_rows();
 	}
 
-	public function removeExamQuestion($value='')
+	public function removeExamQuestion($value = '')
 	{
-		$this->db->delete('exam_questions', ['id'=>$value]);
+		$this->db->delete('exam_questions', ['id' => $value]);
 		return $this->db->affected_rows();
 	}
 
-	public function submitAnswer($value='')
+	public function submitAnswer($value = '')
 	{
 		$this->db->insert('exam_records', $value);
 		return $this->db->insert_id();
 	}
 
-	public function deleteAnswer($data='')
+	public function deleteAnswer($data = '')
 	{
-		$this->db->delete('exam_records', ['user_id'=>$data['user_id'], 'question_id'=>$data['question_id'], 'exam_id'=>$data['exam_id']] );
+		$this->db->delete('exam_records', ['user_id' => $data['user_id'], 'question_id' => $data['question_id'], 'exam_id' => $data['exam_id']]);
 		return $this->db->affected_rows();
 	}
 
-	public function deleteAnswerById($ans_id='') {
-		$this->db->delete('exam_records', ['id'=>$ans_id]);
+	public function deleteAnswerById($ans_id = '')
+	{
+		$this->db->delete('exam_records', ['id' => $ans_id]);
 		return $this->db->affected_rows();
 	}
 
-	public function checkAnswerExists($data='')
+	public function checkAnswerExists($data = '')
 	{
 		$q = $this->db->get_where('exam_records', [
-			'user_id'=>$data['user_id'], 
-			'question_id'=>$data['question_id'], 
-			'exam_id'=>$data['exam_id'],
+			'user_id' => $data['user_id'],
+			'question_id' => $data['question_id'],
+			'exam_id' => $data['exam_id'],
 			'answer_id' => $data['answer_id']
-			]);
+		]);
 		return $q->row_array();
 	}
 
-	public function getUserAnswer($data='')
+	public function getUserAnswer($data = '')
 	{
 		$arr = [
 			'user_id' => $data['user_id'],
@@ -530,7 +544,7 @@ class Exams_model extends CI_Model {
 		return $q->row_array();
 	}
 
-	public function getUserAnswers($data='')
+	public function getUserAnswers($data = '')
 	{
 		$arr = [
 			'ec.user_id' => $data['user_id'],
@@ -545,7 +559,7 @@ class Exams_model extends CI_Model {
 		return $q->result_array();
 	}
 
-	public function getExamResult($exam_id='', $user_id='')
+	public function getExamResult($exam_id = '', $user_id = '')
 	{
 		$arr = [
 			'er.user_id' => $user_id,
@@ -554,13 +568,13 @@ class Exams_model extends CI_Model {
 		$this->db->select('er.*, q.question_type');
 		$this->db->from('exam_records er');
 		$this->db->join('questions q', 'q.question_id = er.question_id');
-		
+
 		$this->db->where($arr);
 		$q = $this->db->get();
 		return $q->result_array();
 	}
 
-	public function checkCandidateExamInfo($data='')
+	public function checkCandidateExamInfo($data = '')
 	{
 		$arr = [
 			'user_id' => $data['user_id'],
@@ -572,50 +586,50 @@ class Exams_model extends CI_Model {
 		return $q->row_array();
 	}
 
-	public function enableRetry($data='')
+	public function enableRetry($data = '')
 	{
 		$arr = [
 			'user_id' => $data['user_id'],
 			'exam_id' => $data['exam_id']
 		];
 		$this->db->update('candidate_exam_records', [
-			're_entry' => 'true', 
-			'exam_token' => '', 
+			're_entry' => 'true',
+			'exam_token' => '',
 			'left_at' => null,
 			're_entry_timestamp' => null
 		], $arr);
 		return $this->db->affected_rows();
 	}
 
-	public function setCandidateExamInfo($data='')
+	public function setCandidateExamInfo($data = '')
 	{
 		$this->db->insert('candidate_exam_records', $data);
 		return $this->db->insert_id();
 	}
 
-	public function updateCandidateExamInfo($data='', $id='')
+	public function updateCandidateExamInfo($data = '', $id = '')
 	{
-		$this->db->update('candidate_exam_records', $data, ['id'=>$id]);
+		$this->db->update('candidate_exam_records', $data, ['id' => $id]);
 		return $this->db->affected_rows();
 	}
 
-	public function updateCandidatesExamInfo($data='', $id='')
+	public function updateCandidatesExamInfo($data = '', $id = '')
 	{
-		$this->db->update('candidate_exam_records', $data, ['exam_id'=>$id]);
+		$this->db->update('candidate_exam_records', $data, ['exam_id' => $id]);
 		return $this->db->affected_rows();
 	}
 
-	public function updateCandidatesExamLeftInfo($data='', $id='', $specifiedTime = '')
+	public function updateCandidatesExamLeftInfo($data = '', $id = '', $specifiedTime = '')
 	{
-	    // Assuming $specifiedTime is in seconds
-	    $this->db->where("(left_at IS NULL OR TIMESTAMPDIFF(SECOND, left_at, NOW()) > '".$specifiedTime."')", NULL, FALSE);
-	    $this->db->where('exam_id', $id);
-	    $this->db->update('candidate_exam_records', $data);
-	    
-	    return $this->db->affected_rows();
+		// Assuming $specifiedTime is in seconds
+		$this->db->where("(left_at IS NULL OR TIMESTAMPDIFF(SECOND, left_at, NOW()) > '" . $specifiedTime . "')", NULL, FALSE);
+		$this->db->where('exam_id', $id);
+		$this->db->update('candidate_exam_records', $data);
+
+		return $this->db->affected_rows();
 	}
 
-	public function insertExamClients($data='', $exam_id ='')
+	public function insertExamClients($data = '', $exam_id = '')
 	{
 		$ins_arr = [];
 		foreach ($data as $key => $obj) {
@@ -628,13 +642,13 @@ class Exams_model extends CI_Model {
 		return $this->db->affected_rows();
 	}
 
-	public function removeExamClients($value='')
+	public function removeExamClients($value = '')
 	{
-		$this->db->delete('exam_clients', ['exam_id'=>$value]);
+		$this->db->delete('exam_clients', ['exam_id' => $value]);
 		return $this->db->affected_rows();
 	}
 
-	public function getExamResults($exam_id='')
+	public function getExamResults($exam_id = '')
 	{
 		$this->db->select('u.id, u.firstname, u.middlename, u.lastname, u.phone, u.email, u.gender');
 		$this->db->from('candidates u');
@@ -644,14 +658,14 @@ class Exams_model extends CI_Model {
 		return $q->result_array();
 	}
 
-	public function countCandidatesTotalExams($user_id='')
+	public function countCandidatesTotalExams($user_id = '')
 	{
 		$this->db->from('exam_candidates');
 		$this->db->where('candidate_id', $user_id);
 		return $this->db->count_all_results();
 	}
 
-	public function countCandidatesUpcomingExams($user_id='')
+	public function countCandidatesUpcomingExams($user_id = '')
 	{
 		$currentDatetime = date('Y-m-d H:i:s');
 		$this->db->from('exam_candidates ec');
@@ -662,21 +676,21 @@ class Exams_model extends CI_Model {
 		return $this->db->count_all_results();
 	}
 
-	public function countCandidatesCompletedExams($user_id='')
+	public function countCandidatesCompletedExams($user_id = '')
 	{
 		$this->db->select('COUNT(DISTINCT(exam_id)) AS total');
 		$this->db->where('user_id', $user_id);
 		$this->db->from('exam_records');
 
 		$query = $this->db->get();
-		if ($query->row()){
+		if ($query->row()) {
 			return $query->row()->total;
 		} else {
 			return "0";
 		}
 	}
 
-	public function getCandidatesCompletedExam($limit, $offset, $order="desc", $value='')
+	public function getCandidatesCompletedExam($limit, $offset, $order = "desc", $value = '')
 	{
 		$currentDatetime = date('Y-m-d H:i:s');
 		$this->db->select('e.*');
@@ -686,22 +700,22 @@ class Exams_model extends CI_Model {
 		$this->db->where('ec.user_id', $value);
 		$this->db->where('e.exam_datetime <', $currentDatetime);
 		$this->db->order_by('e.created_at', $order);
-        // $this->db->limit($limit, $offset);
-        $q = $this->db->get();
+		// $this->db->limit($limit, $offset);
+		$q = $this->db->get();
 		return $q->result_array();
 	}
 
-	public function deleteExam($value='')
+	public function deleteExam($value = '')
 	{
-		$this->db->delete('exam_candidates', ['exam_id'=>$value]);
-		$this->db->delete('exam_clients', ['exam_id'=>$value]);
-		$this->db->delete('exam_questions', ['exam_id'=>$value]);
-		$this->db->delete('exam_records', ['exam_id'=>$value]);
-		$this->db->delete('exams', ['id'=>$value]);
+		$this->db->delete('exam_candidates', ['exam_id' => $value]);
+		$this->db->delete('exam_clients', ['exam_id' => $value]);
+		$this->db->delete('exam_questions', ['exam_id' => $value]);
+		$this->db->delete('exam_records', ['exam_id' => $value]);
+		$this->db->delete('exams', ['id' => $value]);
 		return $this->db->affected_rows();
 	}
 
-	public function getCorrectExamAns($exam_id='', $user_id='')
+	public function getCorrectExamAns($exam_id = '', $user_id = '')
 	{
 		$this->db->select('COUNT(question_id) as count_ans, status');
 		$this->db->from('exam_records');
@@ -715,9 +729,9 @@ class Exams_model extends CI_Model {
 		return $query->row_array();
 	}
 
-	public function isExamAttended($cand_id='', $exam_id='')
+	public function isExamAttended($cand_id = '', $exam_id = '')
 	{
-		$q = $this->db->get_where('candidate_exam_records', ['user_id'=>$cand_id, 'exam_id'=> $exam_id]);
+		$q = $this->db->get_where('candidate_exam_records', ['user_id' => $cand_id, 'exam_id' => $exam_id]);
 		if ($q->row()) {
 			return true;
 		} else {
@@ -725,7 +739,7 @@ class Exams_model extends CI_Model {
 		}
 	}
 
-	public function countExamAppearedCandidates($exam_id='')
+	public function countExamAppearedCandidates($exam_id = '')
 	{
 		$this->db->where('exam_id', $exam_id);
 		return $this->db->count_all_results('candidate_exam_records');
@@ -739,7 +753,7 @@ class Exams_model extends CI_Model {
 	// 	return $q->result_array();
 	// }
 
-	public function getCandidateWithStats($exam_id='')
+	public function getCandidateWithStats($exam_id = '')
 	{
 		$sql = "SELECT c.id, CONCAT_WS( ' ', c.firstname, c.middlename, c.lastname ) AS name, c.empid, cd.aadhaar_number, c.profile_img FROM `candidates` c INNER JOIN candidate_details cd ON c.id = cd.user_id INNER JOIN `exam_candidates` ec ON c.id = ec.candidate_id WHERE ec.exam_id = $exam_id";
 
@@ -750,22 +764,22 @@ class Exams_model extends CI_Model {
 	public function getExamsConductedCount()
 	{
 		$sql = "SELECT DATE_FORMAT( DATE_ADD( NOW(), INTERVAL MONTHS.month - 0 MONTH), '%b' ) AS `Month`, COUNT(exams.id) AS `Count` FROM ( SELECT 1 AS MONTH UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 ) AS MONTHS LEFT JOIN exams ON MONTHS.month = MONTH(exams.created_at) AND exams.created_at >= DATE_ADD(NOW(), INTERVAL - 12 MONTH) GROUP BY MONTHS.month ORDER BY MONTHS.month";
-		
+
 		$q = $this->db->query($sql);
 		return $q->result_array();
 	}
 
 	public function getClientExamsConductedCount($companyid = '')
 	{
-		$sql = "SELECT DATE_FORMAT( DATE_ADD( NOW(), INTERVAL MONTHS.month - 0 MONTH), '%b' ) AS `Month`, COUNT(exams.id) AS `Count` FROM ( SELECT 1 AS MONTH UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 ) AS MONTHS LEFT JOIN( SELECT exams.id, exams.created_at FROM exams INNER JOIN exam_clients ec ON exams.id = ec.exam_id AND ec.client_id = ".$companyid." WHERE exams.created_at >= DATE_FORMAT(NOW(), '%Y-%m-01') - INTERVAL 12 MONTH) AS exams ON MONTHS.month = CAST( MONTH(exams.created_at) AS UNSIGNED ) GROUP BY MONTHS.month ORDER BY MONTHS.month";
-		
+		$sql = "SELECT DATE_FORMAT( DATE_ADD( NOW(), INTERVAL MONTHS.month - 0 MONTH), '%b' ) AS `Month`, COUNT(exams.id) AS `Count` FROM ( SELECT 1 AS MONTH UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 ) AS MONTHS LEFT JOIN( SELECT exams.id, exams.created_at FROM exams INNER JOIN exam_clients ec ON exams.id = ec.exam_id AND ec.client_id = " . $companyid . " WHERE exams.created_at >= DATE_FORMAT(NOW(), '%Y-%m-01') - INTERVAL 12 MONTH) AS exams ON MONTHS.month = CAST( MONTH(exams.created_at) AS UNSIGNED ) GROUP BY MONTHS.month ORDER BY MONTHS.month";
+
 		$q = $this->db->query($sql);
 		return $q->result_array();
 	}
 
-	public function fetchExamsChartData($conArr=[], $days='')
+	public function fetchExamsChartData($conArr = [], $days = '')
 	{
-		if (!empty($days) && $days >= 90 ) {
+		if (!empty($days) && $days >= 90) {
 			$this->db->select('DATE_FORMAT(e.created_at, "%b %y") AS date, COUNT(DISTINCT(e.id)) as countVal');
 			$this->db->order_by("MONTH(e.created_at)", 'ASC');
 			$this->db->order_by("YEAR(e.created_at)", 'ASC');
@@ -773,7 +787,7 @@ class Exams_model extends CI_Model {
 			$this->db->select('DATE_FORMAT(e.created_at, "%D %b %y") AS date, COUNT(DISTINCT(e.id)) as countVal');
 			$this->db->order_by("e.created_at", 'DESC');
 		}
-		
+
 		$this->db->from('exams e');
 		if ($conArr['type'] == 'client') {
 			$this->db->join('exam_clients ec', 'ec.exam_id = e.id');
@@ -783,20 +797,21 @@ class Exams_model extends CI_Model {
 				$this->db->where('e.company_id', $conArr['company_id']);
 			}
 		}
-		
 
-		if  ( (isset($conArr['startDate']) && !empty($conArr['startDate'])) && (isset($conArr['endDate']) && !empty($conArr['endDate'])) ) {
+
+		if ((isset($conArr['startDate']) && !empty($conArr['startDate'])) && (isset($conArr['endDate']) && !empty($conArr['endDate']))) {
 			$this->db->where('e.created_at BETWEEN "' . $conArr['startDate'] . '" AND "' . $conArr['endDate'] . '"');
 		}
 
 		$this->db->group_by("date");
-		
+
 		$q = $this->db->get();
 		return $q->result_array();
 	}
 
-	public function updateExamCandidatesPassword($examid='', $password=''){
-		$sql = "UPDATE `candidates` SET `password`='".md5($password)."' WHERE id IN (SELECT candidate_id FROM `exam_candidates` WHERE exam_id = ".$examid.")";
+	public function updateExamCandidatesPassword($examid = '', $password = '')
+	{
+		$sql = "UPDATE `candidates` SET `password`='" . md5($password) . "' WHERE id IN (SELECT candidate_id FROM `exam_candidates` WHERE exam_id = " . $examid . ")";
 		$q = $this->db->query($sql);
 		return $this->db->affected_rows();
 	}

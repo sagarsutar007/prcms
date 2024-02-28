@@ -1467,6 +1467,10 @@ class Exams extends CI_Controller
 			redirect('exams');
 		}
 
+		if ($exam['sms_notif'] == 'off' && $exam['email_notif'] == 'off') {
+			redirect('exams');
+		}
+
 		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
 		$arr_candidates = [];
 		foreach ($candidates as $candidate => $cnd) {

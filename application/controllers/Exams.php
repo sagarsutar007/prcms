@@ -1538,6 +1538,7 @@ class Exams extends CI_Controller
 	protected function sendExamEmailNotification($user_id = '', $exam_id = '')
 	{
 		$exam_details = $this->exam_model->get($exam_id);
+		if ($exam_details['email_notif'] == 'off') { return 'success'; }
 		$site_data = $this->setting_model->getSiteSetting();
 		$business = $this->business_model->get($exam_details['company_id']);
 		$user_info = $this->candidate_model->get($user_id);
@@ -1634,6 +1635,7 @@ class Exams extends CI_Controller
 	{
 		$site_data = $this->setting_model->getSiteSetting();
 		$exam_details = $this->exam_model->get($exam_id);
+		if ($exam_details['sms_notif'] == 'off') { return 'success'; }
 		$business = $this->business_model->get($exam_details['company_id']);
 		$get_candidate = $this->candidate_model->get($user_id);
 		$databaseValues = [

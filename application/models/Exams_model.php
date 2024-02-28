@@ -169,6 +169,35 @@ class Exams_model extends CI_Model
 
 	public function addExamLog($data = [])
 	{
+		if (isset($data['headers']) && !empty($data['headers'])) {
+			$headers = json_decode($data['headers'], true);
+			if (isset($headers['Cookie']) && !empty($headers['Cookie'])) {
+				$cookieString = $headers['Cookie'];
+
+				$matches = array();
+
+				if (preg_match("/exam_entry=(.*?);/", $cookieString, $matches)) {
+				  $examEntryValue = $matches[1];
+				  $data['req_cookie'] = $examEntryValue;
+				} else {
+				  $data['req_cookie'] = '';
+				}
+			}
+
+			if (isset($headers['sec-ch-ua']) && !empty($headers['sec-ch-ua'])) {
+				$channels = explode(",", $headers['sec-ch-ua']);
+				$data['browser'] = end($channels);
+			}
+
+			if (isset($headers['sec-ch-ua-platform']) && !empty($headers['sec-ch-ua-platform'])) {
+				$data['platform'] = $headers['sec-ch-ua-platform'];
+			}
+
+			if (isset($headers['sec-ch-ua-mobile']) && !empty($headers['sec-ch-ua-mobile'])) {
+				$data['isMobile'] = $headers['sec-ch-ua-mobile'] == "?1" ? 'Yes' : 'No';
+			}
+		}
+		
 		$this->db->insert('exam_candidate_logs', $data);
 		return $this->db->insert_id();
 	}

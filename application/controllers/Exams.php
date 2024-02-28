@@ -647,7 +647,7 @@ class Exams extends CI_Controller
 		$can['entered_at'] = date('Y-m-d H:i:s');
 
 		$logArr = [
-			'action' => 'Entered the question screen',
+			'action' => 'Start Exam Button Clicked',
 			'candidate_id' => $can['user_id'],
 			'exam_id' => $can['exam_id'],
 			'headers' => json_encode($this->input->request_headers())
@@ -657,32 +657,62 @@ class Exams extends CI_Controller
 		//Check if exam is scheduled or not
 		if ($data['exam_info']['status'] != 'scheduled') {
 			$this->session->set_flashdata('error', 'This exam is now ' . $data['exam_info']['status']);
+			$logArr = [
+				'action' => 'This exam is now ' . $data['exam_info']['status'],
+				'candidate_id' => $can['user_id'],
+				'exam_id' => $can['exam_id'],
+				'headers' => json_encode($this->input->request_headers())
+			];
+			$this->exam_model->addExamLog($logArr);
 			redirect('dashboard');
 		}
 		//Check if exam is over or not
 		if (time() > strtotime($data['exam_info']['exam_endtime'])) {
-			$this->session->set_flashdata('error', 'Exam time has been passed!');
+			$this->session->set_flashdata('error', 'Exam time is over!');
+			$logArr = [
+				'action' => 'Exam time is over!',
+				'candidate_id' => $can['user_id'],
+				'exam_id' => $can['exam_id'],
+				'headers' => json_encode($this->input->request_headers())
+			];
+			$this->exam_model->addExamLog($logArr);
 			redirect('dashboard');
 		}
 
 		//Check if exam time has been started or not
 		if (strtotime($data['exam_info']['exam_datetime']) > time()) {
 			$this->session->set_flashdata('error', 'Exam is yet to start!');
+			$logArr = [
+				'action' => 'Exam is yet to start!',
+				'candidate_id' => $can['user_id'],
+				'exam_id' => $can['exam_id'],
+				'headers' => json_encode($this->input->request_headers())
+			];
+			$this->exam_model->addExamLog($logArr);
 			redirect('dashboard');
 		}
 
 		$token = uniqid();
-
-
 
 		//Check if exam candidate is assigned to that exam
 		$arr = [
 			'candidate_id' => $can['user_id'],
 			'exam_id' => $can['exam_id']
 		];
+
 		$valid_cand = $this->exam_model->isExamAndCandidateExists($arr);
 		if (!$valid_cand) {
 			$this->session->set_flashdata('error', 'You are not allowed to appear in this exam!');
+
+			$logArr = [
+				'action' => 'You are not allowed to appear in this exam!',
+				'candidate_id' => $can['user_id'],
+				'exam_id' => $can['exam_id'],
+				'headers' => json_encode($this->input->request_headers())
+			];
+			$this->exam_model->addExamLog($logArr);
+
+			redirect('dashboard');
 		}
 
 		//Set first time entry
@@ -700,14 +730,39 @@ class Exams extends CI_Controller
 			set_cookie($cookie_data);
 			$can['exam_token'] = $token;
 			$this->exam_model->setCandidateExamInfo($can);
+			$logArr = [
+				'action' => 'Unique Id generated for the user',
+				'candidate_id' => $can['user_id'],
+				'exam_id' => $can['exam_id'],
+				'dbtoken' => $token,
+				'headers' => json_encode($this->input->request_headers())
+			];
+			$this->exam_model->addExamLog($logArr);
 		} else {
 			if (!empty($exam_appeared['left_at'])) {
+				$logArr = [
+					'action' => 'You are trying to appear again after submitting the exam!',
+					'candidate_id' => $can['user_id'],
+					'exam_id' => $can['exam_id'],
+					'headers' => json_encode($this->input->request_headers())
+				];
+				$this->exam_model->addExamLog($logArr);
+
 				redirect('exams/' . $data['exam_info']['id'] . '/view-result');
 			}
 
 			$exam_token = $this->input->cookie('exam_entry', TRUE);
 			if (!empty($exam_appeared['exam_token']) && $exam_appeared['exam_token'] != $exam_token) {
 				$this->session->set_flashdata('error', 'Exam is going on in another device!');
+				$logArr = [
+					'action' => 'Exam is going on in another device',
+					'candidate_id' => $can['user_id'],
+					'exam_id' => $can['exam_id'],
+					'cookie' => $exam_token??'',
+					'dbtoken' => $exam_appeared['exam_token'],
+					'headers' => json_encode($this->input->request_headers())
+				];
+				$this->exam_model->addExamLog($logArr);
 				redirect('exams/ongoing');
 			}
 
@@ -726,17 +781,17 @@ class Exams extends CI_Controller
 				$userarr['exam_token'] = $token;
 				$userarr['re_entry_timestamp'] = date('Y-m-d h:i:s');
 				$this->exam_model->updateCandidateExamInfo($userarr, $exam_appeared['id']);
+
+				$logArr = [
+					'action' => 'Re-entry done - cookie and token regenerated',
+					'candidate_id' => $can['user_id'],
+					'exam_id' => $can['exam_id'],
+					'dbtoken' => $token,
+					'headers' => json_encode($this->input->request_headers())
+				];
+				$this->exam_model->addExamLog($logArr);
 			}
-
 		}
-
-		$logArr = [
-			'action' => 'Unique Id generate for the user',
-			'candidate_id' => $can['user_id'],
-			'exam_id' => $can['exam_id'],
-			'headers' => json_encode($this->input->request_headers())
-		];
-		$this->exam_model->addExamLog($logArr);
 
 		$questions = [];
 		$ques = $this->exam_model->getExamQuestions($data['exam_info']['id'], 'active');

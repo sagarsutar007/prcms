@@ -844,6 +844,11 @@ class Exams_model extends CI_Model
 		$q = $this->db->query($sql);
 		return $this->db->affected_rows();
 	}
+
+	public function getExamInfo($examid='')
+	{
+		return $this->db->get_where($this->primary_table, ['id' => $examid])->row_array();
+	}
 }
 
 /* End of file  */

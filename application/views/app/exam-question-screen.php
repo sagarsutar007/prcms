@@ -184,6 +184,7 @@
       $(document).ready(function() {
 			const examQuestions = <?= json_encode($queIds); ?>;
 			const examStartTime = new Date('<?= $exam_info['exam_datetime']; ?>').getTime();
+			const examEndTime = new Date('<?= $exam_info['exam_endtime']; ?>').getTime();
 			const examDuration = <?= $exam_info['duration']; ?> * 60;
 			const timerElement = document.getElementById('countdown');
 			const _questionsArr = <?= json_encode($questions); ?>;
@@ -193,6 +194,13 @@
 			function updateTimer() {
 				serverTime += 1000;
 				var now = serverTime; 
+				
+				if (now >= examEndTime) {
+					timerElement.innerText = 'Time is up!';
+					window.location.href = "<?= base_url('exams/'. $exam_info['id'] .'/view-result'); ?>";
+					return;
+				}
+
 				const timeRemaining = examStartTime + examDuration * 1000 - now;
 				if (timeRemaining < 0) {
 					timerElement.innerText = 'Time is up!';

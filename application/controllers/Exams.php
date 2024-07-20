@@ -881,6 +881,7 @@ class Exams extends CI_Controller
 		$this->session->set_flashdata('success', 'Enabled the candidate to rewrite exam successfully');
 		redirect('exams/' . $arr['exam_id'] . '/view-exam-dashboard');
 	}
+	
 	public function getExamQuestion()
 	{
 		$this->isValidCandidate(true);
@@ -935,6 +936,18 @@ class Exams extends CI_Controller
 			$temp['exam_id'] = $post['examId'];
 			$temp['status'] = 'unknown';
 			$data['ans_type'] = 'not answered';
+
+			$exam = $this->exam_model->getExamInfo($temp['exam_id']);
+
+			$current_time = new DateTime();
+			$exam_endtime = new DateTime($exam['exam_endtime']);
+			
+			if ($exam_endtime < $current_time) {
+				$data['status'] = "ERROR";
+				$data['message'] = "The exam has ended.";
+				echo json_encode($data);
+				return;
+			}
 
 			$exam_appeared = $this->exam_model->checkCandidateExamInfo($temp);
 			if (!empty($exam_appeared['left_at']) && $exam_appeared['re_entry'] == "false") {

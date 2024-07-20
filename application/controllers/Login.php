@@ -474,7 +474,7 @@ class Login extends CI_Controller {
 				$sms_resp = json_decode($response, true);
 				if ($sms_resp['status'] == 'Success') {
 					$s_data['response'] = 'success';
-$s_data['req_response'] = $sms_resp['description'];
+					$s_data['req_response'] = $sms_resp['description'];
 					$this->notif_model->insertLog($s_data);
 				} else {
 					$s_data['response'] = 'failed';

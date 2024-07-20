@@ -25,6 +25,7 @@ class Exams extends CI_Controller
 		$this->load->model('Notification_model', 'notif_model');
 		$this->load->model('Business_units_model', 'business_model');
 		$this->load->model('Managers_model', 'manager_model');
+		date_default_timezone_set('Asia/Kolkata');
 	}
 
 	public function updateAnonymous()
@@ -634,6 +635,7 @@ class Exams extends CI_Controller
 
 	public function showQuestionScreen($value = '')
 	{
+		
 		$this->isValidCandidate();
 
 		//Check if exam exists
@@ -881,7 +883,7 @@ class Exams extends CI_Controller
 		$this->session->set_flashdata('success', 'Enabled the candidate to rewrite exam successfully');
 		redirect('exams/' . $arr['exam_id'] . '/view-exam-dashboard');
 	}
-	
+
 	public function getExamQuestion()
 	{
 		$this->isValidCandidate(true);
@@ -1961,7 +1963,6 @@ class Exams extends CI_Controller
 
 		if ($exam['creator_type'] == 'admin') {
 			$exam['created_by'] = $_SESSION['firstname'] . " " . $_SESSION['middlename'] . " " . $_SESSION['lastname'];
-			;
 		} else {
 			$user_info = $this->manager_model->get($exam['created_by']);
 			$exam['created_by'] = $user_info['firstname'] . " " . $user_info['middlename'] . " " . $user_info['lastname'];
@@ -1997,10 +1998,7 @@ class Exams extends CI_Controller
 					if ($currentTimestamp <= $exam_endtime) {
 						$to_time = $currentTimestamp;
 					}
-
-
-
-
+					
 					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
 					$temp['time'] = $diff_minutes;
 					$temp['status'] = "Appearing";

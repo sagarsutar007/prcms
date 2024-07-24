@@ -143,5 +143,7 @@ $route['delivery-report'] = 'Notifications';
 
 $route['e/(:any)'] = 'Login/candidate/$1';
 
+$route['stress-test'] = 'Test/load';
+
 
 

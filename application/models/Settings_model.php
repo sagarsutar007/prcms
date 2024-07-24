@@ -25,7 +25,7 @@ class Settings_model extends CI_Model {
 	{
 		$value['updated_at'] = date('Y-m-d H:i:s');
 		$this->db->update('app_preferences', $value, ['id'=>$id]);
-		return $this->db->insert_id();
+		return $this->db->affected_rows();
 	}
 }
 

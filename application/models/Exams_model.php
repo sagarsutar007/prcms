@@ -849,6 +849,22 @@ class Exams_model extends CI_Model
 	{
 		return $this->db->get_where($this->primary_table, ['id' => $examid])->row_array();
 	}
+
+	public function updateExamCandidatesStatus($examid = '', $status = '')
+	{
+		if ($status == 1) {
+			$sts = "active";
+		} else {
+			$sts = "blocked";
+		}
+		$sql = "UPDATE `candidates` SET `status`='$sts' WHERE id IN (SELECT candidate_id FROM `exam_candidates` WHERE exam_id = " . $examid . ")";
+		$q = $this->db->query($sql);
+
+		$esql = "UPDATE `exams` SET `candidate_status`='$status' WHERE id = $examid";
+		$eq = $this->db->query($esql);
+		
+		return $this->db->affected_rows();
+	}
 }
 
 /* End of file  */

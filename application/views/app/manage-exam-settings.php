@@ -58,6 +58,9 @@
                         <a class="nav-link active" href="#cecp" data-toggle="tab">Change Password</a>
                       </li>
                       <li class="nav-item">
+                        <a class="nav-link" href="#cecs" data-toggle="tab">Candidates Status</a>
+                      </li>
+                      <li class="nav-item">
                         <a class="nav-link" href="#soe" data-toggle="tab">Stop Ongoing Exam</a>
                       </li>
                       <li class="nav-item">
@@ -144,6 +147,36 @@
                             <div class="col-12 text-right">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-check"></i> Update Password
+                                </button>
+                            </div>
+                        </div>
+                        </form>
+                      </div>
+                      <div class="tab-pane p-3" id="cecs">
+                        <p class="text-danger text-sm">Note: This will impact the exam candidates authentication process.</p>
+                        <form action="change-candidate-status" method="post">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="text-box">Select <b>'STATUS'</b> : </label>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group mb-3">
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" name="candidates_status" type="radio" value="1" id="active" <?= ($exam['candidate_status'] == 1)?'checked':''; ?>>
+                                    <label class="form-check-label" for="active">Active</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input class="form-check-input" name="candidates_status" type="radio" value="0" id="in-active" <?= ($exam['candidate_status'] == 0)?'checked':''; ?>>
+                                    <label class="form-check-label" for="in-active">In-active</label>
+                                  </div>
+                                  <?= form_error('candidates_status', '<div class="text-danger">', '</div>'); ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 text-right">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-ban"></i> Update Status
                                 </button>
                             </div>
                         </div>

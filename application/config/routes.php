@@ -108,6 +108,7 @@ $route['exam/(:num)/edit-questions'] = 'Exams/editQuestions/$1';
 $route['exam/(:num)/edit-candidates'] = 'Exams/editCandidates/$1';
 $route['exam/(:num)/exam-settings'] = 'Exams/editSettings/$1';
 $route['exam/(:num)/change-candidates-password'] = 'Exams/changeCandidatesPassword/$1';
+$route['exam/(:num)/change-candidate-status'] = 'Exams/changeCandidateStatus/$1';
 $route['exam/(:num)/stop-exam'] = 'Exams/stopExam/$1';
 $route['exam/(:num)/start-exam-repair'] = 'Exams/startExamRepair/$1';
 $route['exam/(:num)/repair-exam-candidates'] = 'Exams/RepairExamCandidates/$1';

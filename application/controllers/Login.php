@@ -225,7 +225,6 @@ class Login extends CI_Controller {
 					$this->load->view('app/new-login', $data);
 				} else {
 					$record = $this->Login_model->authenticate($this->input->post(), $type);
-
 					if(empty($record)){
 						$this->session->set_flashdata('error', 'Incorrect Email or Password!');
 						redirect('candidate-login');

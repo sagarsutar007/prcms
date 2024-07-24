@@ -808,6 +808,8 @@ class Candidates extends CI_Controller {
 				if (strtotime($data['exam']['exam_endtime']) < time()) {
 					$exam_log['left_at'] = $data['exam']['exam_endtime'];
 				}
+			} elseif ($exam_log && $exam_log['left_at'] > $data['exam']['exam_endtime']) {
+				$exam_log['left_at'] = $data['exam']['exam_endtime'];
 			}
 
 			$data['exam_log'] = $exam_log;

@@ -308,6 +308,38 @@ class Exams extends CI_Controller
 		}
 	}
 
+	public function changeCandidateStatus($value = '')
+	{
+		$this->isAdminOrManager();
+		$exam = $this->exam_model->get($value);
+		if (!$exam) {
+			$this->session->set_flashdata('warning', 'Exam does not exists in our portal!');
+			redirect('/exams');
+		}
+
+		if ($this->input->method() != 'post') {
+			$this->session->set_flashdata('warning', 'Invalid request!');
+			redirect('/exams');
+		}
+
+		$post = $this->input->post();
+
+		$this->form_validation->set_rules('candidates_status', 'Candidate status', 'required');
+
+		if ($this->form_validation->run() == TRUE) {
+			$res = $this->exam_model->updateExamCandidatesStatus($value, $post['candidates_status']);
+			// if ($res) {
+				$this->session->set_flashdata('success', 'Authentication status changed of exam candidates!');
+			// } else {
+			// 	$this->session->set_flashdata('error', 'Authentication status changing failed of exam candidates! Same status is already present.');
+			// }
+			redirect('/exam/' . $value . '/exam-settings');
+		} else {
+			$this->session->set_flashdata('warning', 'Authentication status is required!');
+			redirect('/exam/' . $value . '/exam-settings');
+		}
+	}
+
 	public function stopExam($value = '')
 	{
 		$this->isAdminOrManager();
@@ -1991,7 +2023,7 @@ class Exams extends CI_Controller
 					$from_time = $exam_time;
 				}
 
-				if ($candidateInfo['left_at'] == '0000-00-00 00:00:00' || empty($candidateInfo['left_at'])) {
+				if ($candidateInfo['left_at'] == '0000-00-00 00:00:00' || empty($candidateInfo['left_at']) || strtotime($candidateInfo['left_at']) >= strtotime($exam['exam_endtime'])) {
 					$currentTimestamp = time();
 					$exam_endtime = strtotime($exam['exam_endtime']);
 					$to_time = $exam_endtime;

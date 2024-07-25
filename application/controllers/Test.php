@@ -16,17 +16,14 @@ class Test extends CI_Controller {
 
     function load() {
         $first = uniqid();
-        $record = $this->test->getLast();
-        if (empty($record)) {
-            $record = [
-                'first' => $first,
-                'count' => 0
-            ];
-            $last = $this->test->insert($record);
-        } else {
-            $this->test->update($record['id'], NULL, $first, $record['count']);
-            $record = $this->test->get($record['id']);
-        }
+        $record = [
+            'first' => $first,
+            'count' => 0
+        ];
+        $last = $this->test->insert($record);
+        $record = $this->test->get($last);
+        $this->test->update($record['id'], NULL, $first, $record['count']);
+        $record = $this->test->get($record['id']);
 
         echo json_encode(['status'=>'SUCCESS', 'record'=>$record]);
     }

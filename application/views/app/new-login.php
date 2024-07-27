@@ -111,7 +111,7 @@
                       <?php } ?>
 
                       <div class="form-group">
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Login with email</button>
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Login as <?= $type; ?></button>
                       </div>
                     </form>
                   </div>

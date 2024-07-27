@@ -454,7 +454,7 @@
                     var fontSize = (height / 180).toFixed(2);
                     ctx.font = fontSize + "em sans-serif";
                     ctx.textBaseline = "middle";
-                    var text = "<?= $num . "/" . $exam['candidates']; ?>",
+                    var text = "<?= $exam['candidates'] - $absent . "/" . $exam['candidates']; ?>",
                         textX = Math.round((width - ctx.measureText(text).width) / 2),
                         textY = (height / 2)+15;
                     ctx.fillText(text, textX, textY);

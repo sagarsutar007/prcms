@@ -512,7 +512,6 @@
                 `);
             });
         });
-        //<?= $absent; ?>
     </script>
   </body>
 </html>

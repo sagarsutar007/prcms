@@ -1,0 +1,425 @@
+@import url("https://fonts.googleapis.com/css?family=Titillium+Web:300,400,600,700,900");
+
+.listReset {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+.link {
+	text-decoration: none;
+	color: #2d385e;
+}
+
+.linkFocus:focus {
+	outline: none;
+	text-decoration: none;
+}
+
+.heading {
+	font-family: "Titillium Web", sans-serif;
+	color: #2d385e;
+}
+
+.linkHover,
+.linkFocus:hover,
+.linkFocus:focus {
+	color: #4f77ff;
+}
+
+.btnPrimary {
+	background-color: #4f77ff;
+	border-color: #4f77ff;
+}
+
+.btnPrimary:hover,
+.btnPrimary:focus,
+.btnPrimary:active {
+	background-color: #486ff2;
+	border-color: #486ff2;
+}
+
+.authfyLoginButton {
+	border-radius: 3px;
+	box-shadow: 0px 2px 3px #9c9c9c;
+}
+
+.brandLogo {
+	margin-top: 0px;
+	margin-bottom: 35px;
+}
+
+/*--------------------*/
+/* 03. Section Panel UI CSS */
+/*--------------------*/
+
+.authContainer {
+	background-color: #f0f2f5;
+	background-image: url("../img/computer-1867758_1920-min.jpg");
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: 100%;
+	height: 100vh;
+	overflow-x: hidden;
+	text-rendering: optimizeLegibility;
+	font-family: "Titillium Web", sans-serif;
+	font-size: 1.6em;
+	font-weight: 400;
+	color: #44525f;
+}
+
+.authSubText {
+	font-family: "Titillium Web", sans-serif;
+	font-size: 16px;
+	font-weight: 400;
+	color: #44525f;
+}
+
+.authfyContainer {
+	margin-top: 97px;
+	margin-bottom: 97px;
+}
+
+.authfyPanelLeft {
+	background-color: rgba(38, 43, 72, 0.92);
+	color: #ffffff;
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+	-webkit-box-shadow: 0px 3px 6px #1d2030;
+	box-shadow: 0px 3px 6px #1d2030;
+}
+
+.authfyPanelRight {
+	background-color: #ffffff;
+	border-top-right-radius: 4px;
+	border-bottom-right-radius: 4px;
+	-webkit-box-shadow: 0px 2px 6px 0px #1d2030;
+	box-shadow: 0px 2px 6px 0px #1d2030;
+}
+
+.authfyLogin,
+.authfyPanelLeft .brandCol {
+	height: 520px;
+}
+
+.authfyPanelLeft .brandCol {
+	display: table;
+	width: 100%;
+	padding: 25px;
+}
+
+.authfyPanelLeft .headline {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.headline h1,
+.headline h2,
+.headline h3 {
+	color: #fff;
+	font-size: 48px;
+	font-weight: 700;
+}
+
+.authfyLogin {
+	position: relative;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+}
+
+.authfyPanel {
+	padding: 20px 30px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	transition: all 0.5s ease;
+	opacity: 0;
+	transform: translateX(-100%);
+	-webkit-transform: translateX(-100%);
+}
+
+.authfyHeading {
+	margin-bottom: 30px;
+}
+
+.authTitle {
+	font-weight: 700;
+	font-size: 24px;
+}
+
+.authfyLogin .active {
+	opacity: 1;
+	transform: translateX(0);
+	-webkit-transform: translateX(0);
+}
+
+.socialButtons a {
+	color: #ffffff;
+	margin-top: 15px;
+}
+
+.socialButtons a:hover {
+	color: white;
+	opacity: 0.9;
+}
+
+.socialButtons .btnFacebook {
+	background: #3b5998;
+}
+
+.socialButtons .btnTwitter {
+	background: #00aced;
+}
+
+.socialButtons .btnGoogle {
+	background: #c32f10;
+}
+
+.socialButtons a > span {
+	padding-left: 5px;
+}
+
+.panelLogin {
+	margin-top: 20px;
+}
+
+.panelLogin .rememberRow {
+	margin-bottom: 10px;
+	font-size: 16px;
+	text-align: left;
+}
+
+.panelLogin .rememberRow label {
+	font-weight: normal;
+	position: relative;
+	cursor: pointer;
+	color: #666;
+	/* padding-left: 24px; */
+}
+
+.authfyLogin .forgotPwd {
+	text-align: right;
+	margin-top: 10px;
+}
+
+.panelLogin .formControl,
+.panelLogin .formSelect,
+.panelSignup .formControl,
+.panelForgot .formControl {
+	background-color: #fff;
+	color: #333333;
+	font-size: 18px;
+	height: 50px;
+	margin-bottom: 20px;
+	padding: 12px 22px;
+	border-radius: 3px;
+	border: solid 1px #bcc2ce;
+	outline: none;
+	box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.1), 0 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.authfyPanelForgot {
+	padding-top: 40px;
+}
+
+.panelLogin .formControl:focus,
+.panelSignup .formControl:focus,
+.panelForgot .formControl:focus {
+	border-color: #4f77ff;
+	z-index: 2;
+	outline: 0;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+		0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+.pwdMask {
+	position: relative;
+}
+
+.pwdMask .pwdToggle {
+	color: #cccccc;
+	position: absolute;
+	z-index: 2;
+}
+
+.panelLogin .pwdMask .pwdToggle,
+.panelSignup .pwdMask .pwdToggle {
+	top: 3px;
+	right: 15px;
+}
+
+.pwdMask .pwdToggle:hover,
+.pwdMask .pwdToggle:focus {
+	cursor: pointer;
+}
+
+.pwdMask .pwdToggle:hover,
+.pwdMask .pwdToggle:focus,
+.pwdMask .pwdToggle.faEye {
+	color: #4f77ff;
+}
+
+.panelSignup .termPolicy a {
+	text-decoration: underline;
+}
+/*--------------------*/
+/* 04. Check box UI CSS */
+/*--------------------*/
+
+.checkboxInput {
+	position: absolute;
+	right: 9000px;
+	opacity: 0;
+	z-index: 1;
+	cursor: pointer;
+}
+
+.labelText::before,
+.labelText::after {
+	font-size: 11px;
+	display: inline-block;
+	width: 17px;
+	height: 17px;
+	padding: 2px;
+	margin-left: 0;
+	position: absolute;
+	top: 2px;
+	left: 0;
+}
+
+.labelText::before {
+	content: "";
+	background-color: #ffffff;
+	border: 1px solid #ced4da;
+	border-radius: 3px;
+	cursor: pointer;
+	transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.labelText::after {
+	background-color: #4f77ff;
+	color: #ffffff;
+	border-radius: 2px;
+	border-color: #4f77ff;
+	line-height: 1.4;
+}
+
+.checkboxInput:focus + .labelText::before {
+	outline: thin dotted;
+	outline: 5px auto -webkit-focus-ring-color;
+	outline-offset: -2px;
+}
+
+.checkboxInput:checked + .labelText::after {
+	font-family: "FontAwesome";
+	content: "\f00c";
+}
+
+/*--------------------*/
+/* 05. Responsive CSS */
+/*--------------------*/
+
+@media (min-width: 768px) {
+	.authfyPanel {
+		padding: 20px;
+	}
+}
+
+@media (max-width: 767px) {
+	.authfyLogin {
+		height: 460px;
+	}
+
+	.authfyPanelLeft .brandCol {
+		height: 200px;
+	}
+
+	.authfyPanelLeft,
+	.authfyPanelRight {
+		box-shadow: none;
+	}
+
+	.authfyPanelLeft {
+		border-top-left-radius: 4px;
+		border-top-right-radius: 4px;
+		border-bottom-left-radius: 0px;
+		border-bottom-right-radius: 0px;
+	}
+
+	.authfyPanelRight {
+		border-top-left-radius: 0px;
+		border-top-right-radius: 0px;
+		border-bottom-left-radius: 4px;
+		border-bottom-right-radius: 4px;
+	}
+
+	.brandCol {
+		height: 300px;
+		text-align: center;
+	}
+
+	.termPolicy {
+		font-size: 75%;
+	}
+}
+
+@media (min-width: 320px) and (max-width: 375px) {
+	.authfyLogin .authfyPanel {
+		padding: 20px;
+	}
+
+	.rememberRow {
+		margin-bottom: 10px;
+		font-size: 14px;
+	}
+}
+
+@media (max-width: 320px) {
+	.authfyLogin {
+		height: 480px;
+	}
+
+	.authfyHeading p {
+		font-size: 14px;
+	}
+
+	.rememberRow .colSm6 {
+		width: 100%;
+	}
+
+	.authfyLogin .forgotPwd {
+		text-align: left;
+		margin-top: 0px;
+	}
+}
+
+.customFileLabel {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	border: 1px solid #ced4da;
+	border-radius: 3px;
+	padding: 10px;
+	background-color: #fff;
+	box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.1), 0 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.placeholderText {
+	margin-right: 10px;
+	color: #6c757d;
+	padding-left: 0.8em;
+	font-size: 17px;
+}
+
+.fileInput {
+	opacity: 0;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	cursor: pointer;
+}

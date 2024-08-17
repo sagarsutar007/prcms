@@ -1,1 +1,0 @@
-[29-Oct-2023 22:30:44 Asia/Kolkata] PHP Fatal error:  Cannot use try without catch or finally in /home1/kiaanits/public_html/application/controllers/Candidates.php on line 493

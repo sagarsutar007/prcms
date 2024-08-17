@@ -34,3 +34,4 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /assets/img/
 /assets/admin/exams/
 /api/node_modules/
+/candidate-portal/node_modules

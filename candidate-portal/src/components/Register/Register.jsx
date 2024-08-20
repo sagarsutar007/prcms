@@ -4,7 +4,8 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import styles from "../../assets/css/auth.module.css";
-import brandLogo from "../../assets/img/brand-logo-white.png";
+
+import AuthfyBrand from "../AuthfyBrand";
 const Register = () => {
 	const navigate = useNavigate();
 	const [fullname, setFullname] = useState("");
@@ -49,14 +50,7 @@ const Register = () => {
 						>
 							<Row>
 								<Col sm={5} className={styles.authfyPanelLeft}>
-									<div className={styles.brandCol}>
-										<div className={styles.headline}>
-											<div className={`${styles.brandLogo} text-center`}>
-												<img src={brandLogo} width="95px" alt="brand-logo" />
-											</div>
-											<p className="text-center">Your Next Milestone</p>
-										</div>
-									</div>
+									<AuthfyBrand />
 								</Col>
 								<Col sm={7} className={styles.authfyPanelRight}>
 									<div className={styles.authfyLogin}>

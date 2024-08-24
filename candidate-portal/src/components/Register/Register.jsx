@@ -3,9 +3,11 @@ import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { encrypt } from "../../utils/cryptoUtils";
 import styles from "../../assets/css/auth.module.css";
-
+import axios from "axios";
 import AuthfyBrand from "../AuthfyBrand";
+
 const Register = () => {
 	const navigate = useNavigate();
 	const [fullname, setFullname] = useState("");
@@ -13,6 +15,54 @@ const Register = () => {
 	const [phone, setPhone] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordVisible, setPasswordVisible] = useState(false);
+
+	// State for tracking field validity
+	const [fullnameValid, setFullnameValid] = useState(true);
+	const [emailValid, setEmailValid] = useState(true);
+	const [phoneValid, setPhoneValid] = useState(true);
+	const [passwordValid, setPasswordValid] = useState(true);
+
+	const handleRegister = async () => {
+		// Validate fields before submitting
+		const isFullnameValid = fullname.trim() !== "";
+		const isEmailValid = email.trim() !== "";
+		const isPhoneValid = phone.trim() !== "";
+		const isPasswordValid = password.trim() !== "";
+
+		setFullnameValid(isFullnameValid);
+		setEmailValid(isEmailValid);
+		setPhoneValid(isPhoneValid);
+		setPasswordValid(isPasswordValid);
+
+		if (!fullname || !email || !phone || !password) {
+			alert("All fields are required.");
+			return;
+		}
+		try {
+			const response = await axios.post(
+				process.env.SERVER_API_URL + "register",
+				{
+					name: fullname,
+					email: email,
+					phone: phone,
+					password: password,
+				}
+			);
+
+			if (response.data.status) {
+				const encryptedUserId = encrypt(response.data.userId);
+				localStorage.setItem("userId", encryptedUserId);
+				navigate(`/personal-detail`);
+			} else {
+				alert(response.data.message || "Registration failed!");
+			}
+		} catch (error) {
+			console.log(error);
+			alert(
+				error.response?.data?.error || "An error occurred during registration."
+			);
+		}
+	};
 
 	const handleNameChange = (e) => {
 		setFullname(e.target.value);
@@ -76,6 +126,12 @@ const Register = () => {
 																className={styles.formControl}
 																placeholder="Full Name"
 																onChange={handleNameChange}
+																style={{
+																	borderColor: fullnameValid ? "" : "red",
+																	backgroundColor: fullnameValid
+																		? ""
+																		: "#ffe3e3",
+																}}
 															/>
 														</Form.Group>
 														<Form.Group>
@@ -86,6 +142,10 @@ const Register = () => {
 																className={styles.formControl}
 																placeholder="Email"
 																onChange={handleEmailChange}
+																style={{
+																	borderColor: emailValid ? "" : "red",
+																	backgroundColor: emailValid ? "" : "#ffe3e3",
+																}}
 															/>
 														</Form.Group>
 														<Form.Group>
@@ -96,6 +156,10 @@ const Register = () => {
 																className={styles.formControl}
 																placeholder="Phone Number"
 																onChange={handlePhoneChange}
+																style={{
+																	borderColor: phoneValid ? "" : "red",
+																	backgroundColor: phoneValid ? "" : "#ffe3e3",
+																}}
 															/>
 														</Form.Group>
 														<Form.Group>
@@ -107,6 +171,12 @@ const Register = () => {
 																	className={styles.formControl}
 																	placeholder="Password"
 																	onChange={handlePasswordChange}
+																	style={{
+																		borderColor: passwordValid ? "" : "red",
+																		backgroundColor: passwordValid
+																			? ""
+																			: "#ffe3e3",
+																	}}
 																/>
 																<span
 																	className={styles.pwdToggle}
@@ -121,7 +191,7 @@ const Register = () => {
 															<Button
 																className={`btn w-100 btn-lg ${styles.btnPrimary} ${styles.authfyLoginButton}`}
 																type="button"
-																onClick={() => navigate("/personal-detail")}
+																onClick={handleRegister}
 															>
 																Register as Candidate
 															</Button>

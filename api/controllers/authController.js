@@ -3,7 +3,8 @@ const md5 = require("md5");
 const jwt = require("jsonwebtoken");
 const useragent = require("useragent");
 const User = require("../models/userModel");
-
+const humanparser = require("humanparser");
+const logApiRecord = require("../helpers/logHelper");
 const secretKey = process.env.SECRET_KEY;
 
 const getClientType = (userAgent) => {
@@ -42,38 +43,57 @@ exports.register = (req, res) => {
 					.json({ status: false, message: "Phone number already exists!" });
 			}
 
+			const parsedName = humanparser.parseName(name);
+
 			// If both email and phone are unique, proceed to register the user
-			User.register(name, email, phone, hashedPassword, (err, results) => {
-				if (err) {
-					return res.status(500).json({ status: false, error: err.message });
-				}
+			User.register(
+				parsedName.firstName,
+				parsedName.middleName,
+				parsedName.lastName,
+				email,
+				phone,
+				hashedPassword,
+				(err, results) => {
+					if (err) {
+						return res.status(500).json({ status: false, error: err.message });
+					}
 
-				const userId = results.id;
+					// Check the database result for insertId
+					const userId = results.insertId;
 
-				const userAgent = req.headers["user-agent"];
-				const clientType = getClientType(userAgent);
-				const ipAddress = req.ip;
-				const macAddress = req.headers["x-mac-address"] || "00:00:00:00:00:00";
+					// Debugging log to ensure we got a userId
+					if (!userId) {
+						return res
+							.status(500)
+							.json({ status: false, error: "User ID is null." });
+					}
 
-				// Log the registration
-				logApiRecord(
-					"candidate register",
-					userId,
-					ipAddress,
-					macAddress,
-					clientType
-				)
-					.then(() => {
-						res.status(201).json({
-							status: true,
-							message: "User registered and logged successfully!",
-							userId: userId,
+					const userAgent = req.headers["user-agent"];
+					const clientType = getClientType(userAgent);
+					const ipAddress = req.ip;
+					const macAddress =
+						req.headers["x-mac-address"] || "00:00:00:00:00:00";
+
+					// Log the registration
+					logApiRecord(
+						"candidate register",
+						userId,
+						ipAddress,
+						macAddress,
+						clientType
+					)
+						.then(() => {
+							res.status(201).json({
+								status: true,
+								message: "User registered and logged successfully!",
+								userId: userId,
+							});
+						})
+						.catch((logErr) => {
+							res.status(500).json({ status: false, error: logErr.message });
 						});
-					})
-					.catch((logErr) => {
-						res.status(500).json({ status: false, error: logErr.message });
-					});
-			});
+				}
+			);
 		});
 	});
 };

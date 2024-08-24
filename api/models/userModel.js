@@ -1,10 +1,31 @@
 const db = require("../db/db");
 
 const User = {
-	register: (name, email, password, callback) => {
+	register: (
+		firstname,
+		middlename,
+		lastname,
+		email,
+		phone,
+		password,
+		callback
+	) => {
 		const query =
-			"INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?)";
-		db.query(query, [name, email, phone, password], callback);
+			"INSERT INTO candidates (firstname, middlename, lastname, email, phone, password, source, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		db.query(
+			query,
+			[
+				firstname,
+				middlename,
+				lastname,
+				email,
+				phone,
+				password,
+				"manual",
+				"active",
+			],
+			callback
+		);
 	},
 
 	findByEmail: (email, callback) => {

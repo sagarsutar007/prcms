@@ -1,18 +1,36 @@
 import { Helmet, HelmetProvider } from "react-helmet-async";
-
+import { decrypt } from "../../utils/cryptoUtils";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../../assets/css/auth.module.css";
 import brandLogo from "../../assets/img/brand-logo-white.png";
 import FileUpload from "../FileUpload";
+import AuthfyBrand from "../AuthfyBrand";
 const PersonalDetail = () => {
 	const navigate = useNavigate();
 	const [dob, setDob] = useState("");
+	const [userId, setUserId] = useState(null);
 
 	const handleDOBChange = (e) => {
 		setDob(e.target.value);
 	};
+
+	useEffect(() => {
+		const encryptedUserId = localStorage.getItem("userId");
+		if (encryptedUserId) {
+			try {
+				const decryptedUserId = decrypt(encryptedUserId);
+				setUserId(decryptedUserId);
+				console.log(userId);
+			} catch (error) {
+				console.error("Decryption failed:", error);
+				navigate("/register");
+			}
+		} else {
+			navigate("/register");
+		}
+	}, [navigate]);
 
 	return (
 		<HelmetProvider>
@@ -31,14 +49,7 @@ const PersonalDetail = () => {
 						>
 							<Row>
 								<Col sm={5} className={styles.authfyPanelLeft}>
-									<div className={styles.brandCol}>
-										<div className={styles.headline}>
-											<div className={`${styles.brandLogo} text-center`}>
-												<img src={brandLogo} width="95px" alt="brand-logo" />
-											</div>
-											<p className="text-center">Your Next Milestone</p>
-										</div>
-									</div>
+									<AuthfyBrand />
 								</Col>
 								<Col sm={7} className={styles.authfyPanelRight}>
 									<div className={styles.authfyLogin}>

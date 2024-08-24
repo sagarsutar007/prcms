@@ -7,6 +7,7 @@ const logApiRecord = require("../helpers/logHelper");
 const { getClientType } = require("../helpers/clientHelper");
 const multer = require("multer");
 const path = require("path");
+const sharp = require("sharp");
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -97,7 +98,7 @@ exports.personal = (req, res) => {
 	// Configure multer for file uploads
 	const storage = multer.diskStorage({
 		destination: (req, file, cb) => {
-			cb(null, "uploads/"); // Set your desired upload directory
+			cb(null, "./../assets/img/");
 		},
 		filename: (req, file, cb) => {
 			const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -130,50 +131,126 @@ exports.personal = (req, res) => {
 					.json({ status: false, message: "User doesn't exist!" });
 			}
 
+			const uploadedFileName = uploadedFile
+				? path.basename(req.file.path)
+				: userRec.profilePicture;
+
 			// Prepare data for user update including the file if available
 			const updateData = {
 				highestQualification,
 				gender,
 				dob,
-				profilePicture: uploadedFile
-					? uploadedFile.path
-					: userRec.profilePicture, // Update path if file is uploaded
+				profilePicture: uploadedFileName,
 			};
 
-			// Proceed to update the user's personal details
-			User.updatePersonalDetails(userId, updateData, (updateErr, results) => {
-				if (updateErr) {
-					return res
-						.status(500)
-						.json({ status: false, error: updateErr.message });
-				}
+			// Create thumbnail after file upload
+			if (uploadedFile) {
+				const inputPath = req.file.path;
+				const thumbnailPath = path.join(
+					"./../assets/img/thumbnails",
+					`thumb-${uploadedFileName}`
+				);
 
-				const userAgent = req.headers["user-agent"];
-				const clientType = getClientType(userAgent);
-				const ipAddress = req.ip;
-				const macAddress = req.headers["x-mac-address"] || "00:00:00:00:00:00";
+				sharp(inputPath)
+					.resize({ width: 100, height: 100 }) // Adjust thumbnail size as needed
+					.toFile(thumbnailPath, (thumbErr, info) => {
+						if (thumbErr) {
+							return res
+								.status(500)
+								.json({ status: false, error: "Error creating thumbnail." });
+						}
 
-				// Log the update
-				logApiRecord(
-					"candidate personal details update",
-					userId,
-					ipAddress,
-					macAddress,
-					clientType
-				)
-					.then(() => {
-						res.status(200).json({
-							status: true,
-							message:
-								"User's personal details updated and logged successfully!",
-							userId: userId,
-							fileUrl: uploadedFile ? uploadedFile.path : null, // Include file URL if uploaded
-						});
-					})
-					.catch((logErr) => {
-						res.status(500).json({ status: false, error: logErr.message });
+						// Proceed to update the user's personal details
+						User.updatePersonalDetails(
+							userId,
+							updateData.highestQualification,
+							updateData.gender,
+							updateData.dob,
+							updateData.profilePicture,
+							(updateErr, results) => {
+								if (updateErr) {
+									return res
+										.status(500)
+										.json({ status: false, error: updateErr.message });
+								}
+
+								const userAgent = req.headers["user-agent"];
+								const clientType = getClientType(userAgent);
+								const ipAddress = req.ip;
+								const macAddress =
+									req.headers["x-mac-address"] || "00:00:00:00:00:00";
+
+								// Log the update
+								logApiRecord(
+									"candidate personal details update",
+									userId,
+									ipAddress,
+									macAddress,
+									clientType
+								)
+									.then(() => {
+										res.status(200).json({
+											status: true,
+											message:
+												"User's personal details updated and logged successfully!",
+											userId: userId,
+											fileUrl: uploadedFile ? uploadedFile.path : null,
+											thumbnailUrl: thumbnailPath, // Include thumbnail URL in response
+										});
+									})
+									.catch((logErr) => {
+										res.status(500).json({
+											status: false,
+											error: logErr.message,
+										});
+									});
+							}
+						);
 					});
-			});
+			} else {
+				// Proceed to update the user's personal details if no file uploaded
+				User.updatePersonalDetails(
+					userId,
+					updateData.highestQualification,
+					updateData.gender,
+					updateData.dob,
+					updateData.profilePicture,
+					(updateErr, results) => {
+						if (updateErr) {
+							return res
+								.status(500)
+								.json({ status: false, error: updateErr.message });
+						}
+
+						const userAgent = req.headers["user-agent"];
+						const clientType = getClientType(userAgent);
+						const ipAddress = req.ip;
+						const macAddress =
+							req.headers["x-mac-address"] || "00:00:00:00:00:00";
+
+						// Log the update
+						logApiRecord(
+							"candidate personal details update",
+							userId,
+							ipAddress,
+							macAddress,
+							clientType
+						)
+							.then(() => {
+								res.status(200).json({
+									status: true,
+									message:
+										"User's personal details updated and logged successfully!",
+									userId: userId,
+									fileUrl: uploadedFile ? uploadedFile.path : null,
+								});
+							})
+							.catch((logErr) => {
+								res.status(500).json({ status: false, error: logErr.message });
+							});
+					}
+				);
+			}
 		});
 	});
 };

@@ -107,7 +107,7 @@ const PersonalDetail = () => {
 			if (response.data.status) {
 				const encryptedUserId = encrypt(response.data.userId);
 				localStorage.setItem("userId", encryptedUserId);
-				navigate(`/personal-detail`);
+				navigate(`/organisation-detail`);
 			} else {
 				alert(response.data.message || "Registration failed!");
 			}
@@ -193,6 +193,10 @@ const PersonalDetail = () => {
 																value={gender}
 																className={styles.formSelect}
 																onChange={handleGenderChange}
+																style={{
+																	borderColor: isDobValid ? "" : "red",
+																	backgroundColor: isDobValid ? "" : "#ffe3e3",
+																}}
 															>
 																<option value="" disabled hidden>
 																	Select Gender
@@ -210,11 +214,16 @@ const PersonalDetail = () => {
 																className={styles.formControl}
 																placeholder="Date of Birth"
 																onChange={handleDOBChange}
+																style={{
+																	borderColor: isDobValid ? "" : "red",
+																	backgroundColor: isDobValid ? "" : "#ffe3e3",
+																}}
 															/>
 														</Form.Group>
 														<Form.Group controlId="formFileLg" className="mb-3">
 															<Form.Control
 																type="file"
+																name="file"
 																size="lg"
 																onChange={handleFileChange}
 															/>
@@ -223,7 +232,7 @@ const PersonalDetail = () => {
 															<Button
 																className={`btn w-100 btn-lg ${styles.btnPrimary} ${styles.authfyLoginButton}`}
 																type="button"
-																onClick={() => navigate("organisation-detail")}
+																onClick={handleProfileUpdate}
 															>
 																Proceed to Final Step
 															</Button>

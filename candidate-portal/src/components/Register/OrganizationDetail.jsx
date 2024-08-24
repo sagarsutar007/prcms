@@ -1,11 +1,9 @@
 import { Helmet, HelmetProvider } from "react-helmet-async";
-
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import styles from "../../assets/css/auth.module.css";
 import brandLogo from "../../assets/img/brand-logo-white.png";
-import FileUpload from "../FileUpload";
 const OrganizationDetail = () => {
 	const navigate = useNavigate();
 	const [empId, setEmpId] = useState("");
@@ -18,7 +16,7 @@ const OrganizationDetail = () => {
 		<HelmetProvider>
 			<div className={styles.authContainer}>
 				<Helmet>
-					<title>Personal Detail</title>
+					<title>Organization Detail</title>
 				</Helmet>
 				<Container fluid>
 					<Row className="">
@@ -76,7 +74,6 @@ const OrganizationDetail = () => {
 																onChange={handleEmpidChange}
 															/>
 														</Form.Group>
-														<FileUpload />
 														<Form.Group>
 															<Button
 																className={`btn w-100 btn-lg ${styles.btnPrimary} ${styles.authfyLoginButton}`}

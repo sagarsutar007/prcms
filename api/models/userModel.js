@@ -43,28 +43,57 @@ const User = {
 		highestQualification,
 		gender,
 		dob,
+		profilePicture,
 		callback
 	) => {
-		const candidateDetailsQuery =
-			"UPDATE candidate_details SET highest_qualification = ?, gender = ?, dob = ? WHERE user_id = ?";
-
-		const candidateQuery = "UPDATE candidates SET gender = ? WHERE id = ?";
-
+		// Check if candidate exists
 		db.query(
-			candidateDetailsQuery,
-			[highestQualification, gender, dob, userId],
-			(err, results) => {
+			"SELECT * FROM candidate_details WHERE user_id = ?",
+			[userId],
+			(err, rows) => {
 				if (err) {
 					return callback(err);
 				}
 
-				db.query(candidateQuery, [gender, userId], (err, results) => {
-					if (err) {
-						return callback(err);
-					}
+				const candidateExists = rows.length > 0;
+				let candidateDetailsQuery = "";
+				let candidateDetailsParams = [];
 
-					callback(null, results);
-				});
+				if (!candidateExists) {
+					candidateDetailsQuery =
+						"INSERT INTO candidate_details (user_id, highest_qualification, dob) VALUES (?, ?, ?)";
+					candidateDetailsParams = [userId, highestQualification, dob];
+				} else {
+					candidateDetailsQuery =
+						"UPDATE candidate_details SET highest_qualification = ?, dob = ? WHERE user_id = ?";
+					candidateDetailsParams = [highestQualification, dob, userId];
+				}
+
+				// Execute candidate_details query
+				db.query(
+					candidateDetailsQuery,
+					candidateDetailsParams,
+					(err, results) => {
+						if (err) {
+							return callback(err);
+						}
+
+						// Update candidates table
+						const candidateQuery =
+							"UPDATE candidates SET gender = ?, profile_img = ? WHERE id = ?";
+						db.query(
+							candidateQuery,
+							[gender, profilePicture, userId],
+							(err, results) => {
+								if (err) {
+									return callback(err);
+								}
+
+								callback(null, results);
+							}
+						);
+					}
+				);
 			}
 		);
 	},
@@ -89,7 +118,7 @@ const User = {
 		});
 	},
 	find: (userId, callback) => {
-		const query = "SELECT * FROM users WHERE id = ?";
+		const query = "SELECT * FROM candidates WHERE id = ?";
 		db.query(query, [userId], callback);
 	},
 	findInfo: (userId, callback) => {

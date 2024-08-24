@@ -4,25 +4,50 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import styles from "../../assets/css/auth.module.css";
-import brandLogo from "../../assets/img/brand-logo-white.png";
-import FileUpload from "../FileUpload";
 import AuthfyBrand from "../AuthfyBrand";
+import axios from "axios";
 const PersonalDetail = () => {
 	const navigate = useNavigate();
 	const [dob, setDob] = useState("");
+	const [highestQualification, setHighestQualification] = useState("");
+	const [gender, setGender] = useState("");
 	const [userId, setUserId] = useState(null);
+	const [file, setFile] = useState(null);
 
-	const handleDOBChange = (e) => {
-		setDob(e.target.value);
-	};
+	// State for tracking field validity
+	const [isDobValid, setDobValid] = useState(true);
+	const [isGenderValid, setGenderValid] = useState(true);
 
 	useEffect(() => {
 		const encryptedUserId = localStorage.getItem("userId");
+		handleUserIdDecryption(encryptedUserId, setUserId, navigate);
+	}, [navigate]);
+
+	useEffect(() => {
+		if (userId) {
+			axios
+				.get(
+					process.env.SERVER_API_URL + `get-candidate-details?userId=${userId}`
+				)
+				.then((response) => {
+					setHighestQualification(response.data.userdata.highest_qualification);
+					setGender(response.data.userdata.gender);
+					const dobString = response.data.userdata.dob;
+					const dobDate = new Date(dobString);
+					const dobFormatted = dobDate.toISOString().split("T")[0];
+					setDob(dobFormatted);
+				})
+				.catch((error) => {
+					console.error("Failed to fetch user data:", error);
+				});
+		}
+	}, [userId]);
+
+	function handleUserIdDecryption(encryptedUserId, setUserId, navigate) {
 		if (encryptedUserId) {
 			try {
 				const decryptedUserId = decrypt(encryptedUserId);
 				setUserId(decryptedUserId);
-				console.log(userId);
 			} catch (error) {
 				console.error("Decryption failed:", error);
 				navigate("/register");
@@ -30,7 +55,69 @@ const PersonalDetail = () => {
 		} else {
 			navigate("/register");
 		}
-	}, [navigate]);
+	}
+
+	const handleQualificationChange = (event) => {
+		setHighestQualification(event.target.value);
+	};
+
+	const handleGenderChange = (event) => {
+		setGender(event.target.value);
+	};
+
+	const handleDOBChange = (event) => {
+		setDob(event.target.value);
+	};
+
+	const handleFileChange = (event) => {
+		setFile(event.target.files[0]); // Set selected file to state
+	};
+
+	const handleProfileUpdate = async () => {
+		// Validate fields before submitting
+		const isDobValid = dob.trim() !== "";
+		const isGenderValid = gender.trim() !== "";
+
+		setDobValid(isDobValid);
+		setGenderValid(isGenderValid);
+
+		if (!dob || !gender) {
+			return;
+		}
+
+		try {
+			const formData = new FormData();
+			formData.append("gender", gender);
+			formData.append("dob", dob);
+			formData.append("highestQualification", highestQualification);
+			if (file) {
+				formData.append("file", file);
+			}
+
+			const response = await axios.post(
+				process.env.SERVER_API_URL + "update-personal-info",
+				formData,
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				}
+			);
+
+			if (response.data.status) {
+				const encryptedUserId = encrypt(response.data.userId);
+				localStorage.setItem("userId", encryptedUserId);
+				navigate(`/personal-detail`);
+			} else {
+				alert(response.data.message || "Registration failed!");
+			}
+		} catch (error) {
+			console.log(error);
+			alert(
+				error.response?.data?.error || "An error occurred during registration."
+			);
+		}
+	};
 
 	return (
 		<HelmetProvider>
@@ -64,13 +151,17 @@ const PersonalDetail = () => {
 											</div>
 											<Row>
 												<Col xs={12}>
-													<Form className={styles.loginForm}>
+													<Form
+														className={styles.loginForm}
+														enctype="multipart/form-data"
+													>
 														<Form.Group>
 															<Form.Select
 																name="highest_qualification"
 																aria-label="Select highest qualification"
-																defaultValue=""
+																value={highestQualification}
 																className={styles.formSelect}
+																onChange={handleQualificationChange}
 															>
 																<option value="" disabled hidden>
 																	Select Qualification
@@ -99,8 +190,9 @@ const PersonalDetail = () => {
 															<Form.Select
 																name="gender"
 																aria-label="Select gender"
-																defaultValue=""
+																value={gender}
 																className={styles.formSelect}
+																onChange={handleGenderChange}
 															>
 																<option value="" disabled hidden>
 																	Select Gender
@@ -120,7 +212,13 @@ const PersonalDetail = () => {
 																onChange={handleDOBChange}
 															/>
 														</Form.Group>
-														<FileUpload />
+														<Form.Group controlId="formFileLg" className="mb-3">
+															<Form.Control
+																type="file"
+																size="lg"
+																onChange={handleFileChange}
+															/>
+														</Form.Group>
 														<Form.Group>
 															<Button
 																className={`btn w-100 btn-lg ${styles.btnPrimary} ${styles.authfyLoginButton}`}

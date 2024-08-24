@@ -5,6 +5,8 @@ const router = express.Router();
 
 // User registration
 router.post("/register", authController.register);
+router.post("/update-personal-info", authController.personal);
+router.post("/update-organisation-info", authController.organization);
 
 // User login
 router.post("/login", authController.login);

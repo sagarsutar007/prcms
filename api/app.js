@@ -7,6 +7,7 @@ const compression = require("compression");
 const app = express();
 const port = 3000;
 const authRouter = require("./routes/authRouter");
+const candidateRouter = require("./routes/candidateRouter");
 
 // Use Helmet for security
 app.use(helmet());
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use("/api", authRouter);
+app.use("/api", candidateRouter);
 
 app.get("/", (req, res) => {
 	res.send("Hello World!");

@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js";
 
-const SECRET_KEY = "LhQIQJt5ayvROK8a7vPkifyOnLzR7Nvo";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 export const encrypt = (text) => {
 	if (typeof text !== "string") {

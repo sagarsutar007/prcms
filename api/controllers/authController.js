@@ -1,19 +1,14 @@
 // controllers/authController.js
 const md5 = require("md5");
 const jwt = require("jsonwebtoken");
-const useragent = require("useragent");
 const User = require("../models/userModel");
 const humanparser = require("humanparser");
 const logApiRecord = require("../helpers/logHelper");
-const secretKey = process.env.SECRET_KEY;
+const { getClientType } = require("../helpers/clientHelper");
+const multer = require("multer");
+const path = require("path");
 
-const getClientType = (userAgent) => {
-	const agent = useragent.parse(userAgent);
-	if (agent.device.toString().toLowerCase().includes("mobile")) {
-		return "phone";
-	}
-	return "computer";
-};
+const secretKey = process.env.SECRET_KEY;
 
 exports.register = (req, res) => {
 	const { name, email, phone, password } = req.body;
@@ -99,29 +94,58 @@ exports.register = (req, res) => {
 };
 
 exports.personal = (req, res) => {
-	const { highestQualification, gender, dob, userId } = req.body;
+	// Configure multer for file uploads
+	const storage = multer.diskStorage({
+		destination: (req, file, cb) => {
+			cb(null, "uploads/"); // Set your desired upload directory
+		},
+		filename: (req, file, cb) => {
+			const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+			cb(
+				null,
+				file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+			);
+		},
+	});
 
-	// Find the user by ID
-	User.find(userId, (err, userRec) => {
-		if (err) {
-			return res.status(500).json({ status: false, error: err.message });
+	const upload = multer({ storage: storage });
+
+	upload.single("file")(req, res, (uploadErr) => {
+		if (uploadErr) {
+			return res.status(500).json({ status: false, error: uploadErr.message });
 		}
 
-		if (userRec.length === 0) {
-			return res
-				.status(400)
-				.json({ status: false, message: "User doesn't exist!" });
-		}
+		const { highestQualification, gender, dob, userId } = req.body;
+		const uploadedFile = req.file;
 
-		// Proceed to update the user's personal details
-		User.updatePersonalDetails(
-			userId,
-			highestQualification,
-			gender,
-			dob,
-			(err, results) => {
-				if (err) {
-					return res.status(500).json({ status: false, error: err.message });
+		// Find the user by ID
+		User.find(userId, (err, userRec) => {
+			if (err) {
+				return res.status(500).json({ status: false, error: err.message });
+			}
+
+			if (userRec.length === 0) {
+				return res
+					.status(400)
+					.json({ status: false, message: "User doesn't exist!" });
+			}
+
+			// Prepare data for user update including the file if available
+			const updateData = {
+				highestQualification,
+				gender,
+				dob,
+				profilePicture: uploadedFile
+					? uploadedFile.path
+					: userRec.profilePicture, // Update path if file is uploaded
+			};
+
+			// Proceed to update the user's personal details
+			User.updatePersonalDetails(userId, updateData, (updateErr, results) => {
+				if (updateErr) {
+					return res
+						.status(500)
+						.json({ status: false, error: updateErr.message });
 				}
 
 				const userAgent = req.headers["user-agent"];
@@ -143,13 +167,14 @@ exports.personal = (req, res) => {
 							message:
 								"User's personal details updated and logged successfully!",
 							userId: userId,
+							fileUrl: uploadedFile ? uploadedFile.path : null, // Include file URL if uploaded
 						});
 					})
 					.catch((logErr) => {
 						res.status(500).json({ status: false, error: logErr.message });
 					});
-			}
-		);
+			});
+		});
 	});
 };
 

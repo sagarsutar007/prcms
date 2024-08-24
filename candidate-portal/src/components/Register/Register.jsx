@@ -35,7 +35,6 @@ const Register = () => {
 		setPasswordValid(isPasswordValid);
 
 		if (!fullname || !email || !phone || !password) {
-			alert("All fields are required.");
 			return;
 		}
 		try {

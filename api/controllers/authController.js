@@ -23,7 +23,7 @@ exports.register = (req, res) => {
 
 		if (emailResults.length > 0) {
 			return res
-				.status(400)
+				.status(200)
 				.json({ status: false, message: "Email already exists!" });
 		}
 
@@ -35,7 +35,7 @@ exports.register = (req, res) => {
 
 			if (phoneResults.length > 0) {
 				return res
-					.status(400)
+					.status(200)
 					.json({ status: false, message: "Phone number already exists!" });
 			}
 
@@ -69,7 +69,9 @@ exports.register = (req, res) => {
 					const ipAddress = req.ip;
 					const macAddress =
 						req.headers["x-mac-address"] || "00:00:00:00:00:00";
-
+					const token = jwt.sign({ id: userId, phone: phone }, secretKey, {
+						expiresIn: "12h",
+					});
 					// Log the registration
 					logApiRecord(
 						"candidate register",
@@ -83,6 +85,7 @@ exports.register = (req, res) => {
 								status: true,
 								message: "User registered and logged successfully!",
 								userId: userId,
+								token: token,
 							});
 						})
 						.catch((logErr) => {
@@ -319,7 +322,7 @@ exports.login = (req, res) => {
 		if (results.length === 0) {
 			return res
 				.status(400)
-				.json({ status: false, message: "Email not found!" });
+				.json({ status: false, message: "Phone number not registered!" });
 		}
 
 		const user = results[0];
@@ -341,7 +344,7 @@ exports.login = (req, res) => {
 			macAddress,
 			clientType
 		)
-			.then(() => res.json({ token }))
+			.then(() => res.json({ status: true, token }))
 			.catch((logErr) =>
 				res.status(500).json({ status: false, error: logErr.message })
 			);

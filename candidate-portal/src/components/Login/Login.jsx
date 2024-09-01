@@ -1,16 +1,24 @@
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import styles from "../../assets/css/auth.module.css";
 import brandLogo from "../../assets/img/brand-logo-white.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { Alert, Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../features/auth/authSlice";
+import axios from "axios";
 
 function Login() {
 	const [phone, setPhone] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordVisible, setPasswordVisible] = useState(false);
 	const [hasAlertShown, setHasAlertShown] = useState(false);
+	const [isPhoneValid, setPhoneValid] = useState(true);
+	const [isPasswordValid, setPasswordValid] = useState(true);
+	const [errorMessage, setErrorMessage] = useState("");
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
 	const handlePhoneChange = (e) => {
 		setPhone(e.target.value);
@@ -35,6 +43,38 @@ function Login() {
 	const handleCloseAlert = () => {
 		setHasAlertShown(false);
 		localStorage.setItem("alertShown", "true");
+	};
+
+	const handleLogin = async () => {
+		// Validate fields before submitting
+		const isPhoneValid = phone.trim() !== "";
+		const isPasswordValid = password.trim() !== "";
+		setPhoneValid(isPhoneValid);
+		setPasswordValid(isPasswordValid);
+
+		if (!phone || !password) {
+			return;
+		}
+		try {
+			const response = await axios.post(process.env.SERVER_API_URL + "login", {
+				phone: phone,
+				password: password,
+			});
+
+			if (response.data.status) {
+				console.log(response.data);
+				dispatch(loginSuccess({ token: response.data.token }));
+				setErrorMessage("");
+				navigate("/student-dashboard");
+			} else {
+				setErrorMessage(response.data.message || "Login failed!");
+			}
+		} catch (error) {
+			console.log("Check error", error);
+			setErrorMessage(
+				error.response?.data?.message || "An error occurred during login."
+			);
+		}
 	};
 
 	return (
@@ -81,15 +121,9 @@ function Login() {
 											</div>
 											<Row>
 												<Col xs={12}>
-													{!hasAlertShown && (
-														<Alert
-															show={!hasAlertShown}
-															variant="success"
-															onClose={() => setHasAlertShown(true)}
-														>
-															<p className={`m-0 p-0 ${styles.fs16}`}>
-																Registration Complete! Login to continue.
-															</p>
+													{errorMessage && (
+														<Alert variant="danger" className={styles.alert}>
+															{errorMessage}
 														</Alert>
 													)}
 													<Form className={styles.loginForm}>
@@ -101,6 +135,12 @@ function Login() {
 																className={styles.formControl}
 																placeholder="Phone Number"
 																onChange={handlePhoneChange}
+																style={{
+																	borderColor: isPhoneValid ? "" : "red",
+																	backgroundColor: isPhoneValid
+																		? ""
+																		: "#ffe3e3",
+																}}
 															/>
 														</Form.Group>
 														<Form.Group>
@@ -112,6 +152,12 @@ function Login() {
 																	className={styles.formControl}
 																	placeholder="Password"
 																	onChange={handlePasswordChange}
+																	style={{
+																		borderColor: isPasswordValid ? "" : "red",
+																		backgroundColor: isPasswordValid
+																			? ""
+																			: "#ffe3e3",
+																	}}
 																/>
 																<span
 																	className={styles.pwdToggle}
@@ -144,7 +190,8 @@ function Login() {
 														<Form.Group>
 															<Button
 																className={`btn w-100 btn-lg ${styles.btnPrimary} ${styles.authfyLoginButton}`}
-																type="submit"
+																type="button"
+																onClick={handleLogin}
 															>
 																Login as Candidate
 															</Button>

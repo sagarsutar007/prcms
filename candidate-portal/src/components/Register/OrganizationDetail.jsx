@@ -82,7 +82,6 @@ const OrganizationDetail = () => {
 			);
 
 			if (response.data.status) {
-				localStorage.setItem("alertShown", false);
 				navigate(`/login`);
 			} else {
 				alert(response.data.message || "Registration failed!");

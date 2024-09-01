@@ -141,6 +141,10 @@
 	-webkit-transform: translateX(-100%);
 }
 
+.alert {
+	font-size: 16px !important;
+}
+
 .authfyHeading {
 	margin-bottom: 30px;
 }

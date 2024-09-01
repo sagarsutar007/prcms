@@ -8,6 +8,7 @@ const app = express();
 const port = 3000;
 const authRouter = require("./routes/authRouter");
 const candidateRouter = require("./routes/candidateRouter");
+const businessRouter = require("./routes/businessRouter");
 
 // Use Helmet for security
 app.use(helmet());
@@ -21,6 +22,7 @@ app.use(compression());
 app.use(express.json());
 app.use("/api", authRouter);
 app.use("/api", candidateRouter);
+app.use("/api", businessRouter);
 
 app.get("/", (req, res) => {
 	res.send("Hello World!");

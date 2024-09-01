@@ -11,8 +11,8 @@ const PersonalDetail = () => {
 	const [dob, setDob] = useState("");
 	const [highestQualification, setHighestQualification] = useState("");
 	const [gender, setGender] = useState("");
-	const [userId, setUserId] = useState(null);
-	const [file, setFile] = useState(null);
+	const [userId, setUserId] = useState("");
+	const [file, setFile] = useState([]);
 
 	// State for tracking field validity
 	const [isDobValid, setDobValid] = useState(true);
@@ -32,10 +32,18 @@ const PersonalDetail = () => {
 				.then((response) => {
 					setHighestQualification(response.data.userdata.highest_qualification);
 					setGender(response.data.userdata.gender);
-					const dobString = response.data.userdata.dob;
-					const dobDate = new Date(dobString);
-					const dobFormatted = dobDate.toISOString().split("T")[0];
-					setDob(dobFormatted);
+					if (
+						response.data.userdata.dob == null ||
+						response.data.userdata.dob == undefined ||
+						response.data.userdata.dob == "0000-00-00"
+					) {
+						console.log("DOB is Invalid");
+					} else {
+						const dobString = response.data.userdata.dob;
+						const dobDate = new Date(dobString);
+						const dobFormatted = dobDate.toISOString().split("T")[0];
+						setDob(dobFormatted);
+					}
 				})
 				.catch((error) => {
 					console.error("Failed to fetch user data:", error);
@@ -90,6 +98,7 @@ const PersonalDetail = () => {
 			formData.append("gender", gender);
 			formData.append("dob", dob);
 			formData.append("highestQualification", highestQualification);
+			formData.append("userId", userId);
 			if (file) {
 				formData.append("file", file);
 			}
@@ -105,8 +114,6 @@ const PersonalDetail = () => {
 			);
 
 			if (response.data.status) {
-				const encryptedUserId = encrypt(response.data.userId);
-				localStorage.setItem("userId", encryptedUserId);
 				navigate(`/organisation-detail`);
 			} else {
 				alert(response.data.message || "Registration failed!");
@@ -153,13 +160,13 @@ const PersonalDetail = () => {
 												<Col xs={12}>
 													<Form
 														className={styles.loginForm}
-														enctype="multipart/form-data"
+														encType="multipart/form-data"
 													>
 														<Form.Group>
 															<Form.Select
 																name="highest_qualification"
 																aria-label="Select highest qualification"
-																value={highestQualification}
+																value={highestQualification || ""}
 																className={styles.formSelect}
 																onChange={handleQualificationChange}
 															>
@@ -190,12 +197,14 @@ const PersonalDetail = () => {
 															<Form.Select
 																name="gender"
 																aria-label="Select gender"
-																value={gender}
+																value={gender || ""}
 																className={styles.formSelect}
 																onChange={handleGenderChange}
 																style={{
-																	borderColor: isDobValid ? "" : "red",
-																	backgroundColor: isDobValid ? "" : "#ffe3e3",
+																	borderColor: isGenderValid ? "" : "red",
+																	backgroundColor: isGenderValid
+																		? ""
+																		: "#ffe3e3",
 																}}
 															>
 																<option value="" disabled hidden>

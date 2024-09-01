@@ -2,14 +2,15 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import styles from "../../assets/css/auth.module.css";
 import brandLogo from "../../assets/img/brand-logo-white.png";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { Alert, Container, Row, Col, Form, Button } from "react-bootstrap";
 
 function Login() {
 	const [phone, setPhone] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordVisible, setPasswordVisible] = useState(false);
+	const [hasAlertShown, setHasAlertShown] = useState(false);
 
 	const handlePhoneChange = (e) => {
 		setPhone(e.target.value);
@@ -22,6 +23,20 @@ function Login() {
 	const togglePasswordVisibility = () => {
 		setPasswordVisible(!passwordVisible);
 	};
+
+	useEffect(() => {
+		const alertShown = localStorage.getItem("alertShown");
+
+		if (!alertShown) {
+			setHasAlertShown(true);
+		}
+	}, []);
+
+	const handleCloseAlert = () => {
+		setHasAlertShown(false);
+		localStorage.setItem("alertShown", "true");
+	};
+
 	return (
 		<HelmetProvider>
 			<div className={styles.authContainer}>
@@ -66,6 +81,17 @@ function Login() {
 											</div>
 											<Row>
 												<Col xs={12}>
+													{!hasAlertShown && (
+														<Alert
+															show={!hasAlertShown}
+															variant="success"
+															onClose={() => setHasAlertShown(true)}
+														>
+															<p className={`m-0 p-0 ${styles.fs16}`}>
+																Registration Complete! Login to continue.
+															</p>
+														</Alert>
+													)}
 													<Form className={styles.loginForm}>
 														<Form.Group>
 															<Form.Control

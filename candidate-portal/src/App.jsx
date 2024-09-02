@@ -4,6 +4,7 @@ import Register from "./components/Register/Register";
 import PersonalDetail from "./components/Register/PersonalDetail";
 import OrganizationDetail from "./components/Register/OrganizationDetail";
 import { useSelector } from "react-redux";
+import Dashboard from "./components/Dashboard";
 
 function App() {
 	const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -18,7 +19,7 @@ function App() {
 			{/* Protected Route */}
 			<Route
 				path="/student-dashboard"
-				element={isAuthenticated ? <Register /> : <Navigate to="/login" />}
+				element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
 			/>
 
 			{/* Add other routes here if needed */}

@@ -5,6 +5,9 @@ import PersonalDetail from "./components/Register/PersonalDetail";
 import OrganizationDetail from "./components/Register/OrganizationDetail";
 import { useSelector } from "react-redux";
 import Dashboard from "./components/Dashboard";
+import Exams from "./components/Exams";
+import Logout from "./components/Logout";
+import ExamScreen from "./components/ExamScreen";
 
 function App() {
 	const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -20,6 +23,19 @@ function App() {
 			<Route
 				path="/student-dashboard"
 				element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+			/>
+			<Route
+				path="/exams"
+				element={isAuthenticated ? <Exams /> : <Navigate to="/login" />}
+			/>
+			<Route
+				path="/exam/:examUrl"
+				element={isAuthenticated ? <ExamScreen /> : <Navigate to="/login" />} // Dynamic exam route
+			/>
+
+			<Route
+				path="/logout"
+				element={<Logout />}
 			/>
 
 			{/* Add other routes here if needed */}

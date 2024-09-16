@@ -116,6 +116,18 @@ class Candidates_model extends CI_Model {
 		return $q->row_array();
 	}
 
+	public function getUserByAadhaar($value='')
+	{
+		$this->db->from('candidates c');
+		$this->db->join('candidate_details cd', 'cd.user_id = c.id', 'left');
+		if ($value) {
+			$this->db->where('cd.aadhaar_number', $value);
+		}
+
+		$q = $this->db->get();
+		return $q->row_array();
+	}
+
 	public function candidateExists($value='')
 	{
 		$this->db->from('candidates c');

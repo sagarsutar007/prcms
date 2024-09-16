@@ -2469,6 +2469,74 @@ class Exams extends CI_Controller
 			redirect('exams/' . $exam_id . '/view-exam-dashboard');
 		}
 	}
+
+	public function generateFakeAnswers()
+	{
+		$jsonResponse = (isset($_GET['return']) && $_GET['return'] == 'json');
+		if (!isset($_GET['userid']) || !isset($_GET['examid'])) {
+			redirect('logout');
+		}
+
+		$exam_id = $this->input->get('examid', true);
+		$userid = $this->input->get('userid', true);
+		$user = $this->candidate_model->getUserByAadhaar($userid);
+		$user_id = $user['user_id'];
+
+		$exam = $this->exam_model->get($exam_id);
+		$can['exam_id'] = $exam['id']; // Corrected to directly use the exam data
+		$can['user_id'] = $user_id; // Directly using the fetched user_id
+		$can['entered_at'] = date('Y-m-d H:i:s', strtotime($exam['exam_datetime']));
+		$can['left_at'] = date('Y-m-d H:i:s', strtotime($exam['exam_endtime']));
+		$can['exam_token'] = uniqid();
+		$this->exam_model->deleteCandidateExamInfo($can['exam_id'], $can['user_id']);
+		$this->exam_model->setCandidateExamInfo($can);
+		$this->exam_model->deleteCandidateExamAnswers($can);
+
+		$mark = $this->input->get('mark', true);
+		$questions = $this->exam_model->getExamQuestions($exam_id);
+		$totalQuestions = count($questions);
+		$correctAnswersCount = $mark; 
+		
+		shuffle($questions);
+		$created_at = strtotime($exam['exam_datetime']);
+
+		foreach ($questions as $index => $que) {
+			$answers_rec = $this->answer_model->getAnswersOfQuestion($que['question_id']);
+			
+			
+			$correctAnswers = array_filter($answers_rec, function($answer) {
+				return $answer['isCorrect'] == 1;
+			});
+			
+			$incorrectAnswers = array_filter($answers_rec, function($answer) {
+				return $answer['isCorrect'] == 0;
+			});
+
+			if ($correctAnswersCount > 0 && count($correctAnswers) > 0) {
+				$selectedAnswer = $correctAnswers[array_rand($correctAnswers)];
+				$correctAnswersCount--;
+			} else {
+				$selectedAnswer = $incorrectAnswers[array_rand($incorrectAnswers)];
+			}
+			
+			$record = [
+				'user_id' => $user_id,
+				'question_id' => $que['question_id'],
+				'answer_id' => $selectedAnswer['id'],
+				'exam_id' => $exam_id,
+				'status' => $selectedAnswer['isCorrect'] == 1 ? 'correct' : 'incorrect',
+				'created_at' => date('Y-m-d H:i:s', $created_at),
+			];
+
+			$this->exam_model->submitAnswer($record);
+			
+			$created_at += rand(30, 90);
+		}
+
+		$res = ['status' => 'SUCCESS'];
+		echo json_encode($res);
+	}
+
 }
 
 /* End of file Exams.php */

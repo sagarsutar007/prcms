@@ -6,6 +6,7 @@ import ExamNavbar from "./ExamAssets/ExamNavbar";
 import ExamSidebar from "./ExamAssets/ExamSidebar";
 import ExamFooter from "./ExamAssets/ExamFooter";
 import ExamQuestion from "./ExamAssets/ExamQuestion";
+import ExamDetail from "./ExamAssets/ExamDetail";
 
 // Redux imports
 import { useDispatch } from 'react-redux';
@@ -14,10 +15,10 @@ import ExamLoading from "./ExamAssets/ExamLoading";
 
 const ExamScreen = () => {
     const { examUrl } = useParams();
-    const [examData, setExamData] = useState(null);  // Initialize with null to check loading state
+    const [examData, setExamData] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
     const [examStarted, setExamStarted] = useState(false);
-    const [loading, setLoading] = useState(true);  // Initial state for spinner
+    const [loading, setLoading] = useState(true);
     const [countdown, setCountdown] = useState(50);
 
     const dispatch = useDispatch();
@@ -31,23 +32,16 @@ const ExamScreen = () => {
                     },
                 });
                 const examData = response.data;
-                setExamData(examData);  // Set exam data when received
-
-                dispatch(setQuestions(examData.examQuestions));  // Store the questions in Redux
-
-                if (examData.timeLeft > 0) {
-                    setTimeLeft(examData.timeLeft);
+                setExamData(examData);
+                dispatch(setQuestions(examData.examQuestions));
+                if (examData.remainingTime > 0) {
+                    setLoading(false);
                 } else {
                     setExamStarted(true);
                 }
-
-                // Set countdown and stop loading when data is ready
-                setCountdown(examData.remainingTime || 0);
-
-                setLoading(false);  // Set loading to false after the data is successfully fetched
+                setLoading(false);
             } catch (error) {
                 console.error("Error fetching data", error);
-                setLoading(false);  // Stop loading even in case of an error
             }
         };
 
@@ -77,8 +71,14 @@ const ExamScreen = () => {
                 <title>{examData ? `${examData.examName}` : 'Loading Exam...'}</title>
             </Helmet>
             <div className="wrapper">
-                {loading && <ExamLoading />}  {/* Show loading spinner while data is being fetched */}
-                {!loading && (
+                {loading && <ExamLoading />}
+                {!loading && !examStarted && (
+                    <ExamDetail 
+                        examData={examData}
+                        countdown={countdown}
+                    />
+                )}
+                {!loading && examStarted && (
                     <>
                         <ExamNavbar examTitle={examData ? examData.examName : 'Not Available'} />
                         <ExamSidebar />

@@ -12,8 +12,11 @@ const Exams = {
         db.query(query, [candidateId], callback);
     },
     getExamByUrl: (examUrl, callback) => {
-        const query = `SELECT * FROM exams WHERE url = ?`;
-        db.query(query, [examUrl], callback);
+        const query = `SELECT * FROM exams WHERE url = ? LIMIT 1`;
+        db.query(query, [examUrl], (err, results) => {
+            if (err) return callback(err, null);
+            return callback(null, results[0]);
+        });
     },
     getExamQuestions: (examId, callback) => {
         const query = `SELECT * FROM questions q INNER JOIN exam_questions eq ON q.question_id = eq.question_id WHERE eq.exam_id = ? ORDER BY RAND()`;

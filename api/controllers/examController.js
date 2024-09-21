@@ -47,27 +47,22 @@ exports.getCandidateExams = (req, res) => {
 exports.loadExam = (req, res) => {
 	const { examUrl } = req.params;
 	const candidateId = req.id;
-
-	// Fetch exam information by URL
+	
 	Exams.getExamByUrl(examUrl, (err, examInfo) => {
-		if (err || !examInfo || examInfo.length === 0) {
+		if (err || !examInfo) {
 			return res.status(400).json({ status: false, message: "Exam not found!" });
 		}
 
-		const exam = examInfo[0];
-
-		// Get the current time and calculate the time left until the exam starts
+		const exam = examInfo;
 		const currentTime = new Date().getTime();
-		const examStartTime = new Date(exam.exam_datetime).getTime(); // Assuming `exam.start_time` is the start time
-		const remainingTime = Math.max((examStartTime - currentTime) / 1000, 0); // Time left in seconds
+		const examStartTime = new Date(exam.exam_datetime).getTime(); 
+		const remainingTime = Math.max((examStartTime - currentTime) / 1000, 0); 
 
-		// Fetch questions for the exam
 		Exams.getExamQuestions(exam.id, (err, questions) => {
 			if (err) {
 				return res.status(500).json({ status: false, message: "Error fetching questions!" });
 			}
-
-			// Filter questions to return only the required fields
+			
 			const filteredQuestions = questions.map((question) => ({
 				question_id: question.question_id,
 				question_en: question.question_en,
@@ -75,8 +70,7 @@ exports.loadExam = (req, res) => {
 				question_img: (question.question_img.length > 0) ? process.env.MAIN_URL + "assets/img/" + question.question_img : "",
 				question_type: question.question_type,
 			}));
-
-			// For each question, fetch the answers
+			
 			let questionsWithAnswers = [];
 			let processedQuestions = 0;
 
@@ -85,18 +79,15 @@ exports.loadExam = (req, res) => {
 					if (err) {
 						return res.status(500).json({ status: false, message: "Error fetching answers!" });
 					}
-
-					// Add answers to the question object
+					
 					questionsWithAnswers.push({
 						...question,
 						answers: answers,
 					});
-
-					// Check if all questions have been processed
+					
 					processedQuestions++;
 					if (processedQuestions === filteredQuestions.length) {
-
-						// Send the response with remaining time
+						
 						return res.status(200).json({
 							status: true,
 							examId: exam.id,
@@ -114,6 +105,22 @@ exports.loadExam = (req, res) => {
 				});
 			});
 		});
+	});
+};
+
+exports.submitAnswer = (req, res) => {
+	const { examUrl } = req.params;
+	const candidateId = req.id;
+	const answerId = req.body.answerId;
+	
+	Exams.getExamByUrl(examUrl, (err, exam) => {
+		if (err || !exam) {
+			return res.status(400).json({ status: false, message: "Exam not found!" });
+		}
+
+		const currentTime = new Date().getTime();
+
+
 	});
 };
 

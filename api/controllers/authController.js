@@ -326,8 +326,7 @@ exports.login = (req, res) => {
 		}
 
 		let user = results[0];
-		console.log("user", user);
-		console.log("hashedPassword", hashedPassword);
+		
 		if (user.password !== hashedPassword) {
 			return res
 				.status(400)

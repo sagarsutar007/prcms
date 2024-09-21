@@ -109,20 +109,60 @@ exports.loadExam = (req, res) => {
 };
 
 exports.submitAnswer = (req, res) => {
-	const { examUrl } = req.params;
-	const candidateId = req.id;
-	const answerId = req.body.answerId;
-	
-	Exams.getExamByUrl(examUrl, (err, exam) => {
-		if (err || !exam) {
-			return res.status(400).json({ status: false, message: "Exam not found!" });
+    const { examUrl } = req.params;
+    const candidateId = req.id;
+    const questionId = req.body.questionId;
+    const answerId = req.body.answerId;
+
+    Exams.getExamByUrl(examUrl, (err, exam) => {
+        if (err || !exam) {
+            return res.status(400).json({ status: false, message: "Exam not found!" });
 		}
+		
+        const question = req.question;
 
-		const currentTime = new Date().getTime();
+        if (question.question_type === "mcq") {
+            Exams.getCorrectAnswer(questionId, (err, answer) => {
+                if (err) {
+                    return res.status(500).json({ status: false, message: "Error retrieving correct answer!" });
+                }
 
+				const answerStatus = (answer.id === answerId) ? 'correct' : 'incorrect';
+				
+				const userAgent = req.headers["user-agent"];
+				const clientType = getClientType(userAgent);
+				const ipAddress = req.ip;
+				const macAddress = req.headers["x-mac-address"] || "00:00:00:00:00:00";
 
-	});
+                Exams.submitAnswer(candidateId, questionId, answerId, exam.id, answerStatus, (err, result) => {
+                    if (err) {
+                        return res.status(500).json({ status: false, message: "Error submitting answer!" });
+					}
+
+					// Log the record
+					logApiRecord(
+						"candidate answer stored",
+						candidateId,
+						ipAddress,
+						macAddress,
+						clientType,
+						{ questionId, examId: exam.id, answerId }
+					)
+					.then(() => {
+						return res.status(200).json({ status: true, message: "Answer stored successfully!" });
+					})
+					.catch((logErr) => {
+						res.status(500).json({ status: false, error: logErr.message });
+					});
+                    
+                });
+            });
+        } else {
+            return res.status(400).json({ status: false, message: "Invalid question type!" });
+        }
+    });
 };
+
 
 
 

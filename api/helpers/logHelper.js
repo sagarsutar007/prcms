@@ -1,6 +1,6 @@
 const db = require("../db/db");
 
-const logApiRecord = (type, userId, ipAddress, macAddress, client) => {
+const logApiRecord = (type, userId, ipAddress, macAddress, client, meta) => {
 	const log = {
 		type,
 		user_id: userId,
@@ -8,6 +8,7 @@ const logApiRecord = (type, userId, ipAddress, macAddress, client) => {
 		ip_address: ipAddress,
 		mac_address: macAddress,
 		client,
+		log_meta: meta
 	};
 
 	return new Promise((resolve, reject) => {

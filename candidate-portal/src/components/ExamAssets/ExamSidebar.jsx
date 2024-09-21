@@ -14,7 +14,7 @@ const ExamSidebar = () => {
 
     return (
         <aside className="main-sidebar sidebar-dark-primary elevation-4" style={{ minHeight: "100vh" }}>
-            <Link to="/student-Dashboard" className="brand-link">
+            <Link to="/student-dashboard" className="brand-link">
                 <img
                     src={brandLogo}
                     alt="Logo"

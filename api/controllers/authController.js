@@ -325,8 +325,9 @@ exports.login = (req, res) => {
 				.json({ status: false, message: "Phone number not registered!" });
 		}
 
-		const user = results[0];
-
+		let user = results[0];
+		console.log("user", user);
+		console.log("hashedPassword", hashedPassword);
 		if (user.password !== hashedPassword) {
 			return res
 				.status(400)

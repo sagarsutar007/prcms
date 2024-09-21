@@ -26,9 +26,16 @@ const examSlice = createSlice({
     goToQuestion: (state, action) => {
       state.currentIndex = action.payload;
     },
+    setUserAnswer: (state, action) => {
+      const { questionId, answerId } = action.payload;
+      const question = state.questions.find(q => q.question_id === questionId);
+      if (question) {
+          question.userAnswer = answerId;
+      }
+    },
   },
 });
 
-export const { setQuestions, nextQuestion, prevQuestion, goToQuestion } = examSlice.actions;
+export const { setQuestions, nextQuestion, prevQuestion, goToQuestion, setUserAnswer } = examSlice.actions;
 
 export default examSlice.reducer;

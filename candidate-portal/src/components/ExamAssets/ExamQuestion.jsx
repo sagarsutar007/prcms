@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { nextQuestion, prevQuestion } from '../../features/exam/examSlice';
+import { nextQuestion, prevQuestion, setUserAnswer } from '../../features/exam/examSlice';
 import { Card, Col, Container, Row, Button, Form } from "react-bootstrap";
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -54,7 +54,6 @@ const ExamQuestion = ({ questions }) => {
         axios.request(config)
             .then((response) => {
                 console.log("Answer submitted successfully:", response.data);
-                // Move to the next question after submitting
                 // handleNextQuestion();
             })
             .catch((error) => {
@@ -65,9 +64,8 @@ const ExamQuestion = ({ questions }) => {
     const handleAnswerChange = (event) => {
         const newAnswer = event.target.value;
         setSelectedAnswer(newAnswer);
-        
-        // Only submit if there was no previous selection or if it’s a new selection
         if (selectedAnswer !== newAnswer) {
+            dispatch(setUserAnswer({ questionId: examQues[currentQuestionIndex].question_id, answerId }));
             handleSubmitQuestion();
         }
     };
@@ -100,7 +98,7 @@ const ExamQuestion = ({ questions }) => {
                                                 label={answer.answer_text_en}
                                                 name="answer"
                                                 value={answer.id}
-                                                checked={selectedAnswer === answer.id.toString()}
+                                                // checked={currentQuestion.userAnswer ? currentQuestion.userAnswer === answer.id : false}
                                                 onChange={handleAnswerChange}
                                             />
                                         ))}

@@ -1,4 +1,4 @@
-const Exams = require("../models/exams");
+const Exams = require("../models/examModel");
 
 // Middleware to check if the question exists for the given exam
 const checkQuestionExists = (req, res, next) => {
@@ -34,6 +34,7 @@ const checkCandidateBelongsToExam = (req, res, next) => {
             if (err || !relationExists) {
                 return res.status(403).json({ status: false, message: "Candidate does not belong to this exam!" });
             }
+            
             next();
         });
     });

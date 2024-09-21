@@ -1,4 +1,3 @@
-const { submitAnswer } = require("../controllers/examController");
 const db = require("../db/db");
 
 const Exams = {
@@ -54,15 +53,28 @@ const Exams = {
             return callback(null, results[0]);
         });
     },
-    submitAnswer: (candidateId, questionId, answerId, examId, status, callback) => {
-        const query = `INSERT INTO exam_records (user_id, question_id, answer_id, exam_id, status, created_at) VALUES (?, ?, ?, ?, ?, current_timestamp())`;
+    submitExamCandidateAnswer: (candidateId, questionId, answerId, examId, status, callback) => {
+        const selectQuery = `SELECT * FROM exam_records WHERE user_id = ? AND question_id = ? AND exam_id = ?`;
         
-        db.query(query, [candidateId, questionId, answerId, examId, status], (err, results) => {
+        db.query(selectQuery, [candidateId, questionId, examId], (err, results) => {
             if (err) return callback(err, null);
-            return callback(null, results);
+
+            if (results.length > 0) {
+                const updateQuery = `UPDATE exam_records SET answer_id = ?, status = ?, updated_at = current_timestamp() WHERE user_id = ? AND question_id = ? AND exam_id = ?`;
+                db.query(updateQuery, [answerId, status, candidateId, questionId, examId], (err, updateResults) => {
+                    if (err) return callback(err, null);
+                    return callback(null, updateResults);
+                });
+            } else {
+                const insertQuery = `INSERT INTO exam_records (user_id, question_id, answer_id, exam_id, status, created_at) VALUES (?, ?, ?, ?, ?, current_timestamp())`;
+                db.query(insertQuery, [candidateId, questionId, answerId, examId, status], (err, insertResults) => {
+                    if (err) return callback(err, null);
+                    return callback(null, insertResults);
+                });
+            }
         });
     },
-    checkExamCandidateExists: (candidateId, examId) => {
+    checkExamCandidateExists: (candidateId, examId, callback) => {
         const query = `SELECT * FROM exam_candidates WHERE candidate_id = ? AND exam_id = ?`;
         db.query(query, [candidateId, examId], (err, results) => {
             if (err) return callback(err, null);

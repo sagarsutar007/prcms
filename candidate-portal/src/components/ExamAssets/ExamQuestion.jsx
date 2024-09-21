@@ -1,18 +1,16 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { nextQuestion, prevQuestion } from '../../features/exam/examSlice';
 import { Card, Col, Container, Row, Button, Form } from "react-bootstrap";
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const ExamQuestion = ({ questions }) => {
     const dispatch = useDispatch();
     const currentQuestionIndex = useSelector((state) => state.exam.currentIndex);
     const examQues = useSelector((state) => state.exam.questions);
     const [selectedAnswer, setSelectedAnswer] = useState('');
-
-    // useEffect(() => {
-    //     // dispatch(setQuestions(questions));
-    //     console.log(examQues);
-    // }, [questions, dispatch]);
+    const { examUrl } = useParams();
 
     useEffect(() => {
         if (examQues.length > 0) {
@@ -24,7 +22,7 @@ const ExamQuestion = ({ questions }) => {
         if (currentQuestionIndex < examQues.length - 1) {
             dispatch(nextQuestion());
         } else {
-            alert("You have reached the end of the exam.");
+            alert("Do you want to submit your exam paper?");
         }
     };
 
@@ -35,16 +33,43 @@ const ExamQuestion = ({ questions }) => {
     };
 
     const handleSubmitQuestion = () => {
-        // submit answers code here
-        handleNextQuestion();
-    };
+        const currentQuestion = examQues[currentQuestionIndex];
+        
+        const data = JSON.stringify({
+            "answerId": selectedAnswer,
+            "questionId": currentQuestion.question_id
+        });
 
-    const handleSkipQuestion = () => {
-        handleNextQuestion();
+        const config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.SERVER_API_URL + `submit-answer/${ examUrl }`,
+            headers: { 
+                'x-auth-token': localStorage.getItem("token"),
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                console.log("Answer submitted successfully:", response.data);
+                // Move to the next question after submitting
+                // handleNextQuestion();
+            })
+            .catch((error) => {
+                console.error("Error submitting answer:", error);
+            });
     };
 
     const handleAnswerChange = (event) => {
-        setSelectedAnswer(event.target.value);
+        const newAnswer = event.target.value;
+        setSelectedAnswer(newAnswer);
+        
+        // Only submit if there was no previous selection or if it’s a new selection
+        if (selectedAnswer !== newAnswer) {
+            handleSubmitQuestion();
+        }
     };
 
     const currentQuestion = examQues[currentQuestionIndex];
@@ -99,12 +124,9 @@ const ExamQuestion = ({ questions }) => {
                             Previous Question
                         </Button>
                     </Col>
-                    <Col xs={6} className="text-right">
-                        <Button className="btn btn-primary" onClick={handleSubmitQuestion}>
-                            Submit Question
-                        </Button>
-                        <Button className="btn btn-secondary ml-2" onClick={handleSkipQuestion}>
-                            Skip Question
+                    <Col xs={6} className="text-md-right">
+                        <Button className="btn btn-primary ml-2" onClick={handleNextQuestion}>
+                            Next Question
                         </Button>
                     </Col>
                 </Row>

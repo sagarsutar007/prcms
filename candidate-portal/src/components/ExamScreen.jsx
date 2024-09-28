@@ -69,6 +69,10 @@ const ExamScreen = () => {
 		}
 	}, [countdown]);
 
+	const handleTimerEnd = () => {
+		console.log("Timer has ended, start the exam or show a message.");
+	};
+
 	return (
 		<HelmetProvider>
 			<Helmet>
@@ -83,7 +87,8 @@ const ExamScreen = () => {
 					<>
 						<ExamNavbar
 							examTitle={examData ? examData.examName : "Not Available"}
-							remainingTime={timeLeft}
+							examStartTime={examData ? examData.examStartTime : "00:00"}
+							onTimerEnd={handleTimerEnd}
 						/>
 						<ExamSidebar />
 						<ExamQuestion />

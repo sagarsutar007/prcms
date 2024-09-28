@@ -99,7 +99,7 @@ exports.loadExam = (req, res) => {
 							examUrl: examUrl,
 							remainingTime,
 							examQuestions: questionsWithAnswers,
-							
+							examStartTime: exam.exam_datetime
 						});
 					}
 				});

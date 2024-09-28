@@ -131,7 +131,7 @@ exports.submitCandidateAnswer = (req, res) => {
 
                 Exams.submitExamCandidateAnswer(candidateId, questionId, answerId, exam.id, answerStatus, (err, result) => {
                     if (err) {
-                        return res.status(500).json({ status: false, message: "Error submitting answer!" });
+                        return res.status(500).json({ status: false, message: "Error submitting answer!", error: err });
                     }
                     return res.status(200).json({ status: true, message: "Answer stored successfully!" });
                 });

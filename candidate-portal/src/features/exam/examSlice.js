@@ -30,7 +30,7 @@ const examSlice = createSlice({
       const { questionId, answerId } = action.payload;
       const question = state.questions.find(q => q.question_id === questionId);
       if (question) {
-          question.userAnswer = answerId;
+        question.userAnswer = answerId;
       }
     },
   },

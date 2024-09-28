@@ -65,7 +65,7 @@ const ExamQuestion = ({ questions }) => {
         const newAnswer = event.target.value;
         setSelectedAnswer(newAnswer);
         if (selectedAnswer !== newAnswer) {
-            dispatch(setUserAnswer({ questionId: examQues[currentQuestionIndex].question_id, answerId }));
+            // dispatch(setUserAnswer({ questionId: examQues[currentQuestionIndex].question_id, answerId }));
             handleSubmitQuestion();
         }
     };

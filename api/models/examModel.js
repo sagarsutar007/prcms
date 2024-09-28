@@ -60,7 +60,7 @@ const Exams = {
             if (err) return callback(err, null);
 
             if (results.length > 0) {
-                const updateQuery = `UPDATE exam_records SET answer_id = ?, status = ?, updated_at = current_timestamp() WHERE user_id = ? AND question_id = ? AND exam_id = ?`;
+                const updateQuery = `UPDATE exam_records SET answer_id = ?, status = ?, created_at = current_timestamp() WHERE user_id = ? AND question_id = ? AND exam_id = ?`;
                 db.query(updateQuery, [answerId, status, candidateId, questionId, examId], (err, updateResults) => {
                     if (err) return callback(err, null);
                     return callback(null, updateResults);

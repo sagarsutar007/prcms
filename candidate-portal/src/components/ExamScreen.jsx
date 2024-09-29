@@ -19,7 +19,7 @@ const ExamScreen = () => {
 	const [timeLeft, setTimeLeft] = useState(null);
 	const [examStarted, setExamStarted] = useState(false);
 	const [loading, setLoading] = useState(true);
-	const [countdown, setCountdown] = useState(5);
+	const [countdown, setCountdown] = useState(5000);
 
 	const dispatch = useDispatch();
 

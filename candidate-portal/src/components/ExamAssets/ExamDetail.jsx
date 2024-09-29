@@ -1,6 +1,7 @@
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 
 const ExamDetail = ({ examData, countdown }) => {
+    const roundedCountdown = Math.floor(countdown);
     return (
         <Container>
             <Row>
@@ -13,8 +14,8 @@ const ExamDetail = ({ examData, countdown }) => {
                                 <strong>Exam Duration:</strong> {examData?.duration} minutes<br/>
                                 <strong>Language:</strong> {examData?.language}
                             </Card.Text>
-                            <Button variant="primary" disabled={countdown > 0}>
-                                {countdown > 0 ? `Start Exam in ${countdown} seconds` : 'Start Exam'}
+                            <Button variant="primary" disabled={roundedCountdown > 0}>
+                                {roundedCountdown > 0 ? `Start Exam in ${roundedCountdown} seconds` : 'Start Exam'}
                             </Button>
                         </Card.Body>
                     </Card>

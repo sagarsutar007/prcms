@@ -30,15 +30,14 @@ function App() {
 			/>
 			<Route
 				path="/exam/:examUrl"
-				element={isAuthenticated ? <ExamScreen /> : <Navigate to="/login" />} // Dynamic exam route
+				element={isAuthenticated ? <ExamScreen /> : <Navigate to="/login" />}
 			/>
 
 			<Route
 				path="/logout"
 				element={<Logout />}
 			/>
-
-			{/* Add other routes here if needed */}
+			
 		</Routes>
 	);
 }

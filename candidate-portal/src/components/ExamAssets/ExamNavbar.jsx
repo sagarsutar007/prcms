@@ -31,7 +31,7 @@ const ExamNavbar = ({ examTitle, examStartTime, onTimerEnd }) => {
 			} else {
 				setTimeRemaining("00:00");
 				clearInterval(interval);
-				onTimerEnd(); // Notify the parent component when time is up
+				onTimerEnd();
 			}
 		}, 1000);
 

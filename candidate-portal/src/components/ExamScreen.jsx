@@ -73,6 +73,10 @@ const ExamScreen = () => {
 		console.log("Timer has ended, start the exam or show a message.");
 	};
 
+	const startExam= () => {
+		setExamStarted(true);
+	}
+
 	return (
 		<HelmetProvider>
 			<Helmet>
@@ -81,7 +85,7 @@ const ExamScreen = () => {
 			<div className="wrapper">
 				{loading && <ExamLoading />}
 				{!loading && !examStarted && (
-					<ExamDetail examData={examData} countdown={countdown} />
+					<ExamDetail examData={examData} countdown={timeLeft} onExamStarted={ startExam } />
 				)}
 				{!loading && examStarted && (
 					<>

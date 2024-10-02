@@ -1,7 +1,25 @@
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 
-const ExamDetail = ({ examData, countdown }) => {
-    const roundedCountdown = Math.floor(countdown);
+const ExamDetail = ({ examData, countdown, onExamStarted }) => {
+    const [roundedCountdown, setCountdown] = useState(Math.floor(countdown));
+
+    useEffect(() => {
+		if (roundedCountdown > 0) {
+			const timer = setInterval(() => {
+				setCountdown((prevCount) => {
+					if (prevCount <= 1) {
+						clearInterval(timer);
+                        onExamStarted();
+						return 0;
+					}
+					return prevCount - 1;
+				});
+			}, 1000);
+
+			return () => clearInterval(timer);
+		}
+	}, [roundedCountdown]);
     return (
         <Container>
             <Row>

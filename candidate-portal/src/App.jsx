@@ -8,6 +8,7 @@ import Dashboard from "./components/Dashboard";
 import Exams from "./components/Exams";
 import Logout from "./components/Logout";
 import ExamScreen from "./components/ExamScreen";
+import './app.css';
 
 function App() {
 	const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);

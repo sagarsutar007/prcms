@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom";
 
 import brandLogo from "../assets/img/brand-logo-white.png";
+import { useSelector } from "react-redux";
+
 
 const DashboardSidebar = () => {
+	const userDetails = useSelector((state) => state.auth.userDetails);
+	const fullName = userDetails ? userDetails.fullName : "User";
+
 	return (
 		<aside className="main-sidebar sidebar-dark-primary elevation-4">
 			<Link to="/student-Dashboard" className="brand-link">
@@ -26,7 +31,7 @@ const DashboardSidebar = () => {
 					</div>
 					<div className="info">
 						<Link to="/my-profile" className="d-block">
-							Akhil Gupta
+							{fullName}
 						</Link>
 					</div>
 				</div>

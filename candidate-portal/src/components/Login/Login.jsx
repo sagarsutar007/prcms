@@ -62,15 +62,13 @@ function Login() {
 			});
 
 			if (response.data.status) {
-				console.log(response.data);
-				dispatch(loginSuccess({ token: response.data.token }));
+				dispatch(loginSuccess({ token: response.data.token, userDetails: response.data.userData }));
 				setErrorMessage("");
 				navigate("/student-dashboard");
 			} else {
 				setErrorMessage(response.data.message || "Login failed!");
 			}
 		} catch (error) {
-			console.log("Check error", error);
 			setErrorMessage(
 				error.response?.data?.message || "An error occurred during login."
 			);

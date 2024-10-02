@@ -333,6 +333,18 @@ exports.login = (req, res) => {
 				.json({ status: false, message: "Incorrect password!" });
 		}
 
+		let outData = {
+			id: user.id,
+			firstname: user.firstname,
+			middlename: user.middlename,
+			lastname: user.lastname,
+			fullName: `${user.firstname}${user.middlename ? user.middlename : ''}${user.lastname}`,
+			profile_img: user.profile_img ? process.env.MAIN_URL + "/assets/img/" + user.profile_img : null,
+			phone: user.phone,
+			email: user.email,
+			gender: user.gender,
+		};
+
 		const token = jwt.sign({ id: user.id, phone: user.phone }, secretKey, {
 			expiresIn: "12h",
 		});
@@ -344,7 +356,7 @@ exports.login = (req, res) => {
 			macAddress,
 			clientType
 		)
-			.then(() => res.json({ status: true, token }))
+			.then(() => res.json({ status: true, token, userData: outData }))
 			.catch((logErr) =>
 				res.status(500).json({ status: false, error: logErr.message })
 			);

@@ -22,9 +22,9 @@ const ExamScreen = () => {
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(5000);
   const [examOver, setExamOver] = useState(false); 
+  const [language, setLanguage] = useState("en"); // Language state
 
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -42,12 +42,25 @@ const ExamScreen = () => {
         setExamData(examData);
         dispatch(setQuestions(examData.examQuestions));
 
-        if (examData.remainingTime > 0) {
+        const examToken = examData.examToken; 
+        const storedExamToken = localStorage.getItem("examToken");
+
+        if (examToken) {
+          if (examToken !== storedExamToken) {
+            alert("Exam is ongoing on another device. Please try again later.");
+            navigate("/student-dashboard");
+            return;
+          }
+        }
+
+        if (examData.leftAt) {
+          setExamOver(true);
+        } else if (examData.remainingTime > 0) {
           setTimeLeft(examData.remainingTime);
           setLoading(false);
         } else {
-			setExamStarted(true);
-			startExamAPI(examData.examId);
+          setExamStarted(true);
+          startExamAPI(examData.examId);
         }
 
         setLoading(false);
@@ -64,8 +77,8 @@ const ExamScreen = () => {
       const timer = setInterval(() => {
         setCountdown((prevCount) => {
           if (prevCount <= 1) {
-			clearInterval(timer);
-			startExamAPI(examData.examId);
+            clearInterval(timer);
+            startExamAPI(examData.examId);
             setExamStarted(true);
             return 0;
           }
@@ -93,11 +106,13 @@ const ExamScreen = () => {
         }
       );
 
+      console.log(response);
+
       if (response.status === 200) {
-        console.log("Exam started successfully");
-	  } else {
-		  navigate('student-dashboard');
-	  }
+        localStorage.setItem("examToken", response.data.authToken);
+      } else {
+        navigate('student-dashboard');
+      }
     } catch (error) {
       console.error("Error starting the exam", error);
     }
@@ -122,7 +137,7 @@ const ExamScreen = () => {
           },
         }
       );
-		
+        
       if (response.status === 200) {
         setExamOver(true);
         console.log("Exam submitted successfully");
@@ -151,13 +166,15 @@ const ExamScreen = () => {
               examStartTime={examData ? examData.examStartTime : "00:00"}
               examEndTime={examData ? examData.examEndTime : "00:00"}
               onTimerEnd={handleTimerEnd}
+              language={language}
+              setLanguage={setLanguage}
             />
             <ExamSidebar />
-            <ExamQuestion onExamExit={handleExamSubmission} />
+            <ExamQuestion onExamExit={handleExamSubmission} language={language} />
             <ExamFooter />
           </>
         )}
-			  
+              
         {!loading && examOver && <ExamOver />}
       </div>
     </HelmetProvider>

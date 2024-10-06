@@ -69,6 +69,7 @@ function Login() {
 				setErrorMessage(response.data.message || "Login failed!");
 			}
 		} catch (error) {
+			alert(error);
 			setErrorMessage(
 				error.response?.data?.message || "An error occurred during login."
 			);

@@ -9,7 +9,7 @@ import { Card, Col, Container, Row, Button, Form } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
-const ExamQuestion = ({ onExamExit }) => {
+const ExamQuestion = ({ onExamExit, language }) => {
     const dispatch = useDispatch();
     const currentQuestionIndex = useSelector((state) => state.exam.currentIndex);
     const examQues = useSelector((state) => state.exam.questions);
@@ -45,6 +45,7 @@ const ExamQuestion = ({ onExamExit }) => {
         const data = JSON.stringify({
             answerId: newAnswer,
             questionId: currentQuestion.question_id,
+            examToken: localStorage.getItem("examToken"),
         });
 
         const config = {
@@ -64,7 +65,14 @@ const ExamQuestion = ({ onExamExit }) => {
                 console.log("Answer submitted successfully:", response.data);
             })
             .catch((error) => {
-                console.error("Error submitting answer:", error);
+                alert("Error submitting answer: " + error.response?.data?.message || "Unknown error");
+                
+                if (error.response?.status === 401) {
+                    alert("Your exam session has expired or is invalid. Redirecting to the dashboard.");
+                    navigate("/student-dashboard");
+                } else {
+                    console.error("Error submitting answer:", error);
+                }
             });
     };
 
@@ -89,14 +97,24 @@ const ExamQuestion = ({ onExamExit }) => {
                         <Card className="card-primary card-outline" style={{minHeight: "196px"}}>
                             <Card.Body>
                                 <h5 className="card-title font-weight-bold">
-                                    {currentQuestion ? currentQuestionIndex + 1 +"."+ currentQuestion.question_en : "Loading question..."}
+                                    {currentQuestion
+                                        ? currentQuestionIndex + 1 + ". " + (language === "en" ? currentQuestion.question_en : currentQuestion.question_hi)
+                                        : "Loading question..."}
                                 </h5>
+                                <br />
+                                {currentQuestion && currentQuestion.question_img && (
+                                    <img 
+                                        src={currentQuestion.question_img} 
+                                        alt={`Question ${currentQuestionIndex + 1} Image`} 
+                                        style={{ maxWidth: "100%", height: "auto", marginTop: "20px" }} 
+                                    />
+                                )}
                             </Card.Body>
                         </Card>
                     </Col>
                     <Col lg={6} id="column2">
                         <Card className="card-primary card-outline" style={{minHeight: "196px"}}>
-                            <Card.Header>Choose the correct answer below:</Card.Header>
+                            <Card.Header>{language === "en" ? 'Choose the correct answer below:' : 'नीचे सही उत्तर चुनें:'}</Card.Header>
                             <Card.Body>
                                 {currentQuestion && currentQuestion.question_type === "mcq" ? (
                                     <Form>
@@ -104,7 +122,7 @@ const ExamQuestion = ({ onExamExit }) => {
                                             <Form.Check
                                                 key={answer.id}
                                                 type="radio"
-                                                label={answer.answer_text_en}
+                                                label={language === "en" ? answer.answer_text_en : answer.answer_text_hi}
                                                 name="answer"
                                                 value={answer.id}
                                                 checked={selectedAnswer === answer.id || currentQuestion.userAnswer == answer.id }
@@ -115,7 +133,7 @@ const ExamQuestion = ({ onExamExit }) => {
                                 ) : (
                                     <ul>
                                         {currentQuestion && currentQuestion.answers.map((answer) => (
-                                            <li key={answer.id}>{answer.answer_text_en}</li>
+                                            <li key={answer.id}>{language === "en" ? answer.answer_text_en : answer.answer_text_hi}</li>
                                         ))}
                                     </ul>
                                 )}

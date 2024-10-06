@@ -315,6 +315,7 @@ exports.login = (req, res) => {
 	const macAddress = req.headers["x-mac-address"] || "00:00:00:00:00:00";
 
 	User.findByPhone(phone, (err, results) => {
+		console.log("Running");
 		if (err) {
 			return res.status(500).json({ status: false, error: err.message });
 		}

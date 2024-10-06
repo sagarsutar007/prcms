@@ -47,6 +47,12 @@ const Exams = {
             WHERE exam_id = ? AND candidate_id = ?`;
         db.query(query, [examId, candidateId], callback);
     },
+    findCandidateRecordsInExam: (examId, candidateId, callback) => {
+        const query = `
+            SELECT * FROM candidate_exam_records 
+            WHERE exam_id = ? AND user_id = ?`;
+        db.query(query, [examId, candidateId], callback);
+    },
     getAnswersByQuestionId: (questionId, callback) => {
         const query = `SELECT id, answer_text_en, answer_text_hi FROM answers WHERE question_id = ? ORDER BY RAND()`;
         db.query(query, [questionId], callback);

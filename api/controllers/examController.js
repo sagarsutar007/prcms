@@ -48,8 +48,8 @@ exports.getCandidateExams = (req, res) => {
 
 exports.loadExam = (req, res) => {
     const { examUrl } = req.params;
-	const candidateId = req.id;
-	
+    const candidateId = req.id;
+
     Exams.getExamByUrl(examUrl, (err, examInfo) => {
         if (err || !examInfo) {
             return res.status(400).json({ status: false, message: "Exam not found!" });
@@ -58,63 +58,77 @@ exports.loadExam = (req, res) => {
         const exam = examInfo;
         const currentTime = new Date().getTime();
         const examStartTime = new Date(exam.exam_datetime).getTime();
-		const remainingTime = Math.max((examStartTime - currentTime) / 1000, 0);
-		
-        Exams.getExamQuestions(exam.id, (err, questions) => {
-            if (err) {
-                return res.status(500).json({ status: false, message: "Error fetching questions!" });
+        const remainingTime = Math.max((examStartTime - currentTime) / 1000, 0);
+        
+        Exams.findCandidateRecordsInExam(exam.id, candidateId, (err, candidateInfo) => {
+            let leftAt = null;
+            let examToken = null;
+            if (err || !candidateInfo[0]) {
+                leftAt = null;
+                examToken = null;
+            } else {
+                leftAt = candidateInfo[0].left_at;
+                examToken = candidateInfo[0].exam_token;
             }
-
-            const filteredQuestions = questions.map((question) => ({
-                question_id: question.question_id,
-                question_en: question.question_en,
-                question_hi: question.question_hi,
-                question_img: (question.question_img.length > 0) ? process.env.MAIN_URL + "assets/img/" + question.question_img : "",
-                question_type: question.question_type,
-            }));
-
-            let questionsWithAnswers = [];
-			let processedQuestions = 0;
-			
-            Exams.getUserAnswersForExam(candidateId, exam.id, (err, userAnswers) => {
+            
+            Exams.getExamQuestions(exam.id, (err, questions) => {
                 if (err) {
-                    return res.status(500).json({ status: false, message: "Error fetching user answers!" });
+                    return res.status(500).json({ status: false, message: "Error fetching questions!" });
                 }
 
-                const userAnswersMap = {};
-                userAnswers.forEach(answer => {
-                    userAnswersMap[answer.question_id] = answer.answer_id;
-				});
-				
-                filteredQuestions.forEach((question) => {
-                    Exams.getAnswersByQuestionId(question.question_id, (err, answers) => {
-                        if (err) {
-                            return res.status(500).json({ status: false, message: "Error fetching answers!" });
-						}
-						
-                        questionsWithAnswers.push({
-                            ...question,
-                            answers: answers,
-                            userAnswer: userAnswersMap[question.question_id] || null, 
-                        });
+                const filteredQuestions = questions.map((question) => ({
+                    question_id: question.question_id,
+                    question_en: question.question_en,
+                    question_hi: question.question_hi,
+                    question_img: (question.question_img.length > 0) ? process.env.MAIN_URL + "assets/img/" + question.question_img : "",
+                    question_type: question.question_type,
+                }));
 
-                        processedQuestions++;
-                        if (processedQuestions === filteredQuestions.length) {
-                            return res.status(200).json({
-                                status: true,
-                                examId: exam.id,
-                                examName: exam.name,
-                                examDuration: exam.duration,
-                                examLanguage: exam.lang,
-                                examQuestionsCount: questions.length,
-                                candidate: candidateId,
-                                examUrl: examUrl,
-                                remainingTime,
-                                examQuestions: questionsWithAnswers,
-                                examStartTime: exam.exam_datetime,
-                                examEndTime: exam.exam_endtime
+                let questionsWithAnswers = [];
+                let processedQuestions = 0;
+
+                Exams.getUserAnswersForExam(candidateId, exam.id, (err, userAnswers) => {
+                    if (err) {
+                        return res.status(500).json({ status: false, message: "Error fetching user answers!" });
+                    }
+
+                    const userAnswersMap = {};
+                    userAnswers.forEach(answer => {
+                        userAnswersMap[answer.question_id] = answer.answer_id;
+                    });
+
+                    filteredQuestions.forEach((question) => {
+                        Exams.getAnswersByQuestionId(question.question_id, (err, answers) => {
+                            if (err) {
+                                return res.status(500).json({ status: false, message: "Error fetching answers!" });
+                            }
+
+                            questionsWithAnswers.push({
+                                ...question,
+                                answers: answers,
+                                userAnswer: userAnswersMap[question.question_id] || null,
                             });
-                        }
+
+                            processedQuestions++;
+                            if (processedQuestions === filteredQuestions.length) {
+                                return res.status(200).json({
+                                    status: true,
+                                    examId: exam.id,
+                                    examName: exam.name,
+                                    examDuration: exam.duration,
+                                    examLanguage: exam.lang,
+                                    examQuestionsCount: questions.length,
+                                    candidate: candidateId,
+                                    examUrl: examUrl,
+                                    remainingTime,
+                                    examQuestions: questionsWithAnswers,
+                                    examStartTime: exam.exam_datetime,
+                                    examEndTime: exam.exam_endtime,
+                                    leftAt,
+                                    examToken
+                                });
+                            }
+                        });
                     });
                 });
             });
@@ -125,17 +139,22 @@ exports.loadExam = (req, res) => {
 exports.submitCandidateAnswer = (req, res) => {
     const { examUrl } = req.params;
     const candidateId = req.id;
-    const questionId = req.body.questionId;
-    const answerId = req.body.answerId;
+    const { questionId, answerId, examToken } = req.body;
 
     Exams.getExamByUrl(examUrl, (err, exam) => {
         if (err || !exam) {
             return res.status(400).json({ status: false, message: "Exam not found!" });
         }
-
-        const question = req.question;  // Ensure that question is being set correctly
-
-        if (question.question_type === "mcq") {
+        
+        Exams.findCandidateRecordsInExam(exam.id, candidateId, (err, records) => {
+            if (err) {
+                return res.status(500).json({ status: false, message: "Error checking exam records!" });
+            }
+            
+            if (!records || records[0].exam_token !== examToken) {
+                return res.status(401).json({ status: false, message: "Invalid exam token!" });
+            }
+            
             Exams.getCorrectAnswer(questionId, (err, answer) => {
                 if (err) {
                     return res.status(500).json({ status: false, message: "Error retrieving correct answer!" });
@@ -150,12 +169,10 @@ exports.submitCandidateAnswer = (req, res) => {
                     return res.status(200).json({ status: true, message: "Answer stored successfully!" });
                 });
             });
-        } else {
-            // If question type is invalid, respond early
-            return res.status(400).json({ status: false, message: "Invalid question type!" });
-        }
+        });
     });
 };
+
 
 exports.getCandidateUpcomingExam = (req, res) => {
     const candidateId = req.id;
@@ -251,10 +268,8 @@ exports.startExamPaper = (req, res) => {
 			if (checkResult[0].left_at !== "" && checkResult[0].re_entry === false) {
 				return res.status(200).json({ status: false, message: "Candidate has already attempted this exam!" });
 			}
-            return res.status(200).json({ status: true, message: "Exam record already exists, no new entry required" });
+            return res.status(200).json({ status: true, message: "Exam record already exists, no new entry required", authToken: checkResult[0].exam_token });
 		}
-
-		
 		
 		const authToken = uuidv4();
 		

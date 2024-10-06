@@ -52,7 +52,7 @@ const ExamDetail = ({ examData, countdown, onExamStarted }) => {
             );
 
             if (response.status === 200) {
-                console.log("Exam started successfully");
+                localStorage.setItem("examToken", response.data.authToken);
             } else {
                 navigate('student-dashboard');
             }

@@ -18,7 +18,15 @@ app.use(helmet());
 app.disable("x-powered-by");
 
 // Enable CORS
-app.use(cors());
+const corsOptions = {
+  origin: 'http://192.168.31.24:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'x-auth-token'],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+
 app.use(compression());
 app.use(express.json());
 app.use("/api", authRouter);

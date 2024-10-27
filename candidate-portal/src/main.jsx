@@ -15,11 +15,11 @@ import store from "./store/store";
 window.$ = $;
 
 createRoot(document.getElementById("root")).render(
-	<StrictMode>
-		<Provider store={store}>
-			<BrowserRouter>
-				<App />
-			</BrowserRouter>
-		</Provider>
-	</StrictMode>
+	// <StrictMode>
+	<Provider store={store}>
+		<BrowserRouter>
+			<App />
+		</BrowserRouter>
+	</Provider>
+	// </StrictMode>
 );

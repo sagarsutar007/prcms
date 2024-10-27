@@ -24,7 +24,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'x-auth-token'],
   credentials: true,
 };
-app.use(cors(corsOptions));
+app.use(cors());
 
 
 app.use(compression());

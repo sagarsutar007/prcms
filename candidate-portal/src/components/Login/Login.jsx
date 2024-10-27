@@ -1,12 +1,13 @@
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import styles from "../../assets/css/auth.module.css";
 import brandLogo from "../../assets/img/brand-logo-white.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
-import { Alert, Container, Row, Col, Form, Button } from "react-bootstrap";
+import { Alert, Container, Row, Col, Form, Button, Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../features/auth/authSlice";
+
 import axios from "axios";
 
 function Login() {
@@ -17,8 +18,10 @@ function Login() {
 	const [isPhoneValid, setPhoneValid] = useState(true);
 	const [isPasswordValid, setPasswordValid] = useState(true);
 	const [errorMessage, setErrorMessage] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const handlePhoneChange = (e) => {
 		setPhone(e.target.value);
@@ -55,6 +58,7 @@ function Login() {
 		if (!phone || !password) {
 			return;
 		}
+		setIsLoading(true);
 		try {
 			const response = await axios.post(process.env.SERVER_API_URL + "login", {
 				phone: phone,
@@ -64,15 +68,17 @@ function Login() {
 			if (response.data.status) {
 				dispatch(loginSuccess({ token: response.data.token, userDetails: response.data.userData }));
 				setErrorMessage("");
-				navigate("/student-dashboard");
+				const redirectTo = location.state?.from || "/student-dashboard";
+				navigate(redirectTo);
 			} else {
 				setErrorMessage(response.data.message || "Login failed!");
 			}
 		} catch (error) {
-			alert(error);
 			setErrorMessage(
 				error.response?.data?.message || "An error occurred during login."
 			);
+		} finally {
+			setIsLoading(false); // Stop loading after response
 		}
 	};
 
@@ -191,8 +197,19 @@ function Login() {
 																className={`btn w-100 btn-lg ${styles.btnPrimary} ${styles.authfyLoginButton}`}
 																type="button"
 																onClick={handleLogin}
+																disabled={isLoading}
 															>
-																Login as Candidate
+																{isLoading ? (
+																	<Spinner
+																		as="span"
+																		animation="border"
+																		size="sm"
+																		role="status"
+																		aria-hidden="true"
+																	/>
+																) : (
+																	"Login as Candidate"
+																)}
 															</Button>
 														</Form.Group>
 													</Form>

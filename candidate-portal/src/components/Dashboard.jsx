@@ -58,9 +58,6 @@ function Dashboard() {
 		const isUpcoming = currentIST < examStartTime;
 		const isOngoing = currentIST >= examStartTime && currentIST <= examEndTime;
 
-		console.log("Is current time < exam start time?", isUpcoming);
-		console.log("Is current time >= exam start time and <= exam end time?", isOngoing);
-
 		if (isUpcoming) {
 			return "upcoming"; // Exam is upcoming
 		} else if (isOngoing) {

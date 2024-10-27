@@ -1,15 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import ExamNavbar from "./ExamAssets/ExamNavbar";
 import ExamSidebar from "./ExamAssets/ExamSidebar";
 import ExamFooter from "./ExamAssets/ExamFooter";
 import ExamQuestion from "./ExamAssets/ExamQuestion";
 import ExamDetail from "./ExamAssets/ExamDetail";
-import ExamOver from "./ExamAssets/ExamOver"; // Import ExamOver screen
-
-// Redux imports
+import ExamOver from "./ExamAssets/ExamOver";
 import { useDispatch } from "react-redux";
 import { setQuestions } from "../features/exam/examSlice";
 import ExamLoading from "./ExamAssets/ExamLoading";
@@ -21,12 +19,69 @@ const ExamScreen = () => {
   const [examStarted, setExamStarted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(5000);
-  const [examOver, setExamOver] = useState(false); 
-  const [language, setLanguage] = useState("en"); // Language state
+  const [examOver, setExamOver] = useState(false);
+  const [language, setLanguage] = useState("en");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // Memoize API calls
+  const startExamAPI = useCallback(async (examId) => {
+    if (!examId) {
+      console.error("Exam ID is not available.");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        process.env.SERVER_API_URL + "start-paper",
+        { examId },
+        {
+          headers: {
+            "x-auth-token": localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        localStorage.setItem("examToken", response.data.authToken);
+      } else {
+        navigate('student-dashboard');
+      }
+    } catch (error) {
+      console.error("Error starting the exam", error);
+    }
+  }, [navigate]);
+
+  const handleExamSubmission = useCallback(async () => {
+    try {
+      const response = await axios.post(
+        process.env.SERVER_API_URL + "submit-paper",
+        { examId: examData?.examId },
+        {
+          headers: {
+            "x-auth-token": localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setExamOver(true);
+      }
+    } catch (error) {
+      console.error("Error submitting the exam", error);
+    }
+  }, [examData?.examId]);
+
+  // Memoize event handlers
+  const handleTimerEnd = useCallback(() => {
+    setExamOver(true);
+  }, []);
+
+  const startExam = useCallback(() => {
+    setExamStarted(true);
+  }, []);
+
+  // Fetch exam data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,18 +97,16 @@ const ExamScreen = () => {
         setExamData(examData);
         dispatch(setQuestions(examData.examQuestions));
 
-        const examToken = examData.examToken; 
+        const examToken = examData.examToken;
         const storedExamToken = localStorage.getItem("examToken");
 
-        if (examToken) {
-          if (examToken !== storedExamToken) {
-            alert("Exam is ongoing on another device. Please try again later.");
-            navigate("/student-dashboard");
-            return;
-          }
+        if (examToken && examToken !== storedExamToken) {
+          alert("Exam is ongoing on another device. Please try again later.");
+          navigate("/student-dashboard");
+          return;
         }
 
-        if (examData.leftAt) {
+        if (examData.leftAt != null && examData.leftAt !== "") {
           setExamOver(true);
         } else if (examData.remainingTime > 0) {
           setTimeLeft(examData.remainingTime);
@@ -70,16 +123,19 @@ const ExamScreen = () => {
     };
 
     fetchData();
-  }, [examUrl, dispatch]);
+  }, [examUrl, dispatch, navigate, startExamAPI]);
 
+  // Countdown timer
   useEffect(() => {
     if (countdown > 0) {
       const timer = setInterval(() => {
         setCountdown((prevCount) => {
           if (prevCount <= 1) {
             clearInterval(timer);
-            startExamAPI(examData.examId);
-            setExamStarted(true);
+            if (examData?.examId) {
+              startExamAPI(examData.examId);
+              setExamStarted(true);
+            }
             return 0;
           }
           return prevCount - 1;
@@ -88,64 +144,17 @@ const ExamScreen = () => {
 
       return () => clearInterval(timer);
     }
-  }, [countdown]);
+  }, [countdown, examData?.examId, startExamAPI]);
 
-  const startExamAPI = async (examId) => {
-    if (!examId) {
-      console.error("Exam ID is not available.");
-      return;
-    }
-    try {
-      const response = await axios.post(
-        process.env.SERVER_API_URL + "start-paper",
-        { examId },
-        {
-          headers: {
-            "x-auth-token": localStorage.getItem("token"),
-          },
-        }
-      );
-
-      console.log(response);
-
-      if (response.status === 200) {
-        localStorage.setItem("examToken", response.data.authToken);
-      } else {
-        navigate('student-dashboard');
-      }
-    } catch (error) {
-      console.error("Error starting the exam", error);
-    }
-  };
-
-  const handleTimerEnd = () => {
-    setExamOver(true);
-  };
-
-  const startExam = () => {
-    setExamStarted(true);
-  };
-
-  const handleExamSubmission = async () => {
-    try {
-      const response = await axios.post(
-        process.env.SERVER_API_URL + "submit-paper", 
-        { examId: examData.examId },
-        {
-          headers: {
-            "x-auth-token": localStorage.getItem("token"),
-          },
-        }
-      );
-        
-      if (response.status === 200) {
-        setExamOver(true);
-        console.log("Exam submitted successfully");
-      }
-    } catch (error) {
-      console.error("Error submitting the exam", error);
-    }
-  };
+  // Memoize navbar props
+  const navbarProps = useMemo(() => ({
+    examTitle: examData?.examName || "Not Available",
+    examStartTime: examData?.examStartTime || "00:00",
+    examEndTime: examData?.examEndTime || "00:00",
+    onTimerEnd: handleTimerEnd,
+    language,
+    setLanguage
+  }), [examData?.examName, examData?.examStartTime, examData?.examEndTime, handleTimerEnd, language]);
 
   return (
     <HelmetProvider>
@@ -154,27 +163,27 @@ const ExamScreen = () => {
       </Helmet>
       <div className="wrapper">
         {loading && <ExamLoading />}
-        
+
         {!loading && !examStarted && !examOver && (
-          <ExamDetail examData={examData} countdown={timeLeft} onExamStarted={startExam} />
+          <ExamDetail
+            examData={examData}
+            countdown={timeLeft}
+            onExamStarted={startExam}
+          />
         )}
-        
+
         {!loading && examStarted && !examOver && (
           <>
-            <ExamNavbar
-              examTitle={examData ? examData.examName : "Not Available"}
-              examStartTime={examData ? examData.examStartTime : "00:00"}
-              examEndTime={examData ? examData.examEndTime : "00:00"}
-              onTimerEnd={handleTimerEnd}
-              language={language}
-              setLanguage={setLanguage}
-            />
+            <ExamNavbar {...navbarProps} />
             <ExamSidebar />
-            <ExamQuestion onExamExit={handleExamSubmission} language={language} />
+            <ExamQuestion
+              onExamExit={handleExamSubmission}
+              language={language}
+            />
             <ExamFooter />
           </>
         )}
-              
+
         {!loading && examOver && <ExamOver />}
       </div>
     </HelmetProvider>

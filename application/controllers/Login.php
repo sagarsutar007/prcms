@@ -198,7 +198,7 @@ class Login extends CI_Controller {
 			$record['companies'] = $this->business_model->getUserCompanies(null, 'admin');
 			$record['type'] = $type;
 			$this->session->set_userdata($record);
-			if ($value) { redirect('exams/'.$value.'/begin'); }
+			if ($value) { redirect('https://candidate.simrangroups.com/exam/'.$value); }
 			else { $this->redirectToDashboard($type); }
 		} else if (get_cookie('email', TRUE)) {
 			$email = $this->encryption->decrypt(get_cookie('email', TRUE));

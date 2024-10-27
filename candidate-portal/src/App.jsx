@@ -8,6 +8,7 @@ import Dashboard from "./components/Dashboard";
 import Exams from "./components/Exams";
 import Logout from "./components/Logout";
 import ExamScreen from "./components/ExamScreen";
+import ProtectedExamRoute from "./ProtectedExamRoute";
 import './app.css';
 
 function App() {
@@ -15,6 +16,10 @@ function App() {
 
 	return (
 		<Routes>
+			<Route
+				path="/"
+				element={isAuthenticated ? <Navigate to="/student-dashboard" /> : <Navigate to="/login" />}
+			/>
 			<Route path="/login" element={<Login />} />
 			<Route path="/register" element={<Register />} />
 			<Route path="/personal-detail" element={<PersonalDetail />} />
@@ -31,14 +36,14 @@ function App() {
 			/>
 			<Route
 				path="/exam/:examUrl"
-				element={isAuthenticated ? <ExamScreen /> : <Navigate to="/login" />}
+				element={<ProtectedExamRoute />}
 			/>
 
 			<Route
 				path="/logout"
 				element={<Logout />}
 			/>
-			
+
 		</Routes>
 	);
 }

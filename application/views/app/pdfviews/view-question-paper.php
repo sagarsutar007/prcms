@@ -96,12 +96,12 @@
               <?php } ?>
             </ol>
           <?php } ?>
-          <div style="line-height: 1;"> 
+          <div style="line-height: 1; display:none;"> 
             Correct answer: <?= $obj['correct_answer_en']; ?>
           </div>
         </div>
         <?php } ?>
-        <?php if ($exam['lang'] == "both" || $exam['lang'] == "hindi") { ?> 
+        <?php if (($exam['lang'] == "both" || $exam['lang'] == "hindi" ) && !empty($obj['question_hi'])) { ?> 
         <div style="display:block; width: 100%;">
           <?= "<h4 class='font-weight-bold hindi-font'>".$i.". ".$obj['question_hi']."</h4>"; ?>
           <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
@@ -116,7 +116,7 @@
               <?php } ?>
             </ol>
           <?php } ?>
-          <div class="hindi-font" style="line-height: 1.5;"> 
+          <div class="hindi-font" style="line-height: 1.5; display:none;"> 
             सही जवाब: <?= $obj['correct_answer_hi']; ?>
           </div>
         </div>

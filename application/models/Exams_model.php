@@ -543,12 +543,6 @@ class Exams_model extends CI_Model
 		return $this->db->affected_rows();
 	}
 
-	public function deleteCandidateExamAnswers($data = '')
-	{
-		$this->db->delete('exam_records', ['user_id' => $data['user_id'], 'exam_id' => $data['exam_id']]);
-		return $this->db->affected_rows();
-	}
-
 	public function deleteAnswerById($ans_id = '')
 	{
 		$this->db->delete('exam_records', ['id' => $ans_id]);
@@ -645,12 +639,6 @@ class Exams_model extends CI_Model
 	public function updateCandidateExamInfo($data = '', $id = '')
 	{
 		$this->db->update('candidate_exam_records', $data, ['id' => $id]);
-		return $this->db->affected_rows();
-	}
-
-	public function deleteCandidateExamInfo($examId='', $user_id = '')
-	{
-		$this->db->delete('candidate_exam_records', ['exam_id'=>$examId, 'user_id' => $user_id]);
 		return $this->db->affected_rows();
 	}
 
@@ -875,6 +863,18 @@ class Exams_model extends CI_Model
 		$esql = "UPDATE `exams` SET `candidate_status`='$status' WHERE id = $examid";
 		$eq = $this->db->query($esql);
 		
+		return $this->db->affected_rows();
+	}
+	
+	public function deleteCandidateExamInfo($examId='', $user_id = '')
+	{
+		$this->db->delete('candidate_exam_records', ['exam_id'=>$examId, 'user_id' => $user_id]);
+		return $this->db->affected_rows();
+	}
+	
+	public function deleteCandidateExamAnswers($data = '')
+	{
+		$this->db->delete('exam_records', ['user_id' => $data['user_id'], 'exam_id' => $data['exam_id']]);
 		return $this->db->affected_rows();
 	}
 }

@@ -441,7 +441,7 @@
                 options: donutOptions
             })
             <?php
-                $num1 = $exam['appeared_candidates'] - $absent;
+                $num1 = $exam['appeared_candidates'];
                 $num2 = $absent - $exam['appeared_candidates'];
                 $num = ($num1>$num2)?$num1:$num2;
             ?>
@@ -512,6 +512,7 @@
                 `);
             });
         });
+        //<?= $absent; ?>
     </script>
   </body>
 </html>

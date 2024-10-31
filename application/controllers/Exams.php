@@ -2469,7 +2469,7 @@ class Exams extends CI_Controller
 			redirect('exams/' . $exam_id . '/view-exam-dashboard');
 		}
 	}
-
+	
 	public function generateFakeAnswers()
 	{
 		$jsonResponse = (isset($_GET['return']) && $_GET['return'] == 'json');
@@ -2536,7 +2536,6 @@ class Exams extends CI_Controller
 		$res = ['status' => 'SUCCESS'];
 		echo json_encode($res);
 	}
-
 }
 
 /* End of file Exams.php */

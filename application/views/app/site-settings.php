@@ -75,6 +75,23 @@
                         </div>
                         <div class="col-md-12">
                           <div class="form-group">
+                            <label for="edart">Exam Dashboard Auto Refresh Time</label>
+                            <select name="edart" id="edart" class="form-control">
+                              <option value="2" <?=$record['edart']==2?'selected':''?>>2 Minutes</option>
+                              <option value="3" <?=$record['edart']==3?'selected':''?>>3 Minutes</option>
+                              <option value="4" <?=$record['edart']==4?'selected':''?>>4 Minutes</option>
+                              <option value="5" <?=$record['edart']==5?'selected':''?>>5 Minutes</option>
+                              <option value="6" <?=$record['edart']==6?'selected':''?>>6 Minutes</option>
+                              <option value="7" <?=$record['edart']==7?'selected':''?>>7 Minutes</option>
+                              <option value="8" <?=$record['edart']==8?'selected':''?>>8 Minutes</option>
+                              <option value="9" <?=$record['edart']==9?'selected':''?>>9 Minutes</option>
+                              <option value="10" <?=$record['edart']==10?'selected':''?>>10 Minutes</option>
+                            </select>
+                            <?= form_error('app_edart', '<div class="text-danger">', '</div>'); ?>
+                          </div>
+                        </div>
+                        <div class="col-md-12">
+                          <div class="form-group">
                             <label for="tr_api">Translate API Key</label>
                             <input type="text" id="tr_api" class="form-control" name="translate_api_key" value="<?= stripslashes($record['translate_api_key']??set_value('translate_api_key')); ?>">
                             <?= form_error('translate_api_key', '<div class="text-danger">', '</div>'); ?>

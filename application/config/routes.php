@@ -134,6 +134,7 @@ $route['exams/remove-selected-candidates'] = 'Exams/removeSelectedCandidates';
 $route['exams/(:num)/download-paper'] = 'Exams/downloadPaper/$1';
 $route['exams/enable-rentry'] = 'Exams/enableRentry';
 $route['exams/search-candidate-exam'] = 'Exams/searchCandidateExams';
+$route['exams/search-candidate-exam-list'] = 'Exams/searchCandidateExamsList';
 
 $route['settings/change-password'] = 'Settings/changePassword';
 $route['settings/sms-templates'] = 'Settings/smsTemplates';

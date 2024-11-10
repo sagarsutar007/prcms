@@ -1988,6 +1988,7 @@ class Exams extends CI_Controller
 		$submitted = 0;
 		$appearing = 0;
 		$exam = $this->exam_model->get($exam_id);
+		$site_data = $this->setting_model->getSiteSetting();
 		if (!$exam) {
 			$this->session->set_flashdata('error', 'Exam record not found!');
 			redirect('exams');
@@ -2097,6 +2098,7 @@ class Exams extends CI_Controller
 			$data['appearing'] = $appearing;
 		}
 		$data['submitted'] = $submitted;
+		$data['site_data'] = $site_data;
 
 		$this->load->view('app/exam-dashboard', $data);
 	}
@@ -2401,20 +2403,11 @@ class Exams extends CI_Controller
 		$data['exam'] = $this->exam_model->get($exam_id);
 		$data['business'] = $this->business_model->get($data['exam']['company_id']);
 		$data['title'] = "View Exam Paper";
-		// $clients = $this->exam_model->getExamClients($exam_id);
-		// $cli = '';
-		// foreach ($clients as $key => $obj) {
-		// 	$cli .= $obj['company_name'] . ",";
-		// }
-		// $data['clients'] = rtrim($cli, ',');
-
-		// $data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id'=>$exam_id, 'user_id'=>$user_id]);
-
-
 		$html = $this->load->view('app/pdfviews/view-question-paper', $data, true);
 		$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 		$mpdf->WriteHTML($html);
-		$output = $mpdf->Output();
+		$filename = $data['exam']['name'].".pdf";
+		$output = $mpdf->Output($filename, 'D');
 
 		$this->clearOlderFiles();
 	}
@@ -2548,21 +2541,28 @@ class Exams extends CI_Controller
 
 		$totalCandidates = count($candidates);
 
-		if ($totalCandidates > 0) {
-			$examIds = $this->exam_model->searchCandidatesExamsList($candidates);
-			$totalExams = count($examIds);
-			if ($totalExams > 0) {
-				$exams = $this->exam_model->findExamsIn($examIds);
-			}
-		} 
-
 		$data['term'] = $term;
 		$data['total_candidates'] = $totalCandidates;
-		$data['candidates'] = $candidates;
-		$data['results'] = $exams;
-		$data['total_exams'] = $totalExams;
-		$data['title'] = "Search Result";
+		$data['results'] = $candidates;
+		$data['title'] = "Search Candidate";
 
+		$this->load->view('app/search-candidate-results', $data);
+	}
+
+	public function searchCandidateExamsList()
+	{
+		if (!isset($_GET['id'])) { redirect('dashboard'); }
+		$term = $this->input->get('id', true);
+		
+		$examIds = $this->exam_model->searchCandidatesExamsList([$term]);
+		$totalExams = count($examIds);
+		if ($totalExams > 0) {
+			$exams = $this->exam_model->findExamsIn($examIds);
+		}
+
+		$data['results'] = $exams;
+		$data['total_exams'] = count($exams);
+		$data['title'] = "Search Candidate Exams";
 		$this->load->view('app/search-candidate-exams', $data);
 	}
 

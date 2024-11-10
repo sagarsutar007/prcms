@@ -68,7 +68,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Candidates found : <?= $total_candidates; ?></h3>
+                            <h3 class="card-title">Exams found : <?= $total_exams; ?></h3>
                         </div>
                         <div class="card-body" id="example1_wrapper">
                             <table id="data-table" class="table table-bordered table-striped">
@@ -198,134 +198,35 @@
     <script src="<?= base_url('assets/admin/js/adminlte.min.js'); ?>"></script>
     <script>
       $(document).ready(function () {
-          var serverTime = <?= $now = time() * 1000; ?>; // Get server time in milliseconds
-          var examStartTime = new Date('2023-12-28 18:55:00').getTime();
-          var btnStartExam = $('#btn-start-exam');
-
-          function updateCountdown() {
-              var now = serverTime; // Use server time
-              var timeRemaining = examStartTime - now;
-
-              if (timeRemaining <= 0) {
-                  btnStartExam.text('Start Exam');
-                  btnStartExam.prop('disabled', false);
-                  clearInterval(countdownInterval);
-              } else {
-                  var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-                  var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-                  btnStartExam.text(minutes + 'm ' + seconds + 's');
-              }
-          }
-
-          updateCountdown();
-          var countdownInterval = setInterval(updateCountdown, 1000);
-      
-        <?php if($this->session->userdata('type') == 'candidate' || $this->session->userdata('type') == 'client'){ ?>
-        $("#data-table").DataTable({
-          "responsive": true, "lengthChange": true, "autoWidth": false, "paging": true, "searching": false
-        });
-        <?php } else { ?> 
         $("#data-table").DataTable({
           "responsive": true, "lengthChange": true, "autoWidth": false, "paging": true,
           "buttons": [
             {
               extend: 'excel',
               exportOptions: {
-                columns: [1,2,3,4,5,6,7,8]
+                columns: [1,2,3,4,5,6]
               }
             },
             { 
               extend: 'pdf',
               exportOptions: {
-                columns: [1,2,3,4,5,6,7,8]
+                columns: [1,2,3,4,5,6]
               }
             }, 
             {
                 extend: 'print',
                 exportOptions: {
-                  columns: [1,2,3,4,5,6,7,8]
+                  columns: [1,2,3,4,5,6]
                 }
             }
           ],
           "columnDefs": [{
-              "targets": [0,9],
+              "targets": [7],
               "orderable": false
           }],
           "order": [[1, 'asc']]
         }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-        <?php } ?>
-        var currentUrl = window.location.href;
-        $('[data-toggle="tooltip"]').tooltip();
-
-        $('#limit-dd').on('change', function () {
-            var selectedValue = $(this).val();
-            var newUrl = updateQueryStringParameter(currentUrl, 'limit', selectedValue);
-            window.location.href = newUrl;
-        });
-
-        $('#order-dd').on('change', function () {
-            var selectedValue = $(this).val();
-            var newUrl = updateQueryStringParameter(currentUrl, 'order', selectedValue);
-            window.location.href = newUrl;
-        });
-
-        $('#company-dd').on('change', function () {
-            var selectedValue = $(this).val();
-            var newUrl = updateQueryStringParameter(currentUrl, 'company_id', selectedValue);
-            window.location.href = newUrl;
-        });
-
-        function updateQueryStringParameter(uri, key, value) {
-            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-            if (uri.match(re)) {
-                return uri.replace(re, '$1' + key + "=" + value + '$2');
-            } else {
-                return uri + separator + key + "=" + value;
-            }
-        }
-
-        $("#check-all").on("change", function() {
-            var isChecked = $(this).prop("checked");
-            $(".check").prop("checked", isChecked);
-            $("#delete-button").prop("disabled", !isChecked);
-        });
-
-        $(".check").on("change", function() {
-            var allChecked = $(".check:checked").length === $(".check").length;
-            $("#check-all").prop("checked", allChecked);
-            if ($(".check:checked").length > 0) {
-              $("#delete-button").prop("disabled", false);
-            } else {
-              $("#delete-button").prop("disabled", true);
-            }
-            
-        });
-
-        $("#delete-button").on('click', function () {
-            var confirmed = confirm("Are you sure you want to delete?");
-            
-            if (confirmed) {
-                var checkedValues = $(".check:checked:not(:disabled)").map(function() {
-                    return $(this).val();
-                }).get();
-                
-                $.ajax({
-                    type: 'POST',
-                    url: '<?= base_url("exams/delete-selected"); ?>',
-                    data: {
-                        checkedValues: JSON.stringify(checkedValues),
-                    },
-                    success: function(response) {
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        alert("Error: " + error);
-                    }
-                });
-            }
-        });
-
+        
         $(document).on('click', '.btn-loader' ,function () {
             $('#overlay').css('display', 'flex');
             setTimeout(function () {

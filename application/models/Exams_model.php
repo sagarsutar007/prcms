@@ -909,19 +909,10 @@ class Exams_model extends CI_Model
 	}
 
 	public function searchCandidate($term='') {
-		$sql = "SELECT id FROM candidates WHERE firstname LIKE '%".$term."%' OR lastname LIKE '%".$term."%' OR middlename LIKE '%".$term."%' OR phone LIKE '%".$term."%' OR email LIKE '%".$term."%'";
+		$sql = "SELECT c.id, c.empid, CONCAT_WS(' ', c.firstname, c.middlename, c.lastname) AS name, phone, email, c.status, c.company_id, co.company_name, cd.aadhaar_number  FROM candidates c INNER JOIN candidate_details cd ON c.id = cd.user_id LEFT JOIN companies co ON c.company_id = co.id WHERE firstname LIKE '%".$term."%' OR lastname LIKE '%".$term."%' OR middlename LIKE '%".$term."%' OR phone LIKE '%".$term."%' OR email LIKE '%".$term."%'";
 		$q = $this->db->query($sql);
 		
-		if ($q->num_rows() > 0) {
-			$result = $q->result_array();
-			
-			// Extract only the 'id' values from each row in the result
-			$ids = array_column($result, 'id');
-			
-			return $ids;
-		}
-		
-		return [];
+		return $q->result_array();
 	}
 	
 }

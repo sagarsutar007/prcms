@@ -14,21 +14,36 @@ function Dashboard() {
     // Fetch exam data from your API
     useEffect(() => {
         const fetchData = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                // Redirect to logout if token is missing
+                window.location.href = "/logout";
+                return;
+            }
+
             try {
-                const response = await axios.get(process.env.SERVER_API_URL + "candidate-exams", {
+                const response = await axios.get(`${process.env.SERVER_API_URL}candidate-exams`, {
                     headers: {
-                        "x-auth-token": localStorage.getItem("token"),
+                        "x-auth-token": token,
                     },
                 });
-                setData(response.data.exams);
+
+                if (response.data && response.data.exams) {
+                    setData(response.data.exams);
+                } else {
+                    // Redirect to logout if exams data is missing
+                    window.location.href = "/logout";
+                }
             } catch (error) {
-                console.error("Error fetching data", error);
+                console.error("Error fetching data:", error);
                 window.location.href = "/logout";
             }
         };
 
         fetchData();
     }, []);
+
 
     return (
         <HelmetProvider>

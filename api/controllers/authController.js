@@ -347,7 +347,7 @@ exports.login = (req, res) => {
 		};
 
 		const token = jwt.sign({ id: user.id, phone: user.phone }, secretKey, {
-			expiresIn: "12h",
+			expiresIn: "10seconds",
 		});
 
 		logApiRecord(

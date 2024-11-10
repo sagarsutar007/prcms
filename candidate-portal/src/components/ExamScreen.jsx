@@ -25,8 +25,25 @@ const ExamScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const handleInvalidToken = useCallback((error) => {
+    if (
+      error.response &&
+      error.response.data &&
+      error.response.data.errors &&
+      error.response.data.errors.some(err => err.msg === "Invalid token")
+    ) {
+      navigate("/logout");
+    }
+  }, [navigate]);
+
   // Memoize API calls
   const startExamAPI = useCallback(async (examId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/logout");
+      return;
+    }
+
     if (!examId) {
       console.error("Exam ID is not available.");
       return;
@@ -45,12 +62,14 @@ const ExamScreen = () => {
       if (response.status === 200) {
         localStorage.setItem("examToken", response.data.authToken);
       } else {
-        navigate('student-dashboard');
+        navigate('logout');
       }
     } catch (error) {
       console.error("Error starting the exam", error);
+      handleInvalidToken(error);
+      navigate("/logout");
     }
-  }, [navigate]);
+  }, [navigate, handleInvalidToken]);
 
   const handleExamSubmission = useCallback(async () => {
     try {
@@ -84,6 +103,12 @@ const ExamScreen = () => {
   // Fetch exam data
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/logout");
+        return;
+      }
+
       try {
         const response = await axios.get(
           process.env.SERVER_API_URL + "load-exam-questions/" + examUrl,
@@ -93,6 +118,11 @@ const ExamScreen = () => {
             },
           }
         );
+
+        if (response.status != 200) {
+          navigate("/logout");
+        }
+
         const examData = response.data;
         setExamData(examData);
         dispatch(setQuestions(examData.examQuestions));
@@ -119,11 +149,13 @@ const ExamScreen = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data", error);
+        handleInvalidToken(error);
+        navigate("/logout");
       }
     };
 
     fetchData();
-  }, [examUrl, dispatch, navigate, startExamAPI]);
+  }, [examUrl, dispatch, navigate, startExamAPI, handleInvalidToken]);
 
   // Countdown timer
   useEffect(() => {

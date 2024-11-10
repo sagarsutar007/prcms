@@ -93,6 +93,7 @@
                                     </td>
                                     <td><?= $record['company_name']; ?></td>
                                     <td class="text-sm">
+                                    <span class="d-none"><?= strtotime($record['exam_datetime']); ?></span>
                                     <?= ($record['exam_datetime'] == '0000-00-00 00:00:00' || empty($record['exam_datetime']))?'':date('d-m-Y h:ia', strtotime($record['exam_datetime'])); ?>
                                     </td>
                                     <td class="text-sm">
@@ -224,7 +225,7 @@
               "targets": [7],
               "orderable": false
           }],
-          "order": [[1, 'asc']]
+          "order": [[3, 'desc']]
         }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
         
         $(document).on('click', '.btn-loader' ,function () {

@@ -380,7 +380,7 @@
             location.reload();
         }
 
-        setTimeout(reloadPage, $site_data['edart']*60000);
+        setTimeout(reloadPage, <?= $site_data['edart'] ?> *60000);
 
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();

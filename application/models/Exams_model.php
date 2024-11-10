@@ -784,7 +784,7 @@ class Exams_model extends CI_Model
 
 	public function getCandidateWithStats($exam_id = '')
 	{
-		$sql = "SELECT c.id, CONCAT_WS( ' ', c.firstname, c.middlename, c.lastname ) AS name, c.empid, cd.aadhaar_number, c.profile_img FROM `candidates` c INNER JOIN candidate_details cd ON c.id = cd.user_id INNER JOIN `exam_candidates` ec ON c.id = ec.candidate_id WHERE ec.exam_id = $exam_id";
+		$sql = "SELECT c.id, CONCAT_WS( ' ', c.firstname, c.middlename, c.lastname ) AS name, c.empid, cd.aadhaar_number, c.phone, c.profile_img FROM `candidates` c INNER JOIN candidate_details cd ON c.id = cd.user_id INNER JOIN `exam_candidates` ec ON c.id = ec.candidate_id WHERE ec.exam_id = $exam_id";
 
 		$q = $this->db->query($sql);
 		return $q->result_array();
@@ -865,6 +865,36 @@ class Exams_model extends CI_Model
 		
 		return $this->db->affected_rows();
 	}
+
+	public function searchCandidatesExamsList($ids = [])
+	{
+		if (empty($ids)) { return []; }
+
+		$this->db->where_in('user_id', $ids);
+		$q = $this->db->get('candidate_exam_records');
+		if ($q->num_rows() > 0) {
+			$result = $q->result_array();
+			$ids = array_column($result, 'exam_id');
+			return $ids;
+		}
+		
+		return [];
+	}
+
+	public function findExamsIn($ids = [])
+	{
+		if (empty($ids)) { return []; }
+
+		$this->db->select('*');
+		$this->db->select('(SELECT COUNT(*) AS clients FROM `exam_clients` WHERE exam_id = exams.id) AS clients');
+		$this->db->select('(SELECT COUNT(*) AS candidates FROM `exam_candidates` WHERE exam_id = exams.id) AS candidates');
+		$this->db->select('(SELECT COUNT(*) AS questions FROM `exam_questions` WHERE exam_id = exams.id) AS questions');
+		$this->db->select('(SELECT company_name FROM `companies` WHERE id = exams.company_id) AS company_name');
+		$this->db->where_in('id', $ids);
+		$this->db->from($this->primary_table);
+		$q = $this->db->get();
+		return $q->result_array();
+	}
 	
 	public function deleteCandidateExamInfo($examId='', $user_id = '')
 	{
@@ -877,6 +907,23 @@ class Exams_model extends CI_Model
 		$this->db->delete('exam_records', ['user_id' => $data['user_id'], 'exam_id' => $data['exam_id']]);
 		return $this->db->affected_rows();
 	}
+
+	public function searchCandidate($term='') {
+		$sql = "SELECT id FROM candidates WHERE firstname LIKE '%".$term."%' OR lastname LIKE '%".$term."%' OR middlename LIKE '%".$term."%' OR phone LIKE '%".$term."%' OR email LIKE '%".$term."%'";
+		$q = $this->db->query($sql);
+		
+		if ($q->num_rows() > 0) {
+			$result = $q->result_array();
+			
+			// Extract only the 'id' values from each row in the result
+			$ids = array_column($result, 'id');
+			
+			return $ids;
+		}
+		
+		return [];
+	}
+	
 }
 
 /* End of file  */

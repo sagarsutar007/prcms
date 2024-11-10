@@ -14,16 +14,17 @@ function Dashboard() {
     // Fetch exam data from your API
     useEffect(() => {
         const fetchData = async () => {
-        try {
-            const response = await axios.get(process.env.SERVER_API_URL + "candidate-exams", {
-                headers: {
-                    "x-auth-token": localStorage.getItem("token"),
-                },
-            });
-            setData(response.data.exams);
-        } catch (error) {
-            console.error("Error fetching data", error);
-        }
+            try {
+                const response = await axios.get(process.env.SERVER_API_URL + "candidate-exams", {
+                    headers: {
+                        "x-auth-token": localStorage.getItem("token"),
+                    },
+                });
+                setData(response.data.exams);
+            } catch (error) {
+                console.error("Error fetching data", error);
+                window.location.href = "/logout";
+            }
         };
 
         fetchData();
@@ -50,14 +51,14 @@ function Dashboard() {
                                     </Card>
                                 </Col>
                             </Row>
-                            
+
                         </Container>
                     </section>
                 </div>
                 <DashboardFooter />
             </div>
         </HelmetProvider>
-	);
+    );
 }
 
 export default Dashboard;

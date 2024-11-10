@@ -29,7 +29,7 @@
         }
     </style>
   </head>
-  <body class="hold-transition sidebar-mini sidebar-collapse">
+  <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
     <div class="wrapper">
 
       <?php $this->load->view('app/includes/topnavbar'); ?>
@@ -275,6 +275,7 @@
                                         <td>Candidate Name</td>
                                         <td>Employee ID</td>
                                         <td>Aadhaar</td>
+                                        <td>Phone</td>
                                         <td>Score</td>
                                         <td>Status</td>
                                         <td>Time</td>
@@ -298,6 +299,9 @@
                                         </td>
                                         <td>
                                             <?= $record['aadhaar_number']; ?>
+                                        </td>
+                                        <td>
+                                            <?= $record['phone']; ?>
                                         </td>
                                         <td>
                                             <?= $record['score']; ?>

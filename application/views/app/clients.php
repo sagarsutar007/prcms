@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/adminlte.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/styles.css'); ?>">
   </head>
-  <body class="hold-transition sidebar-mini sidebar-collapse">
+  <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
     <div class="wrapper">
 
       <?php $this->load->view('app/includes/topnavbar'); ?>

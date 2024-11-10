@@ -2536,6 +2536,37 @@ class Exams extends CI_Controller
 		$res = ['status' => 'SUCCESS'];
 		echo json_encode($res);
 	}
+
+	public function searchCandidateExams()
+	{
+		if (!isset($_GET['term'])) { redirect('dashboard'); }
+		$term = $this->input->get('term', true);
+
+		$candidatesId = [];
+
+		$candidates = $this->exam_model->searchCandidate($term);
+
+		$totalCandidates = count($candidates);
+
+		if ($totalCandidates > 0) {
+			$examIds = $this->exam_model->searchCandidatesExamsList($candidates);
+			$totalExams = count($examIds);
+			if ($totalExams > 0) {
+				$exams = $this->exam_model->findExamsIn($examIds);
+			}
+		} 
+
+		$data['term'] = $term;
+		$data['total_candidates'] = $totalCandidates;
+		$data['candidates'] = $candidates;
+		$data['results'] = $exams;
+		$data['total_exams'] = $totalExams;
+		$data['title'] = "Search Result";
+
+		$this->load->view('app/search-candidate-exams', $data);
+	}
+
+	
 }
 
 /* End of file Exams.php */

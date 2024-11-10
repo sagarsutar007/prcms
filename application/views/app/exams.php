@@ -34,7 +34,7 @@
       }
     </style>
   </head>
-  <body class="hold-transition sidebar-mini sidebar-collapse">
+  <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
     <div class="wrapper">
 
       <?php $this->load->view('app/includes/topnavbar'); ?>

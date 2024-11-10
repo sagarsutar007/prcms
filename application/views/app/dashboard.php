@@ -12,9 +12,8 @@
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/adminlte.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/styles.css'); ?>">
   </head>
-  <body class="hold-transition sidebar-mini">
+  <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-
       <?php $this->load->view('app/includes/topnavbar'); ?>
       <?php $this->load->view('app/includes/sidebar'); ?>
 
@@ -275,6 +274,33 @@
                      </div>
                   </div>
                </div>
+            </div>
+
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="card">
+                     <div class="card-header">
+                        Search Candidate Exams
+                     </div>
+                     <div class="card-body">
+                        <div class="row">
+                           <div class="col-md-8 offset-md-2">
+                              <form action="exams/search-candidate-exam" method="get">
+                                 <div class="input-group">
+                                    <input type="search" name="term" class="form-control form-control-lg" placeholder="Enter name, phone, aadhaar, employee id or email">
+                                    <div class="input-group-append">
+                                       <button type="submit" class="btn btn-lg btn-default">
+                                          <i class="fa fa-search"></i>
+                                       </button>
+                                    </div>
+                                 </div>
+                              </form>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               
             </div>
             <?php } else { ?>
             <div class="row">

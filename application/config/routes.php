@@ -133,6 +133,7 @@ $route['exams/add-selected-candidates'] = 'Exams/addSelectedCandidates';
 $route['exams/remove-selected-candidates'] = 'Exams/removeSelectedCandidates';
 $route['exams/(:num)/download-paper'] = 'Exams/downloadPaper/$1';
 $route['exams/enable-rentry'] = 'Exams/enableRentry';
+$route['exams/search-candidate-exam'] = 'Exams/searchCandidateExams';
 
 $route['settings/change-password'] = 'Settings/changePassword';
 $route['settings/sms-templates'] = 'Settings/smsTemplates';

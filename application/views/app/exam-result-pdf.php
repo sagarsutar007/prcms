@@ -11,11 +11,12 @@
     <link rel="stylesheet" href="<?= base_url('assets/admin/plugins/select2/css/select2.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/admin/plugins/icheck-bootstrap/icheck-bootstrap.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/plugins/daterangepicker/daterangepicker.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/adminlte.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/styles.css'); ?>">
     <style>
-      #progress-bar { display: none; }
+      #progress-bar, .custom-section { display: none; }
     </style>
   </head>
   <body class="hold-transition sidebar-mini">
@@ -91,8 +92,117 @@
                   </div>
                   <div class="card-body p-2">
                     <div class="row" >
-                      <div class="col-12">
+                      <!-- <div class="col-12">
                         <h2 class="text-center gen-text">Generate Exam PDF</h2>
+                      </div> -->
+                      <div class="col-12 text-center pdf-configuration">
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" name="pdf_type" id="chb1" value="1" checked/>
+                            <label for="chb1">Minified</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" name="pdf_type" id="chb2" value="2"/>
+                            <label for="chb2">Full Details</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" name="pdf_type" id="chb3" value="3"/>
+                            <label for="chb3">Custom</label>
+                        </div>
+                      </div>
+                      <div class="col-12 custom-section">
+                        <div class="row">
+                          <div class="col-md-12 mx-auto">
+                            <table class="table table-sm" style="border: none;">
+                              <tr>
+                                <td width="20%">
+                                  <div class="font-weight-bold mt-1">1.Question</div>
+                                </td>
+                                <td>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_config" id="qtc1" value="1"/>
+                                      <label for="qtc1" class="font-weight-normal">Only number</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_config" id="qtc2" value="2"/>
+                                      <label for="qtc2" class="font-weight-normal">Full Text</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_config" id="qtc3" value="3" checked/>
+                                      <label for="qtc3" class="font-weight-normal">Number + Full Text</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_config" id="qtc4" value="4"/>
+                                      <label for="qtc4" class="font-weight-normal">Number + Truncated Text</label>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="20%">
+                                  <div class="font-weight-bold mt-1">2.Question Options</div>
+                                </td>
+                                <td>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_options_config" id="qoc1" value="1" checked/>
+                                      <label for="qoc1" class="font-weight-normal">Yes</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_options_config" id="qoc2" value="2"/>
+                                      <label for="qoc2" class="font-weight-normal">No</label>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="20%">
+                                  <div class="font-weight-bold mt-1">3.User Answer</div>
+                                </td>
+                                <td>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_answer_config" id="qac1" value="1" checked/>
+                                      <label for="qac1" class="font-weight-normal">Full Answer</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_answer_config" id="qac2" value="2"/>
+                                      <label for="qac2" class="font-weight-normal">No Answer</label>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="20%">
+                                  <div class="font-weight-bold mt-1">4.User Answer Status</div>
+                                </td>
+                                <td>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_answer_status_config" id="qasc1" value="1" checked/>
+                                      <label for="qasc1" class="font-weight-normal">Yes</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_question_answer_status_config" id="qasc2" value="2"/>
+                                      <label for="qasc2" class="font-weight-normal">No</label>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="20%">
+                                  <div class="font-weight-bold mt-1">5.Language</div>
+                                </td>
+                                <td>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_language_config" id="qlc1" value="1"/>
+                                      <label for="qlc1" class="font-weight-normal">English</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_language_config" id="qlc2" value="2"/>
+                                      <label for="qlc2" class="font-weight-normal">Hindi</label>
+                                  </div>
+                                  <div class="icheck-primary icheck-inline">
+                                      <input type="radio" name="pdf_language_config" id="qlc2" value="3" checked/>
+                                      <label for="qlc3" class="font-weight-normal">Both</label>
+                                  </div>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        </div>
                       </div>
                       <div class="col-12 p-5" id="progress-bar">
                         <div class="progress">
@@ -128,29 +238,29 @@
           const candidatesArr = <?= json_encode($candidates); ?>;
 
           $('.btn-generate-pdfs').on('click', async function() {
-              
-              var checkFileResult = await checkFile();
-              if (!checkFileResult) {
-                  $('#progress-bar').show();
-                  for (const candidate of candidatesArr) {
-                      const candidateId = candidate.id;
-                      const examId = <?= $exam['id']; ?>;
+              $(".custom-section, .pdf-configuration").hide();
+              // var checkFileResult = await checkFile();
+              // if (!checkFileResult) {
+              //     $('#progress-bar').show();
+              //     for (const candidate of candidatesArr) {
+              //         const candidateId = candidate.id;
+              //         const examId = <?= $exam['id']; ?>;
 
-                      try {
-                          const url = `<?= base_url(); ?>candidate/generate-candidate-result?examid=${examId}&userid=${candidateId}&return=json`;
+              //         try {
+              //             const url = `<?= base_url(); ?>candidate/generate-candidate-result?examid=${examId}&userid=${candidateId}&return=json`;
 
-                          await sendAjaxRequest(url);
+              //             await sendAjaxRequest(url);
 
-                          updateProgressBar((candidatesArr.indexOf(candidate) + 1) / candidatesArr.length * 100, candidate.name);
-                      } catch (error) {
-                          console.error("Error generating PDF for candidate:", candidateId, error);
-                      }
-                  }
-                  downloadFile();
-              } else {
-                  $('#progress-bar').hide();
-                  $(this).attr('disabled', false).html(`Start Generating PDFs`);
-              }
+              //             updateProgressBar((candidatesArr.indexOf(candidate) + 1) / candidatesArr.length * 100, candidate.name);
+              //         } catch (error) {
+              //             console.error("Error generating PDF for candidate:", candidateId, error);
+              //         }
+              //     }
+              //     downloadFile();
+              // } else {
+              //     $('#progress-bar').hide();
+              //     $(this).attr('disabled', false).html(`Start Generating PDFs`);
+              // }
           });
 
           function sendAjaxRequest(url) {
@@ -207,6 +317,15 @@
                   toastr.error('Download failed. Please try again.');
               });
           }
+
+          $(document).on('change', '[name="pdf_type"]', function () {
+            const pdfType = $(this).val();
+            if (pdfType == 3) {
+              $(".custom-section").show();
+            } else {
+              $(".custom-section").hide();
+            }
+          });
 
       });
     </script>

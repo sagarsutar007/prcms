@@ -45,7 +45,10 @@ const Exams = {
         const query = `
             SELECT * FROM exam_candidates 
             WHERE exam_id = ? AND candidate_id = ?`;
-        db.query(query, [examId, candidateId], callback);
+        db.query(query, [examId, candidateId], (err, results) => {
+            if (err) return callback(err, null);
+            callback(null, results[0] || null);
+        });
     },
     findCandidateRecordsInExam: (examId, candidateId, callback) => {
         const query = `

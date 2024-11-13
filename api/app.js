@@ -10,6 +10,7 @@ const authRouter = require("./routes/authRouter");
 const candidateRouter = require("./routes/candidateRouter");
 const businessRouter = require("./routes/businessRouter");
 const examRouter = require("./routes/examRouter");
+const pdfRouter = require("./routes/pdfRouter");
 
 // Use Helmet for security
 app.use(helmet());
@@ -18,12 +19,12 @@ app.use(helmet());
 app.disable("x-powered-by");
 
 // Enable CORS
-const corsOptions = {
-  origin: 'http://192.168.31.24:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'x-auth-token'],
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: 'http://192.168.31.24:5173',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'x-auth-token'],
+//   credentials: true,
+// };
 app.use(cors());
 
 
@@ -33,6 +34,7 @@ app.use("/api", authRouter);
 app.use("/api", candidateRouter);
 app.use("/api", businessRouter);
 app.use("/api", examRouter);
+app.use("/api", pdfRouter);
 
 app.get("/", (req, res) => {
 	res.send("Hello World!");

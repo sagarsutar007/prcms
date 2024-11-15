@@ -315,13 +315,13 @@
                   if (data.status === 'SUCCESS') {
                       window.location.href = data.file;
                   } else {
-                      toastr.error('Download failed. Please try again.');
+                      console.error('Download failed. Please try again.');
                   }
 
                   $('.btn-generate-pdfs').attr('disabled', false).html(`Start Generating PDFs`);
               })
               .fail(function() {
-                  toastr.error('Download failed. Please try again.');
+                  console.error('Download failed. Please try again.');
               });
           }
 

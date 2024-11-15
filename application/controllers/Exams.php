@@ -2183,6 +2183,23 @@ class Exams extends CI_Controller
 		return strtolower(str_replace(" ", "_", $filename)) . '-' . $exam_id . ".pdf";
 	}
 
+	private function generateMinifiedName($user_id='', $exam_id=''){
+		$candidate = $this->candidate_model->get($user_id);
+		$filename = $candidate['firstname'];
+		if(!empty($candidate['middlename'])) {
+			$filename .= " " . $candidate['middlename'];
+		}
+
+		if(!empty($candidate['lastname'])) {
+			$filename .= " " . $candidate['lastname'];
+		}
+
+		if(!empty($candidate['empid'])) {
+			$filename .= "-" . $candidate['empid'];
+		}
+		return strtolower(str_replace(" ", "_", $filename)) . '-omr-' . $exam_id . ".pdf";
+	}
+
 	public function generateDetailedResult($exam_id = '', $user_id = '')
 	{
 		$this->isNotACandidate();
@@ -2279,6 +2296,114 @@ class Exams extends CI_Controller
 			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id' => $exam_id, 'user_id' => $user_id]);
 
 			$html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
+			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
+			$mpdf->WriteHTML($html);
+			$output = $mpdf->Output('', 'S');
+			file_put_contents($filepath, $output);
+
+			$this->clearOlderFiles();
+			return $filepath;
+		}
+	}
+
+	public function generateMinifiedResult($exam_id = '', $user_id = '')
+	{
+		$this->isNotACandidate();
+		if (!isset($exam_id) || !isset($user_id)) {
+			redirect('logout');
+		}
+		$filename = $this->generateMinifiedName($user_id, $exam_id);
+		$filepath = FCPATH . 'assets/admin/exams/' . $filename;
+		$arr = [
+			'exam_id' => $exam_id,
+			'candidate_id' => $user_id,
+		];
+		$val = $this->exam_model->isExamAndCandidateExists($arr);
+		if (!$val) {
+			return false;
+		}
+		if (file_exists($filepath)) {
+			return $filepath;
+		} else {
+			$result = [];
+			$questions = $this->exam_model->getExamQuestions($exam_id);
+			foreach ($questions as $question => $que) {
+				$temp = $que;
+				$correctAnswerEng = '';
+				$correctAnswerHin = '';
+				$correctUserAnswerEng = '';
+				$correctUserAnswerHin = '';
+
+				if ($que['question_type'] != "text") {
+					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
+					foreach ($temp['answers'] as $answers => $answer) {
+						if ($answer['isCorrect']) {
+							$correctAnswerEng .= $answer['answer_text_en'] . ", ";
+							$correctAnswerHin .= $answer['answer_text_hi'] . ", ";
+						}
+					}
+					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
+					$temp['correct_answer_en'] = substr($correctAnswerEng, 0, -2);
+					$temp['correct_answer_hi'] = substr($correctAnswerHin, 0, -2);
+
+					//Get user answers
+					$con_arr = [
+						'user_id' => $user_id,
+						'question_id' => $que['question_id'],
+						'exam_id' => $exam_id
+					];
+					$user_answers = $this->exam_model->getUserAnswers($con_arr);
+					foreach ($user_answers as $usr_answers => $uans) {
+						$correctUserAnswerEng .= $uans['answer_text_en'] . ", ";
+						$correctUserAnswerHin .= $uans['answer_text_hi'] . ", ";
+						$correctUserAnswerIds .= $uans['answer_id'] . ", ";
+					}
+					$temp['correct_user_answer_en'] = substr($correctUserAnswerEng, 0, -2);
+					$temp['correct_user_answer_hi'] = substr($correctUserAnswerHin, 0, -2);
+					$temp['user_answer_id'] = substr($correctUserAnswerIds, 0, -2);
+					if (!empty($user_answers)) {
+						if ($temp['correct_answer_en'] == $temp['correct_user_answer_en']) {
+							$temp['answer_status'] = 1;
+						} else {
+							$temp['answer_status'] = 3;
+						}
+					} else {
+						$temp['answer_status'] = 2;
+					}
+
+				} else {
+					$con_arr = [
+						'user_id' => $user_id,
+						'question_id' => $que['question_id'],
+						'exam_id' => $exam_id
+					];
+					$user_answers = $this->exam_model->getUserAnswer($con_arr);
+					$temp['answers'] = [];
+					$temp['correct_answer_en'] = $correctAnswerEng;
+					$temp['correct_answer_hi'] = $correctAnswerHin;
+					$temp['correct_user_answer_en'] = $user_answers['answer_id'] ?? '';
+					$temp['correct_user_answer_hi'] = $user_answers['answer_id'] ?? '';
+					$temp['answer_status'] = 4;
+				}
+
+				$result[] = $temp;
+			}
+
+			$data['result'] = $result;
+			$data['user'] = $this->candidate_model->getUser($user_id);
+			$data['exam'] = $this->exam_model->get($exam_id);
+			$data['business'] = $this->business_model->get($data['exam']['company_id']);
+			$data['title'] = "View Candidate Answers";
+			$clients = $this->exam_model->getExamClients($exam_id);
+			$cli = '';
+			foreach ($clients as $key => $obj) {
+				$cli .= $obj['company_name'] . ",";
+			}
+			$data['clients'] = rtrim($cli, ',');
+
+			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id' => $exam_id, 'user_id' => $user_id]);
+
+			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 			$mpdf->WriteHTML($html);
 			$output = $mpdf->Output('', 'S');

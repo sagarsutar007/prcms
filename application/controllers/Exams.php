@@ -2308,7 +2308,11 @@ class Exams extends CI_Controller
 
 				foreach (array_chunk($candidates, $batchSize) as $batch) {
 					foreach ($batch as $candidate => $cnd) {
-						$pdf_file = $this->generateDetailedResult($exam_id, $cnd['candidate_id']);
+						if ($pdfType==1) {
+							$pdf_file = $this->generateMinifiedResult($exam_id, $cnd['candidate_id']);
+						} else {
+							$pdf_file = $this->generateDetailedResult($exam_id, $cnd['candidate_id']);
+						}
 						$pdf->addPDF($pdf_file, 'all');
 						$files[] = $pdf_file;
 					}

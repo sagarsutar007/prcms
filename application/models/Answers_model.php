@@ -45,6 +45,25 @@ class Answers_model extends CI_Model {
 		$q = $this->db->get_where('answers', ['question_id'=>$question_id, 'isCorrect' => 1]);
 		return $q->result_array();
 	}
+
+	public function getMaxOptions($exam_id) {
+		$query = $this->db->query("
+			SELECT MAX(option_count) AS max_options
+			FROM (
+				SELECT question_id, COUNT(*) AS option_count
+				FROM answers
+				WHERE question_id IN (
+					SELECT question_id
+					FROM exam_questions
+					WHERE exam_id = ?
+				)
+				GROUP BY question_id
+			) AS option_counts
+		", array($exam_id));
+
+		return $query->row()->max_options;
+	}
+
 }
 
 /* End of file  */

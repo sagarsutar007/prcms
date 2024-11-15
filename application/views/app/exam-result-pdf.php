@@ -236,31 +236,38 @@
     <script>
       $(document).ready(function() {
           const candidatesArr = <?= json_encode($candidates); ?>;
+          const examId = <?= $exam['id']; ?>;
 
           $('.btn-generate-pdfs').on('click', async function() {
               $(".custom-section, .pdf-configuration").hide();
-              // var checkFileResult = await checkFile();
-              // if (!checkFileResult) {
-              //     $('#progress-bar').show();
-              //     for (const candidate of candidatesArr) {
-              //         const candidateId = candidate.id;
-              //         const examId = <?= $exam['id']; ?>;
-
-              //         try {
-              //             const url = `<?= base_url(); ?>candidate/generate-candidate-result?examid=${examId}&userid=${candidateId}&return=json`;
-
-              //             await sendAjaxRequest(url);
-
-              //             updateProgressBar((candidatesArr.indexOf(candidate) + 1) / candidatesArr.length * 100, candidate.name);
-              //         } catch (error) {
-              //             console.error("Error generating PDF for candidate:", candidateId, error);
-              //         }
-              //     }
-              //     downloadFile();
-              // } else {
-              //     $('#progress-bar').hide();
-              //     $(this).attr('disabled', false).html(`Start Generating PDFs`);
-              // }
+              let pdfType = $("[name='pdf_type']").val();
+              let url = '';
+              if (pdfType == 1) {
+                url = `<?= base_url('candidate/generate-candidate-omr-result'); ?>`;
+              } else if (pdfType == 2) {
+                url = `<?= base_url('candidate/generate-candidate-result'); ?>`;
+              } else {
+                url = `<?= base_url('candidate/generate-candidate-custom-result'); ?>`;
+              }
+              
+              var checkFileResult = await checkFile(pdfType);
+              if (!checkFileResult) {
+                  $('#progress-bar').show();
+                  for (const candidate of candidatesArr) {
+                      const candidateId = candidate.id;
+                      try {
+                          newUrl = url + `?examid=${examId}&userid=${candidateId}&return=json`;
+                          await sendAjaxRequest(newUrl);
+                          updateProgressBar((candidatesArr.indexOf(candidate) + 1) / candidatesArr.length * 100, candidate.name);
+                      } catch (error) {
+                          console.error("Error generating PDF for candidate:", candidateId, error);
+                      }
+                  }
+                  downloadFile(pdfType);
+              } else {
+                  $('#progress-bar').hide();
+                  $(this).attr('disabled', false).html(`Start Generating PDFs`);
+              }
           });
 
           function sendAjaxRequest(url) {
@@ -276,11 +283,11 @@
               $('.gen-text').text("Generating " + name +"'s PDF");
           }
 
-          async function checkFile() {
+          async function checkFile(pdfType) {
               return new Promise((resolve, reject) => {
                   $.ajax({
-                      url: '<?= base_url('exams/checkResult/' . $exam['id']); ?>',
-                      type: 'GET',
+                      url: '<?= base_url('exams/checkResult/' . $exam['id'] . '/'); ?>'+pdfType,
+                      type: 'GET'
                   })
                   .done(function(response) {
                       var data = JSON.parse(response);
@@ -297,9 +304,9 @@
               });
           }
 
-          function downloadFile() {
+          function downloadFile(pdfType) {
               $.ajax({
-                  url: '<?= base_url('exams/downloadResult/' . $exam['id']); ?>',
+                  url: '<?= base_url('exams/downloadResult/' . $exam['id']); ?>/'+pdfType,
                   type: 'GET',
               })
               .done(function(response) {

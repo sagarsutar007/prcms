@@ -71,12 +71,16 @@ $route['candidate/edit/(:num)'] = 'Candidates/edit/$1';
 $route['candidate/delete/(:num)'] = 'Candidates/delete/$1';
 $route['candidates/delete-selected'] = 'Candidates/deleteMultiple';
 $route['candidate/view-exam-result'] = 'Candidates/viewExamResult';
-$route['candidate/generate-candidate-result'] = 'Candidates/generateDetailedResult';
+
 $route['candidate/bulk-upload'] = 'Candidates/bulkUpload';
 $route['candidates/send-login-mail'] = 'Candidates/sendLoginMail';
 $route['candidates/send-login-sms'] = 'Candidates/sendLoginSms';
 $route['candidates/filter'] = 'Candidates/filter';
 $route['candidate/search-candidate'] = 'Candidates/searchCandidate';
+
+// Generate Result
+$route['candidate/generate-candidate-result'] = 'Candidates/generateDetailedResult';
+$route['candidate/generate-candidate-omr-result'] = 'Candidates/generateMinifiedResult';
 
 $route['question-bank/categories'] = 'Categories';
 $route['question-bank/categories/(:num)'] = 'Categories/$1';

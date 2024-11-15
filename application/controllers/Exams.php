@@ -2289,11 +2289,16 @@ class Exams extends CI_Controller
 		}
 	}
 
-	public function downloadResult($exam_id = '')
+	public function downloadResult($exam_id='',$pdfType='')
 	{
 		$this->isAdminOrManager(true);
 		$data = [];
-		$outputPdf = 'assets/admin/exams/' . $exam_id . '.pdf';
+		if ($pdfType==1) {
+			$outputPdf = 'assets/admin/exams/' . $exam_id . '-omr.pdf';
+		} else {
+			$outputPdf = 'assets/admin/exams/' . $exam_id . '.pdf';
+		}
+		
 		try {
 			$files = [];
 			if (!file_exists($outputPdf)) {
@@ -2325,11 +2330,16 @@ class Exams extends CI_Controller
 		echo json_encode($data);
 	}
 
-	public function checkResult($exam_id = '')
+	public function checkResult($exam_id='', $pdfType='')
 	{
 		$this->isAdminOrManager(true);
 		$data = [];
-		$outputPdf = 'assets/admin/exams/' . $exam_id . '.pdf';
+		if ($pdfType==1) {
+			$outputPdf = 'assets/admin/exams/' . $exam_id . '-omr.pdf';
+		} else {
+			$outputPdf = 'assets/admin/exams/' . $exam_id . '.pdf';
+		}
+		
 		if (file_exists($outputPdf)) {
 			$data['status'] = 'SUCCESS';
 			$data['message'] = 'File found!';

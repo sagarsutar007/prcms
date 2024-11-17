@@ -2314,6 +2314,9 @@ class Exams extends CI_Controller
 		}
 		$filename = $this->generateMinifiedName($user_id, $exam_id);
 		$filepath = FCPATH . 'assets/admin/exams/' . $filename;
+		$data = [];
+		$data['total_correct'] = 0;
+		$data['attempted'] = 0;
 		$arr = [
 			'exam_id' => $exam_id,
 			'candidate_id' => $user_id,
@@ -2342,7 +2345,6 @@ class Exams extends CI_Controller
 							$correctAnswerHin .= $answer['answer_text_hi'] . ", ";
 						}
 					}
-					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
 					$temp['correct_answer_en'] = substr($correctAnswerEng, 0, -2);
 					$temp['correct_answer_hi'] = substr($correctAnswerHin, 0, -2);
 
@@ -2364,8 +2366,11 @@ class Exams extends CI_Controller
 					if (!empty($user_answers)) {
 						if ($temp['correct_answer_en'] == $temp['correct_user_answer_en']) {
 							$temp['answer_status'] = 1;
+							$data['total_correct'] += 1;
+							$data['attempted'] += 1;
 						} else {
 							$temp['answer_status'] = 3;
+							$data['attempted'] += 1;
 						}
 					} else {
 						$temp['answer_status'] = 2;
@@ -2402,6 +2407,8 @@ class Exams extends CI_Controller
 			$data['clients'] = rtrim($cli, ',');
 
 			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id' => $exam_id, 'user_id' => $user_id]);
+
+			// $this->load->view('app/pdfviews/view-candidate-minified-answers', $data);
 
 			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);

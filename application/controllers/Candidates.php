@@ -864,6 +864,9 @@ class Candidates extends CI_Controller {
 		$user_id = $this->input->get('userid', true);
 		$filename = $this->generateMinifiedName($user_id, $exam_id);
 	    $filepath = FCPATH . 'assets/admin/exams/' . $filename;
+		$data=[];
+		$data['total_correct'] = 0;
+		$data['attempted'] = 0;
 		$arr = [
 			'exam_id'=> $exam_id,
 			'candidate_id'=> $user_id,
@@ -930,8 +933,11 @@ class Candidates extends CI_Controller {
 					if (!empty($user_answers)){
 						if ($temp['correct_answer_en'] == $temp['correct_user_answer_en']) {
 							$temp['answer_status'] = 1;
+							$data['total_correct'] += 1;
+							$data['attempted'] += 1;
 						} else {
 							$temp['answer_status'] = 3;
+							$data['attempted'] += 1;
 						}
 					} else {
 						$temp['answer_status'] = 2;
@@ -978,21 +984,23 @@ class Candidates extends CI_Controller {
 
 			$data['exam_log'] = $exam_log;
 			$data['max_options'] = $this->answer_model->getMaxOptions($exam_id);
+			$this->load->view('app/pdfviews/view-candidate-minified-answers', $data);
 
-			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
 
-			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
-			$mpdf->WriteHTML($html);
-			$output = $mpdf->Output($filepath, 'F');
+			// $html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
 
-			if ($return_val) { 
-				return $filepath; 
-			} else if ($jsonResponse) {
-	        	$res = [ 'status' => 'SUCCESS'];
-	        	echo json_encode($res);
-	        } else {
-				force_download($filename, file_get_contents($filepath));
-			}  
+			// $mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
+			// $mpdf->WriteHTML($html);
+			// $output = $mpdf->Output($filepath, 'F');
+
+			// if ($return_val) { 
+			// 	return $filepath; 
+			// } else if ($jsonResponse) {
+	        // 	$res = [ 'status' => 'SUCCESS'];
+	        // 	echo json_encode($res);
+	        // } else {
+			// 	force_download($filename, file_get_contents($filepath));
+			// }  
 	    }
 	    $this->clearOlderFiles();
 	}

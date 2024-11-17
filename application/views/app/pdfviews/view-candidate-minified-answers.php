@@ -43,6 +43,20 @@
     th:last-child, td:last-child {
         width: 10%;
     }
+    #info-table {
+      border-collapse: collapse;
+      border: none;
+      width: 100%;
+      margin: auto;
+    }
+
+    #info-table td {
+      border: none;
+      padding: 2px;
+      text-align: left;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
 </style>
 <div class="container">
   <div class="row">
@@ -58,35 +72,62 @@
       </p>
       <p style="text-align:center;margin: 0;"><?= "Exam Time: " . date( 'h:i a ', strtotime($exam['exam_datetime']??time())) . " to " . date( 'h:i a ', strtotime($exam['exam_endtime']??time())) . " on " . date('d/m/Y', strtotime($exam['exam_datetime']??time())); ?></p>
     </div>
-    <div style="width: 44%; float:left; text-align: right; padding-top: 15px;">
-      <?php
-          if (isset($user['profile_img']) && !empty($user['profile_img']) && file_exists('assets/img/thumbnails/' . $user['profile_img']) ) {
-            $prof_img = base_url('assets/img/thumbnails/' . $user['profile_img']);
-          }else {
-            if ($user['gender'] == "male") {
-              $prof_img = base_url('assets/admin/img/avatar.png');
-            } else if ($user['gender'] == "female") {
-              $prof_img = base_url('assets/admin/img/avatar2.png');
-            } else {
-              $prof_img = base_url('assets/admin/img/user-avatar.png');
-            }
-          }
-      ?>
-      <img src="<?= $prof_img; ?>" style="height: 120px;" alt="">
-    </div>
-    <div style="width: 53%; float:right; text-align: left; font-style: 13px; line-height: 1.5;">
-      <strong><?= ucwords($user['firstname']. " " .$user['middlename']??''. " " .$user['lastname']??'' ) ?></strong><br/>
-      <?= "Email : " . $user['email']; ?> <br/>
-      <?= "Phone :  +91" . $user['phone']; ?> <br/>
-      <?= "Aadhaar: " . $user['aadhaar_number']; ?> <br/>
-      <?= "Employee ID: " . $user['empid']; ?> <br/>
-      <?= "Gender: " . $user['gender']; ?> <br/>
-      <?= "Exam Started at: " .$exam_entry; ?> <br/>
-      <?= "Exam Ended at: " .$exam_exit; ?> <br/>
-    </div>
-    <div style="clear:both;"></div>
   </div>
 </div>
+<table id="info-table" cellpadding="0" border="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td rowspan="5" style="text-align:center;">
+          <?php
+              if (isset($user['profile_img']) && !empty($user['profile_img']) && file_exists('assets/img/thumbnails/' . $user['profile_img']) ) {
+                $prof_img = base_url('assets/img/thumbnails/' . $user['profile_img']);
+              }else {
+                if ($user['gender'] == "male") {
+                  $prof_img = base_url('assets/admin/img/avatar.png');
+                } else if ($user['gender'] == "female") {
+                  $prof_img = base_url('assets/admin/img/avatar2.png');
+                } else {
+                  $prof_img = base_url('assets/admin/img/user-avatar.png');
+                }
+              }
+          ?>
+          <img src="<?= $prof_img; ?>" style="height: 120px;" alt="">
+        </td>
+        <td style="width: 5%;"><strong>Name</strong></td>
+        <td>: <?= ucwords($user['firstname']. " " .$user['middlename']??''. " " .$user['lastname']??'' ) ?></td>
+        <td style="width: 5%;"><strong>Gender</strong></td>
+        <td>: <?= ucfirst($user['gender']); ?></td>
+      </tr>
+      <tr>
+        <!-- <td>1</td> -->
+        <td style="width: 5%;"><strong>Email</strong></td>
+        <td>: <?= $user['email']; ?></td>
+        <td style="width: 5%;"><strong>Entered Exam</strong></td>
+        <td>: <?= $exam_entry; ?></td>
+      </tr>
+      <tr>
+        <!-- <td>1</td> -->
+        <td style="width: 5%;"><strong>Phone</strong></td>
+        <td>: <?= "+91" . $user['phone']; ?></td>
+        <td style="width: 5%;"><strong>Ended Exam</strong></td>
+        <td>: <?= $exam_exit; ?></td>
+      </tr>
+      <tr>
+        <!-- <td>1</td> -->
+        <td style="width: 5%;"><strong>Aadhaar</strong></td>
+        <td>: <?= $user['aadhaar_number']; ?></td>
+        <td style="width: 5%;"><strong>Attempted</strong></td>
+        <td>: <?= $attempted; ?></td>
+      </tr>
+      <tr>
+        <!-- <td>1</td> -->
+        <td style="width: 5%;"><strong>Employee ID</strong></td>
+        <td>: <?= $user['empid']; ?></td>
+        <td style="width: 5%;"><strong>Total Marks</strong></td>
+        <td>: <?= $total_correct; ?></td>
+      </tr>
+    </tbody>
+</table>
 <div class="container">
   <?php
       $total_questions = count($result);
@@ -158,7 +199,7 @@
                   <td>
                     <?php 
                       if ($ansStatus == 2) {
-                        echo '<span>Not Answered</span>';
+                        echo '<span>Skipped</span>';
                       } else if ($ansStatus == 1) {
                         echo '<span style="color:green;">Correct</span>';
                       } else if ($ansStatus == 3) {

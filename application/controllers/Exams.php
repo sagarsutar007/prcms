@@ -2608,6 +2608,103 @@ class Exams extends CI_Controller
 			redirect('exams/' . $exam_id . '/view-exam-dashboard');
 		}
 	}
+
+	public function generateMarks($exam_id = '')
+	{
+		$this->isAdminOrManager();
+		$absent = 0;
+		$submitted = 0;
+		$appearing = 0;
+		$exam = $this->exam_model->get($exam_id);
+		if (!$exam) { redirect('/exams'); }
+		$questions = $this->exam_model->getExamQuestions($exam_id);
+		$candidates = $this->exam_model->getCandidateWithStats($exam_id);
+		$candArr = [];
+		foreach ($candidates as $key => $obj) {
+			$temp = $obj;
+			if (!empty($obj['profile_img']) && file_exists('./assets/img/thumbnails/' . $obj['profile_img'])) {
+				$temp['profile_img'] = base_url('assets/img/thumbnails/' . $obj['profile_img']);
+			} else {
+				$temp['profile_img'] = base_url('assets/img/letter-p.png');
+			}
+
+			//Check if candidate is appearing or not
+			$checkArr = ['user_id' => $obj['id'], 'exam_id' => $exam['id']];
+			$candidateInfo = $this->exam_model->checkCandidateExamInfo($checkArr);
+			if (!empty($candidateInfo)) {
+
+				$from_time = strtotime($candidateInfo['entered_at']);
+				$exam_time = strtotime($exam['exam_datetime']);
+				if ($from_time <= $exam_time) {
+					$from_time = $exam_time;
+				}
+
+				if ($candidateInfo['left_at'] == '0000-00-00 00:00:00' || empty($candidateInfo['left_at']) || strtotime($candidateInfo['left_at']) >= strtotime($exam['exam_endtime'])) {
+					$currentTimestamp = time();
+					$exam_endtime = strtotime($exam['exam_endtime']);
+					$to_time = $exam_endtime;
+					if ($currentTimestamp <= $exam_endtime) {
+						$to_time = $currentTimestamp;
+					}
+					
+					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
+					$temp['time'] = $diff_minutes;
+					$temp['status'] = "Appearing";
+					$appearing++;
+				} else {
+					$to_time = strtotime($candidateInfo['left_at']);
+
+					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
+					$temp['time'] = $diff_minutes;
+					$temp['status'] = "Submitted";
+					$submitted++;
+				}
+
+				// Calculate Scores
+				$calc = $this->calcScore($exam_id, $obj['id'], $exam['pass_percentage']);
+				$temp['score'] = $calc['result'];
+				$temp['percentage'] = $calc['score'];
+				$temp['result'] = $calc['status'];
+			} else {
+				$temp['time'] = "";
+				$temp['status'] = "Absent";
+				$temp['score'] = "";
+				$temp['percentage'] = "0";
+				$temp['result'] = "Fail";
+				$absent++;
+			}
+
+			$candArr[] = $temp;
+		}
+
+		function customSort($a, $b)
+		{
+			$scoreComparison = (floatval($b['score']) - floatval($a['score']));
+			if ($scoreComparison === 0) {
+				$timeA = intval($a['time']);
+				$timeB = intval($b['time']);
+				if (strpos($a['time'], 'Mins') !== false) {
+					$timeA *= 1;
+				}
+				if (strpos($b['time'], 'Mins') !== false) {
+					$timeB *= 1;
+				}
+				// Sort by time in ascending order
+				return $timeA - $timeB;
+			}
+			// Sort by score in descending order
+			return $scoreComparison;
+		}
+
+		usort($candArr, 'customSort');
+
+		$data['candidates'] = $candArr;
+		$data['exam'] = $exam;
+		
+		$data['totalQuestions'] = count($questions);
+
+		$this->load->view('app/generate-marks', $data);
+	}
 	
 	public function generateFakeAnswers()
 	{
@@ -2622,8 +2719,8 @@ class Exams extends CI_Controller
 		$user_id = $user['user_id'];
 
 		$exam = $this->exam_model->get($exam_id);
-		$can['exam_id'] = $exam['id']; // Corrected to directly use the exam data
-		$can['user_id'] = $user_id; // Directly using the fetched user_id
+		$can['exam_id'] = $exam['id']; 
+		$can['user_id'] = $user_id; 
 		$can['entered_at'] = date('Y-m-d H:i:s', strtotime($exam['exam_datetime']));
 		$can['left_at'] = date('Y-m-d H:i:s', strtotime($exam['exam_endtime']));
 		$can['exam_token'] = uniqid();
@@ -2641,7 +2738,6 @@ class Exams extends CI_Controller
 
 		foreach ($questions as $index => $que) {
 			$answers_rec = $this->answer_model->getAnswersOfQuestion($que['question_id']);
-			
 			
 			$correctAnswers = array_filter($answers_rec, function($answer) {
 				return $answer['isCorrect'] == 1;

@@ -105,7 +105,9 @@
                                         ?>
                                         <div class="row">
                                             <div class="col-3">
-                                                <img class="profile-user-img img-fluid img-circle" style="width: 70px;" src="<?= $company_pic; ?>" alt="User profile picture">
+                                                <a href="<?= base_url('/exams/'.$exam['id'].'/generate-marks'); ?>" target="_blank">
+                                                    <img class="profile-user-img img-fluid img-circle" style="width: 70px;" src="<?= $company_pic; ?>" alt="User profile picture">
+                                                </a>
                                             </div>
                                             <div class="col-9">
                                                 <h3 class="profile-username"><?= !empty($business['company_name'])?$business['company_name']:'Not Available'; ?></h3>

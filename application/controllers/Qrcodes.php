@@ -50,7 +50,7 @@ class Qrcodes extends CI_Controller {
         }
 
         if (!file_exists('./assets/admin/img/qrcodes/candidate-login.png')) {
-            $params['data'] = base_url('candidate-login');
+            $params['data'] = "https://candidate.simrangroups.com";
             $params['level'] = 'H';
             $params['size'] = 10;
             $params['savename'] = FCPATH.'assets/admin/img/qrcodes/candidate-login.png';

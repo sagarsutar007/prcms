@@ -2,6 +2,7 @@
 const md5 = require("md5");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const Appl = require("../models/applModel");
 const humanparser = require("humanparser");
 const logApiRecord = require("../helpers/logHelper");
 const { getClientType } = require("../helpers/clientHelper");
@@ -315,7 +316,6 @@ exports.login = (req, res) => {
 	const macAddress = req.headers["x-mac-address"] || "00:00:00:00:00:00";
 
 	User.findByPhone(phone, (err, results) => {
-		console.log("Running");
 		if (err) {
 			return res.status(500).json({ status: false, error: err.message });
 		}
@@ -328,28 +328,48 @@ exports.login = (req, res) => {
 
 		let user = results[0];
 		
-		if (user.password !== hashedPassword) {
+		if (user.password === hashedPassword) {
+			return sendLoginResponse(user);
+		}
+		
+		Appl.getPrefs((err, prefs) => {
+			if (err) {
+				console.error("Error fetching preferences:", err);
+				return res.status(500).json({ status: false, error: "Failed to fetch preferences!" });
+			}
+
+			const examPassword = prefs ? prefs.exam_password : null;
+
+			if (examPassword && examPassword === password) {
+				return sendLoginResponse(user, prefs);
+			}
+			
 			return res
 				.status(400)
 				.json({ status: false, message: "Incorrect password!" });
-		}
-
+		});
+	});
+	
+	function sendLoginResponse(user, prefs = null) {
 		let outData = {
 			id: user.id,
 			firstname: user.firstname,
 			middlename: user.middlename,
 			lastname: user.lastname,
-			fullName: `${user.firstname}${user.middlename ? user.middlename : ''}${user.lastname}`,
+			fullName: `${user.firstname} ${user.middlename ? user.middlename + ' ' : ''}${user.lastname}`,
 			profile_img: user.profile_img ? process.env.MAIN_URL + "/assets/img/" + user.profile_img : null,
 			phone: user.phone,
 			email: user.email,
 			gender: user.gender,
+			prefs: prefs
 		};
 
+		// Generate JWT token
 		const token = jwt.sign({ id: user.id, phone: user.phone }, secretKey, {
 			expiresIn: "12h",
 		});
 
+		// Log API record
 		logApiRecord(
 			"candidate login with password",
 			user.id,
@@ -361,5 +381,6 @@ exports.login = (req, res) => {
 			.catch((logErr) =>
 				res.status(500).json({ status: false, error: logErr.message })
 			);
-	});
+	}
 };
+

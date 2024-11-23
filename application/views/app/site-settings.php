@@ -92,6 +92,13 @@
                         </div>
                         <div class="col-md-12">
                           <div class="form-group">
+                            <label for="edart">Exam Password</label>
+                            <input type="text" name="exam_password" class="form-control" value="<?=$record['exam_password']??''; ?>" placeholder="Enter exam password"/>
+                            <?= form_error('exam_password', '<div class="text-danger">', '</div>'); ?>
+                          </div>
+                        </div>
+                        <div class="col-md-12">
+                          <div class="form-group">
                             <label for="tr_api">Translate API Key</label>
                             <input type="text" id="tr_api" class="form-control" name="translate_api_key" value="<?= stripslashes($record['translate_api_key']??set_value('translate_api_key')); ?>">
                             <?= form_error('translate_api_key', '<div class="text-danger">', '</div>'); ?>

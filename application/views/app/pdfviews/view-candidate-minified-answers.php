@@ -116,8 +116,8 @@
         <!-- <td>1</td> -->
         <td style="width: 5%;"><strong>Aadhaar</strong></td>
         <td>: <?= $user['aadhaar_number']; ?></td>
-        <td style="width: 5%;"><strong>Attempted</strong></td>
-        <td>: <?= $attempted; ?></td>
+        <td style="width: 5%;"><strong>Status</strong></td>
+        <td>: <?= $pass_status??'N/A'; ?></td>
       </tr>
       <tr>
         <!-- <td>1</td> -->

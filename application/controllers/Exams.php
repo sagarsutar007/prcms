@@ -2731,7 +2731,7 @@ class Exams extends CI_Controller
 		$mark = $this->input->get('mark', true);
 		$questions = $this->exam_model->getExamQuestions($exam_id);
 		$totalQuestions = count($questions);
-		$correctAnswersCount = $mark; 
+		$correctAnswersCount = $mark + 1; 
 		
 		shuffle($questions);
 		$created_at = strtotime($exam['exam_datetime']);
@@ -2768,8 +2768,13 @@ class Exams extends CI_Controller
 			$created_at += rand(30, 90);
 		}
 
-		$res = ['status' => 'SUCCESS'];
-		echo json_encode($res);
+		if ($jsonResponse) {
+			$res = ['status' => 'SUCCESS'];
+			echo json_encode($res);
+		} else {
+			redirect('/exams/'.$exam['id'].'/generate-marks'); 
+		}
+		
 	}
 
 	public function searchCandidateExams()

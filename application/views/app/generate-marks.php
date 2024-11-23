@@ -145,9 +145,9 @@
                             <td><?= number_format($record['percentage'], 2); ?>%</td>
                             <td><?= $record['result']; ?></td>
                             <td>
-                                <a class="btn btn-link m-0 p-0" data-href="<?= 'examid='.$exam_id.'&userid='.$record['aadhaar_number']; ?>" data-toggle="tooltip" data-placement="top" title="Generate Mark">
+                                <button class="btn btn-link m-0 p-0 btn-generate-mark" data-examid="<?= $exam_id;?>" data-userid="<?= $record['aadhaar_number']; ?>" data-toggle="tooltip" data-placement="top" title="Generate Mark">
                                     <i class="fas fa-pen"></i>
-                                </a>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                </button>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                 <a class="btn btn-link m-0 p-0" target="_blank" href="<?= base_url('candidate/generate-candidate-result?examid='.$exam_id.'&userid='.$record['id']); ?>"  data-toggle="tooltip" data-placement="top" title="Download PDF"><i class="fas fa-download"></i></a>
                             </td>
                         </tr>
@@ -204,6 +204,33 @@
         </div>
       </div>
     </div>
+
+    <form action="<?= base_url('/exams/generateFakeAnswers');?>">
+    <input type="hidden" name="examid" value="<?= $exam['id']; ?>">
+    <input type="hidden" name="userid" value="" id="singleUserIdInput">
+    <input type="hidden" name="return" value="view">
+    <div class="modal" tabindex="-1" id="singleUserMarkModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="mark-modal-title">Set Mark</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group" id="singleUserMark">
+              <input type="number" id="singleUserMarkInput" name="mark" class="form-control" placeholder="Enter Mark" max="<?= $totalQuestions; ?>" min="0">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Generate Result</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </form>
 
     <!-- Scripts -->
     <script src="<?= base_url('assets/admin/plugins/jquery/jquery.min.js'); ?>"></script>
@@ -340,7 +367,6 @@
             }
           });
 
-
           function sendAjaxRequest(url) {
               return $.ajax({
                   url: url,
@@ -464,6 +490,16 @@
             var button = $(event.relatedTarget);
             $("#progress-bar").hide();
           })
+
+          $(document).on('click', ".btn-generate-mark", function () {
+            $('#singleUserMarkModal').modal('show');
+            $("#singleUserIdInput").val($(this).data('userid'));
+          });
+
+          $('#singleUserMarkModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            
+          });
         });
     </script>
   </body>

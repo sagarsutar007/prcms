@@ -104,10 +104,10 @@
                             <input type="radio" name="pdf_type" id="chb2" value="2"/>
                             <label for="chb2">Full Details</label>
                         </div>
-                        <div class="icheck-primary icheck-inline">
+                        <!-- <div class="icheck-primary icheck-inline">
                             <input type="radio" name="pdf_type" id="chb3" value="3"/>
                             <label for="chb3">Custom</label>
-                        </div>
+                        </div> -->
                       </div>
                       <div class="col-12 custom-section">
                         <div class="row">
@@ -240,7 +240,7 @@
 
           $('.btn-generate-pdfs').on('click', async function() {
               $(".custom-section, .pdf-configuration").hide();
-              let pdfType = $("[name='pdf_type']").val();
+              let pdfType = $("[name='pdf_type']:checked").val();
               let url = '';
               if (pdfType == 1) {
                 url = `<?= base_url('candidate/generate-candidate-omr-result'); ?>`;

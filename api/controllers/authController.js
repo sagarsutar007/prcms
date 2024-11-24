@@ -360,8 +360,7 @@ exports.login = (req, res) => {
 			profile_img: user.profile_img ? process.env.MAIN_URL + "/assets/img/" + user.profile_img : null,
 			phone: user.phone,
 			email: user.email,
-			gender: user.gender,
-			prefs: prefs
+			gender: user.gender
 		};
 
 		// Generate JWT token

@@ -60,10 +60,7 @@
 </style>
 <div class="container">
   <div class="row">
-    <div style="display:block;width:100%;margin-bottom: 15px;">            
-      <h2 style="text-align:center;margin-bottom:0;">
-        <?= $clients; ?>
-      </h2>
+    <div style="display:block;width:100%;margin-bottom: 15px;">
       <h3 style="text-align:center;margin-bottom:0;">
         <?= $exam['name']; ?>
       </h3>
@@ -77,7 +74,7 @@
 <table id="info-table" cellpadding="0" border="0" cellspacing="0">
     <tbody>
       <tr>
-        <td rowspan="5" style="text-align:center;">
+        <td rowspan="5" style="text-align:left; width:20%;">
           <?php
               if (isset($user['profile_img']) && !empty($user['profile_img']) && file_exists('assets/img/thumbnails/' . $user['profile_img']) ) {
                 $prof_img = base_url('assets/img/thumbnails/' . $user['profile_img']);
@@ -93,9 +90,9 @@
           ?>
           <img src="<?= $prof_img; ?>" style="height: 120px;" alt="">
         </td>
-        <td style="width: 5%;"><strong>Name</strong></td>
+        <td><strong>Name</strong></td>
         <td>: <?= ucwords($user['firstname']. " " .$user['middlename']??''. " " .$user['lastname']??'' ) ?></td>
-        <td style="width: 5%;"><strong>Gender</strong></td>
+        <td><strong>Gender</strong></td>
         <td>: <?= ucfirst($user['gender']); ?></td>
       </tr>
       <tr>

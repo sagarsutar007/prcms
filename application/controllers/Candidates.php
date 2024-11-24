@@ -981,28 +981,73 @@ class Candidates extends CI_Controller {
 			} elseif ($exam_log && $exam_log['left_at'] > $data['exam']['exam_endtime']) {
 				$exam_log['left_at'] = $data['exam']['exam_endtime'];
 			}
-
+			$calc = $this->calcScore($exam_id, $user_id, $data['exam']['pass_percentage']);
 			$data['exam_log'] = $exam_log;
 			$data['max_options'] = $this->answer_model->getMaxOptions($exam_id);
-			$this->load->view('app/pdfviews/view-candidate-minified-answers', $data);
+			$data['pass_status'] = $calc['status'];
+
+			// $this->load->view('app/pdfviews/view-candidate-minified-answers', $data);
 
 
-			// $html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
+			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
 
-			// $mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
-			// $mpdf->WriteHTML($html);
-			// $output = $mpdf->Output($filepath, 'F');
+			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
+			$mpdf->WriteHTML($html);
+			$output = $mpdf->Output($filepath, 'F');
 
-			// if ($return_val) { 
-			// 	return $filepath; 
-			// } else if ($jsonResponse) {
-	        // 	$res = [ 'status' => 'SUCCESS'];
-	        // 	echo json_encode($res);
-	        // } else {
-			// 	force_download($filename, file_get_contents($filepath));
-			// }  
+			if ($return_val) { 
+				return $filepath; 
+			} else if ($jsonResponse) {
+	        	$res = [ 'status' => 'SUCCESS'];
+	        	echo json_encode($res);
+	        } else {
+				force_download($filename, file_get_contents($filepath));
+			}  
 	    }
 	    $this->clearOlderFiles();
+	}
+
+	public function calcScore($exam_id = '', $user_id = '', $passPercentage = '')
+	{
+		$questions = $this->exam_model->getExamQuestions($exam_id);
+		$total_question = count($questions);
+		$correct_answers = 0;
+		$result = $this->exam_model->getExamResult($exam_id, $user_id);
+		$ansArr = [];
+		foreach ($result as $item) {
+			$questionId = $item['question_id'];
+			$status = $item['status'];
+			if (array_key_exists($questionId, $ansArr)) {
+				if ($status === 'incorrect') {
+					$ansArr[$questionId] = $status;
+				}
+			} else {
+				$ansArr[$questionId] = $status;
+			}
+		}
+
+		foreach ($ansArr as $key => $obj) {
+			if ($obj == 'correct') {
+				$correct_answers++;
+			}
+		}
+
+		$score = $correct_answers / $total_question * 100;
+
+		$resultString = $correct_answers . "/" . $total_question;
+
+		if ($score >= $passPercentage) {
+			$resultStatus = "Pass";
+		} else {
+			$resultStatus = "Fail";
+		}
+
+		$arr = [
+			'score' => $score,
+			'result' => $resultString,
+			'status' => $resultStatus
+		];
+		return $arr;
 	}
 
 	public function bulkUpload()

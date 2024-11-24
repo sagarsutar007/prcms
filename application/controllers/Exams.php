@@ -2405,7 +2405,8 @@ class Exams extends CI_Controller
 				$cli .= $obj['company_name'] . ",";
 			}
 			$data['clients'] = rtrim($cli, ',');
-
+			$calc = $this->calcScore($exam_id, $user_id, $data['exam']['pass_percentage']);
+			$data['pass_status'] = $calc['status'];
 			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id' => $exam_id, 'user_id' => $user_id]);
 
 			// $this->load->view('app/pdfviews/view-candidate-minified-answers', $data);

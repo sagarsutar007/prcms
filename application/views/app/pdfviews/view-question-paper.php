@@ -6,8 +6,26 @@
       $exam_entry = 'Not Available';
       $exam_exit = 'Not Available';
   }
+
+  $company = "";
+  if(!empty($business)) {
+    $company = $business['company_name'];
+  }
 ?>
 <style>
+  .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* Two columns */
+      gap: 10px; /* Space between items */
+      margin: 0;
+      padding: 0;
+  }
+
+  .answer-item {
+      padding: 5px;
+      background: #f9f9f9; /* Optional: Light background for each item */
+      font-size: 14px; /* Font size for text */
+  }
   /* devanagari */
   /*@font-face {
     font-family: 'Hind';
@@ -66,7 +84,7 @@
   <div class="row">
     <div style="display:block;width:100%;margin-bottom: 15px;">
       <p style="text-align:center;margin: 0;">
-        <?= "Exam conducted by <strong>" . $business['company_name'] . "</strong>"; ?>
+        <?= "Exam conducted by <strong>" . $company??'' . "</strong>"; ?>
       </p>
       <p style="text-align:center;margin: 0;">
         <?= "Exam Time: " . date( 'h:i a ', strtotime($exam['exam_datetime'])) . " to " . date( 'h:i a ', strtotime($exam['exam_endtime'])) . " on " . date('d/m/Y', strtotime($exam['exam_datetime'])); ?>
@@ -74,54 +92,121 @@
     </div>
   </div>
 </div>
-<div class="container-fluid">
-    <?php 
-      $i= 1; 
+<div style="width:100%;">
+  <?php 
+    $totalResults = count($result);
+
+    if ($config['pdf_language_config'] == 3) {
+      $i=1;
       foreach ($result as $key => $obj) { 
         if (!empty($obj['question_en'])) { 
-    ?>
-      <div style="display:block; width:100%; margin-bottom: 15px;">
-        <?php if ($exam['lang'] == "both" || $exam['lang'] == "eng") { ?> 
-        <div style="display:block; width: 100%;">
-          <?= "<h4 class='font-weight-bold' style='line-height: 1.3;'>".$i.". ".$obj['question_en']."</h4>"; ?>
-          <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
-            <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="50%" alt="">
-          <?php } ?>
-          <?php if ($obj['question_type'] != 'text') { ?>
-            <ol type="A">
-              <?php foreach ($obj['answers'] as $answers => $ans){ ?>
-                <li style="line-height: 1.5;">
-                  <?= $ans['answer_text_en']??'';?>
-                </li>
-              <?php } ?>
-            </ol>
-          <?php } ?>
-          <div style="line-height: 1; display:none;"> 
-            Correct answer: <?= $obj['correct_answer_en']; ?>
+  ?>
+        <div style="display:block; width:100%; margin-bottom: 15px;">
+          <div style="width: 49%; float:left;">
+            <?= "<h4 class='font-weight-bold' style='line-height: 1.3;'>".$i.". ".$obj['question_en']."</h4>"; ?>
+            <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
+              <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="40%" alt="">
+            <?php } ?>
+            <?php if ($obj['question_type'] != 'text') { ?>
+                <div class="answer-grid">
+                    <?php foreach ($obj['answers'] as $index => $ans) { ?>
+                        <div class="answer-item">
+                            <?= chr(65 + $index) . ". " . ($ans['answer_text_en'] ?? ''); ?>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+            <div style="line-height: 1; display:<?= $config['pdf_question_options_config']==1?'none':'inline'; ?>;"> 
+              <b>Correct answer</b>: <?= $obj['correct_answer_en']; ?>
+            </div>
           </div>
-        </div>
-        <?php } ?>
-        <?php if (($exam['lang'] == "both" || $exam['lang'] == "hindi" ) && !empty($obj['question_hi'])) { ?> 
-        <div style="display:block; width: 100%;">
-          <?= "<h4 class='font-weight-bold hindi-font'>".$i.". ".$obj['question_hi']."</h4>"; ?>
-          <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
-            <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="50%" alt="">
-          <?php } ?>
-          <?php if ($obj['question_type'] != 'text') { ?>
-            <ol type="A">
-              <?php foreach ($obj['answers'] as $answers => $ans){ ?>
-                <li class="hindi-font" style="line-height: 1.5;">
-                  <?= $ans['answer_text_hi']??'';?>
-                </li>
-              <?php } ?>
-            </ol>
-          <?php } ?>
-          <div class="hindi-font" style="line-height: 1.5; display:none;"> 
-            सही जवाब: <?= $obj['correct_answer_hi']; ?>
+          <div style="width: 49%; float:right;">
+            <?= "<h4 class='font-weight-bold hindi-font'>".$i.". ".$obj['question_hi']."</h4>"; ?>
+            <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
+              <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="40%" alt="">
+            <?php } ?>
+            <?php if ($obj['question_type'] != 'text') { ?>
+                <div class="answer-grid">
+                    <?php foreach ($obj['answers'] as $index => $ans) { ?>
+                        <div class="answer-item hindi-font">
+                            <?= chr(65 + $index) . ". " . ($ans['answer_text_hi'] ?? ''); ?>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+            <div class="hindi-font" style="line-height: 1.5; display:<?= $config['pdf_question_options_config']==1?'none':'inline'; ?>;"> 
+              <b>सही जवाब</b>: <?= $obj['correct_answer_hi']; ?>
+            </div>
           </div>
+          <div style="clear:both;"></div>
         </div>
+  <?php
+        }
+        $i++;
+      }
+    } elseif ($config['pdf_language_config'] == 2) {
+      $i=1;
+      foreach ($result as $key => $obj) { 
+        if (!empty($obj['question_en'])) { 
+  ?>
+      <div style="width: 49%; float:<?= ($i%2==0)?'right':'left'; ?>;">
+        <?= "<h4 class='font-weight-bold hindi-font'>".$i.". ".$obj['question_hi']."</h4>"; ?>
+        <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
+          <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="40%" alt="">
         <?php } ?>
-        <div style="clear:both;"></div>
+        <?php if ($obj['question_type'] != 'text') { ?>
+            <div class="answer-grid">
+                <?php foreach ($obj['answers'] as $index => $ans) { ?>
+                    <div class="answer-item hindi-font">
+                        <?= chr(65 + $index) . ". " . ($ans['answer_text_hi'] ?? ''); ?>
+                    </div>
+                <?php } ?>
+            </div>
+        <?php } ?>
+        <div class="hindi-font" style="line-height: 1.5; display:<?= $config['pdf_question_options_config']==1?'none':'inline'; ?>;"> 
+          <b>सही जवाब</b>: <?= $obj['correct_answer_hi']; ?>
+        </div>
       </div>
-    <?php } $i++; } ?>
+  <?php } if($i%2==0){ ?>
+  <div style="clear:both;"></div>
+  <?php
+        }
+        $i++;
+      }
+    } elseif ($config['pdf_language_config'] == 1) {
+?>
+
+  <?php
+      $i=1;
+      foreach ($result as $key => $obj) { 
+        if (!empty($obj['question_en'])) { 
+  ?>
+          <div style="width: 49%; float:<?= ($i%2==0)?'right':'left'; ?>;">
+            <?= "<h4 class='font-weight-bold' style='line-height: 1.3;'>".$i.". ".$obj['question_en']."</h4>"; ?>
+            <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
+              <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="40%" alt="">
+            <?php } ?>
+            <?php if ($obj['question_type'] != 'text') { ?>
+                <div class="answer-grid">
+                    <?php foreach ($obj['answers'] as $index => $ans) { ?>
+                        <div class="answer-item">
+                            <?= chr(65 + $index) . ". " . ($ans['answer_text_en'] ?? ''); ?>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+            <div style="line-height: 1; display:<?= $config['pdf_question_options_config']==1?'none':'inline'; ?>;"> 
+              <b>Correct answer</b>: <?= $obj['correct_answer_en']; ?>
+            </div>
+          </div>
+  <?php }
+    if($i%2==0){
+  ?>
+  <div style="clear:both;"></div>
+  <?php
+    }
+        $i++;
+      }
+    }
+  ?>
 </div>

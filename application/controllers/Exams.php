@@ -2519,6 +2519,8 @@ class Exams extends CI_Controller
 		$this->isNotACandidate();
 		if (!isset($exam_id)) { redirect('logout'); }
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
+			$data = [];
+			$data['config'] = $_POST;
 			$result = [];
 			$questions = $this->exam_model->getExamQuestions($exam_id);
 			foreach ($questions as $question => $que) {
@@ -2527,7 +2529,6 @@ class Exams extends CI_Controller
 				$correctAnswerHin = '';
 				$correctUserAnswerEng = '';
 				$correctUserAnswerHin = '';
-
 				if ($que['question_type'] != "text") {
 					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
 					foreach ($temp['answers'] as $answers => $answer) {
@@ -2539,17 +2540,17 @@ class Exams extends CI_Controller
 					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
 					$temp['correct_answer_en'] = substr($correctAnswerEng, 0, -2);
 					$temp['correct_answer_hi'] = substr($correctAnswerHin, 0, -2);
-
-
 				}
-
 				$result[] = $temp;
 			}
 
 			$data['result'] = $result;
 			$data['exam'] = $this->exam_model->get($exam_id);
 			$data['business'] = $this->business_model->get($data['exam']['company_id']);
-			$data['title'] = "View Exam Paper";
+			// print_r($data);
+			// $this->load->view('app/pdfviews/view-question-paper', $data);
+			// exit();
+			
 			$html = $this->load->view('app/pdfviews/view-question-paper', $data, true);
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 			$mpdf->WriteHTML($html);
@@ -2591,7 +2592,7 @@ class Exams extends CI_Controller
 		$exam = $this->exam_model->get($exam_id);
 		if (!$exam) { redirect('/exams'); }
 		@unlink('assets/admin/exams/' . $exam_id . ".pdf");
-		@unlink('assets/admin/exams/' . $exam_id . "-omr-.pdf");
+		@unlink('assets/admin/exams/' . $exam_id . "-omr.pdf");
 		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
 		$arr_candidates = [];
 		foreach ($candidates as $candidate => $cnd) {

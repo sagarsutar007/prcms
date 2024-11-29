@@ -2411,7 +2411,7 @@ class Exams extends CI_Controller
 
 			// $this->load->view('app/pdfviews/view-candidate-minified-answers', $data);
 
-			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
+			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers-v2', $data, true);
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 			$mpdf->WriteHTML($html);
 			$output = $mpdf->Output('', 'S');

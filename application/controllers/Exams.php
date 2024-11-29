@@ -2591,6 +2591,7 @@ class Exams extends CI_Controller
 			redirect('/exams');
 		}
 		@unlink('assets/admin/exams/' . $exam_id . ".pdf");
+		@unlink('assets/admin/exams/' . $exam_id . "-omr-.pdf");
 		$candidates = $this->exam_model->fetchExamCandidates($exam_id);
 		$arr_candidates = [];
 		foreach ($candidates as $candidate => $cnd) {

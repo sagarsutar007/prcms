@@ -2587,9 +2587,7 @@ class Exams extends CI_Controller
 	{
 		$this->isAdminOrManager();
 		$exam = $this->exam_model->get($exam_id);
-		if (!$exam) {
-			redirect('/exams');
-		}
+		if (!$exam) { redirect('/exams'); }
 		@unlink('assets/admin/exams/' . $exam_id . ".pdf");
 		@unlink('assets/admin/exams/' . $exam_id . "-omr-.pdf");
 		$candidates = $this->exam_model->fetchExamCandidates($exam_id);

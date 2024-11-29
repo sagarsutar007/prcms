@@ -987,9 +987,11 @@ class Candidates extends CI_Controller {
 			$data['pass_status'] = $calc['status'];
 
 			// $this->load->view('app/pdfviews/view-candidate-minified-answers', $data);
+			// $this->load->view('app/pdfviews/view-candidate-minified-answers-v2', $data);
 
 
 			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers', $data, true);
+			$html = $this->load->view('app/pdfviews/view-candidate-minified-answers-v2', $data, true);
 
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
 			$mpdf->WriteHTML($html);

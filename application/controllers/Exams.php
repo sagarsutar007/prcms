@@ -2595,9 +2595,16 @@ class Exams extends CI_Controller
 		foreach ($candidates as $candidate => $cnd) {
 			$user_id = $cnd['candidate_id'];
 			$filename = $this->generateName($user_id, $exam_id);
+			$minifiedfilename = $this->generateMinifiedName($user_id, $exam_id);
+			
 			$filepath = FCPATH . 'assets/admin/exams/' . $filename;
 			if (file_exists($filepath)) {
 				@unlink($filepath);
+			}
+
+			$minifiedfilepath = FCPATH . 'assets/admin/exams/' . $minifiedfilename;
+			if (file_exists($minifiedfilepath)) {
+				@unlink($minifiedfilepath);
 			}
 		}
 

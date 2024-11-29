@@ -2515,48 +2515,50 @@ class Exams extends CI_Controller
 
 	public function downloadPaper($exam_id = '')
 	{
+		$this->clearOlderFiles();
 		$this->isNotACandidate();
-		if (!isset($exam_id)) {
-			redirect('logout');
-		}
-		$result = [];
-		$questions = $this->exam_model->getExamQuestions($exam_id);
-		foreach ($questions as $question => $que) {
-			$temp = $que;
-			$correctAnswerEng = '';
-			$correctAnswerHin = '';
-			$correctUserAnswerEng = '';
-			$correctUserAnswerHin = '';
+		if (!isset($exam_id)) { redirect('logout'); }
+		if ($this->input->server('REQUEST_METHOD') === 'POST') {
+			$result = [];
+			$questions = $this->exam_model->getExamQuestions($exam_id);
+			foreach ($questions as $question => $que) {
+				$temp = $que;
+				$correctAnswerEng = '';
+				$correctAnswerHin = '';
+				$correctUserAnswerEng = '';
+				$correctUserAnswerHin = '';
 
-			if ($que['question_type'] != "text") {
-				$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
-				foreach ($temp['answers'] as $answers => $answer) {
-					if ($answer['isCorrect']) {
-						$correctAnswerEng .= $answer['answer_text_en'] . ", ";
-						$correctAnswerHin .= $answer['answer_text_hi'] . ", ";
+				if ($que['question_type'] != "text") {
+					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
+					foreach ($temp['answers'] as $answers => $answer) {
+						if ($answer['isCorrect']) {
+							$correctAnswerEng .= $answer['answer_text_en'] . ", ";
+							$correctAnswerHin .= $answer['answer_text_hi'] . ", ";
+						}
 					}
+					$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
+					$temp['correct_answer_en'] = substr($correctAnswerEng, 0, -2);
+					$temp['correct_answer_hi'] = substr($correctAnswerHin, 0, -2);
+
+
 				}
-				$temp['answers'] = $this->answer_model->getAnswersOfQuestion($que['question_id']);
-				$temp['correct_answer_en'] = substr($correctAnswerEng, 0, -2);
-				$temp['correct_answer_hi'] = substr($correctAnswerHin, 0, -2);
 
-
+				$result[] = $temp;
 			}
 
-			$result[] = $temp;
-		}
-
-		$data['result'] = $result;
-		$data['exam'] = $this->exam_model->get($exam_id);
-		$data['business'] = $this->business_model->get($data['exam']['company_id']);
-		$data['title'] = "View Exam Paper";
-		$html = $this->load->view('app/pdfviews/view-question-paper', $data, true);
-		$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
-		$mpdf->WriteHTML($html);
-		$filename = $data['exam']['name'].".pdf";
-		$output = $mpdf->Output($filename, 'D');
-
-		$this->clearOlderFiles();
+			$data['result'] = $result;
+			$data['exam'] = $this->exam_model->get($exam_id);
+			$data['business'] = $this->business_model->get($data['exam']['company_id']);
+			$data['title'] = "View Exam Paper";
+			$html = $this->load->view('app/pdfviews/view-question-paper', $data, true);
+			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
+			$mpdf->WriteHTML($html);
+			$filename = $data['exam']['name']."-exampaper.pdf";
+			$output = $mpdf->Output($filename, 'D');
+		} else {
+			$data['title'] = "Download Exam Paper";
+			$this->load->view('app/download-paper', $data);
+		}		
 	}
 
 	public function downloadResults($exam_id = '')

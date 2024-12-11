@@ -292,7 +292,7 @@
                   .done(function(response) {
                       var data = JSON.parse(response);
                       if (data.status === 'SUCCESS') {
-                          window.location.href = data.file;
+                          window.open(data.file, '_blank');
                           resolve(true);
                       } else {
                           resolve(false);
@@ -310,10 +310,11 @@
                   type: 'GET',
               })
               .done(function(response) {
+                console.log(response);
                   var data = JSON.parse(response);
 
                   if (data.status === 'SUCCESS') {
-                      window.location.href = data.file;
+                      window.open(data.file, '_blank');
                   } else {
                       console.error('Download failed. Please try again.');
                   }

@@ -65,6 +65,20 @@
       font-family: 'freeserif';
       line-height: 1;
     }
+
+    .answer-list {
+      display: inline-flex;
+      flex-wrap: wrap;
+      margin-left: 5px;
+      padding: 0 30px;
+      margin: 10px 0;
+    }
+
+    .answer-item {
+      flex: 0 0 calc(50% - 20px); 
+      line-height: 1.5;
+    }
+
   </style>
 </head>
 
@@ -116,64 +130,73 @@
       $i= 1; 
       foreach ($result as $key => $obj) { 
     ?>
-      <div style="display:block; width:100%; margin-bottom: 15px;">
-        <?php if ($exam['lang'] == "both" || $exam['lang'] == "eng") { ?> 
-        <div style="display:block; width: 100%;">
-          <?= "<h4 class='font-weight-bold' style='line-height: 1.3;'>".$i.". ".$obj['question_en']."</h4>"; ?>
-          <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
-                  <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="50%" alt="">
-                  <?php } ?>
-          <?php if ($obj['question_type'] != 'text') { ?>
-            <ol type="A">
-              <?php foreach ($obj['answers'] as $answers => $ans){ ?>
-                <li style="line-height: 1.5;">
-                  <?= $ans['answer_text_en']??'';?>
-                </li>
-              <?php } ?>
-            </ol>
-          <?php } ?>
-          <div style="line-height: 1.5;"> Correct answer: <?= $obj['correct_answer_en']; ?><br/>User answer: <?= $obj['correct_user_answer_en']; ?><br/>Result:
-            <?php
-              if ($obj['answer_status'] == 2) {
-                echo '<strong class="text-dark">Skipped</strong>';
-              } else if ($obj['answer_status'] == 1) {
-                echo '<strong class="text-success">Correct</strong>';
-              } else if ($obj['answer_status'] == 3) {
-                echo '<strong class="text-danger">Incorrect</strong>';
-              }
-            ?>
-          </div>
-        </div>
+      <div style="display: block; width: 100%; margin-bottom: 15px;">
+    <div style="display: flex; width: 100%; justify-content: space-between;">
+      
+      <?php if ($exam['lang'] == "both" || $exam['lang'] == "eng") { ?> 
+      <div style="width: 48%; padding-right: 10px; border-right: 1px solid #ccc;">
+        <?= "<h4 class='font-weight-bold' style='line-height: 1.3;'>".$i.". ".$obj['question_en']."</h4>"; ?>
+        <?php if (!empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
+          <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="100%" alt="">
         <?php } ?>
-        <?php if ($exam['lang'] == "both" || $exam['lang'] == "hindi") { ?> 
-        <div style="display:block; width: 100%;">
-          <?= "<h4 class='font-weight-bold hindi-font'>".$i.". ".$obj['question_hi']."</h4>"; ?>
-          <?php if ( !empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
-                  <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="50%" alt="">
-                  <?php } ?>
-          <?php if ($obj['question_type'] != 'text') { ?>
-            <ol type="A">
-              <?php foreach ($obj['answers'] as $answers => $ans){ ?>
-                <li class="hindi-font" style="line-height: 1.5;">
-                  <?= $ans['answer_text_hi']??'';?>
-                </li>
-              <?php } ?>
-            </ol>
-          <?php } ?>
-          <div class="hindi-font" style="line-height: 1.5;"> सही जवाब: <?= $obj['correct_answer_hi']; ?> <br/> प्रयोक्ता उत्तर: <?= $obj['correct_user_answer_hi']; ?> <br/> परिणाम:
-            <?php
-              if ($obj['answer_status'] == 2) {
-                echo '<strong class="text-dark">छोड़ा</strong>';
-              } else if ($obj['answer_status'] == 1) {
-                echo '<strong class="text-success">सही</strong>';
-              } else if ($obj['answer_status'] == 3) {
-                echo '<strong class="text-danger">ग़लत</strong>';
-              }
-            ?>
-          </div>
-        </div>
+        <?php if ($obj['question_type'] != 'text') { ?>
+          <ol type="A" class="answer-list">
+            <?php foreach ($obj['answers'] as $answers => $ans) { ?>
+              <li class="answer-item" style="line-height: 1.5;">
+                <?= $ans['answer_text_en'] ?? ''; ?>
+              </li>
+            <?php } ?>
+          </ol>
         <?php } ?>
-        <div style="clear:both;"></div>
+        <div style="line-height: 1.5;">
+          Correct answer: <?= $obj['correct_answer_en']; ?><br/>
+          User answer: <?= $obj['correct_user_answer_en']; ?><br/>
+          Result:
+          <?php
+            if ($obj['answer_status'] == 2) {
+              echo '<strong class="text-dark">Skipped</strong>';
+            } else if ($obj['answer_status'] == 1) {
+              echo '<strong class="text-success">Correct</strong>';
+            } else if ($obj['answer_status'] == 3) {
+              echo '<strong class="text-danger">Incorrect</strong>';
+            }
+          ?>
+        </div>
       </div>
+      <?php } ?>
+
+      <?php if ($exam['lang'] == "both" || $exam['lang'] == "hindi") { ?> 
+      <div class="hindi-font" style="width: 48%; padding-left: 10px;">
+        <?= "<h4 class='font-weight-bold' style='line-height: 1.3;'>".$i.". ".$obj['question_hi']."</h4>"; ?>
+        <?php if (!empty($obj['question_img']) && file_exists('assets/img/' . $obj['question_img'])) { ?>
+          <img src="<?= base_url('assets/img/' . $obj['question_img']); ?>" width="100%" alt="">
+        <?php } ?>
+        <?php if ($obj['question_type'] != 'text') { ?>
+          <ol type="A" class="answer-list">
+            <?php foreach ($obj['answers'] as $answers => $ans) { ?>
+              <li class="hindi-font answer-item" style="line-height: 1.5;">
+                <?= $ans['answer_text_hi'] ?? ''; ?>
+              </li>
+            <?php } ?>
+          </ol>
+        <?php } ?>
+        <div style="line-height: 1.5;">
+          सही जवाब: <?= $obj['correct_answer_hi']; ?><br/>
+          प्रयोक्ता उत्तर: <?= $obj['correct_user_answer_hi']; ?><br/>
+          परिणाम:
+          <?php
+            if ($obj['answer_status'] == 2) {
+              echo '<strong class="text-dark">छोड़ा</strong>';
+            } else if ($obj['answer_status'] == 1) {
+              echo '<strong class="text-success">सही</strong>';
+            } else if ($obj['answer_status'] == 3) {
+              echo '<strong class="text-danger">ग़लत</strong>';
+            }
+          ?>
+        </div>
+      </div>
+      <?php } ?>
+    </div>
+  </div>
     <?php $i++; } ?>
 </div>

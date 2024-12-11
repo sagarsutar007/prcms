@@ -831,22 +831,24 @@ class Candidates extends CI_Controller {
 
 			$data['exam_log'] = $exam_log;
 
-			$html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
+			$this->load->view('app/pdfviews/view-candidate-answers', $data);
+			
+				// $html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
 
-			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
-			$mpdf->WriteHTML($html);
-			$output = $mpdf->Output($filepath, 'F');
+				// $mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
+				// $mpdf->WriteHTML($html);
+				// $output = $mpdf->Output($filepath, 'F');
 
-			if ($return_val) { 
-				return $filepath; 
-			} else if ($jsonResponse) {
-	        	$res = [ 'status' => 'SUCCESS'];
-	        	echo json_encode($res);
-	        } else {
-				force_download($filename, file_get_contents($filepath));
-			}  
+				// if ($return_val) { 
+				// 	return $filepath; 
+				// } else if ($jsonResponse) {
+				// 			$res = [ 'status' => 'SUCCESS'];
+				// 			echo json_encode($res);
+				// 		} else {
+				// 	force_download($filename, file_get_contents($filepath));
+				// }  
 	    }
-	    $this->clearOlderFiles();
+	    // $this->clearOlderFiles();
 	}
 
 	public function generateMinifiedResult($return_val=false)

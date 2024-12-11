@@ -2203,9 +2203,7 @@ class Exams extends CI_Controller
 	public function generateDetailedResult($exam_id = '', $user_id = '')
 	{
 		$this->isNotACandidate();
-		if (!isset($exam_id) || !isset($user_id)) {
-			redirect('logout');
-		}
+		if (!isset($exam_id) || !isset($user_id)) { redirect('logout'); }
 		$filename = $this->generateName($user_id, $exam_id);
 		$filepath = FCPATH . 'assets/admin/exams/' . $filename;
 		$arr = [
@@ -2213,9 +2211,7 @@ class Exams extends CI_Controller
 			'candidate_id' => $user_id,
 		];
 		$val = $this->exam_model->isExamAndCandidateExists($arr);
-		if (!$val) {
-			return false;
-		}
+		if (!$val) { return false; }
 		if (file_exists($filepath)) {
 			return $filepath;
 		} else {
@@ -2294,6 +2290,8 @@ class Exams extends CI_Controller
 			$data['clients'] = rtrim($cli, ',');
 
 			$data['exam_log'] = $this->exam_model->checkCandidateExamInfo(['exam_id' => $exam_id, 'user_id' => $user_id]);
+
+			// $this->load->view('app/pdfviews/view-candidate-answers', $data);
 
 			$html = $this->load->view('app/pdfviews/view-candidate-answers', $data, true);
 			$mpdf = new \Mpdf\Mpdf(['utf-8', 'A4-C']);
@@ -2434,7 +2432,7 @@ class Exams extends CI_Controller
 		
 		try {
 			$files = [];
-			if (!file_exists($outputPdf)) {
+			if (!empty($outputPdf) && !file_exists($outputPdf)) {
 				$pdf = new \Clegginabox\PDFMerger\PDFMerger;
 				$candidates = $this->exam_model->fetchExamCandidates($exam_id);
 				$batchSize = 10;

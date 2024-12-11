@@ -292,7 +292,8 @@
                   .done(function(response) {
                       var data = JSON.parse(response);
                       if (data.status === 'SUCCESS') {
-                          window.open(data.file, '_blank');
+                          // window.open(data.file, '_blank');
+                          window.location.href = data.file;
                           resolve(true);
                       } else {
                           resolve(false);
@@ -314,7 +315,7 @@
                   var data = JSON.parse(response);
 
                   if (data.status === 'SUCCESS') {
-                      window.open(data.file, '_blank');
+                      window.location.href = data.file;
                   } else {
                       console.error('Download failed. Please try again.');
                   }

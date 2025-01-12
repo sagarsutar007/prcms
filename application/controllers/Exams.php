@@ -116,11 +116,11 @@ class Exams extends CI_Controller
 			$user_id = $this->session->userdata('id');
 			$company = $this->client_model->getCompanyByUserId($user_id);
 			// $data['total'] = $this->exam_model->count($company['id']);
-			$data['results'] = $this->client_model->get_data(NULL, NULL, $order, $company['id']);
+			$data['results'] = $this->client_model->get_data(1000, NULL, $order, $company['id']);
 		} else {
 			$company_id = isset($_GET['company_id']) ? $_GET['company_id'] : '';
 			// $data['total'] = $this->exam_model->count($company_id);
-			$data['results'] = $this->exam_model->get_data(NULL, NULL, $order, $company_id);
+			$data['results'] = $this->exam_model->get_data(1000, NULL, $order, $company_id);
 		}
 
 		$this->load->view('app/exams', $data);
@@ -1598,7 +1598,7 @@ class Exams extends CI_Controller
 		$this->isAdminOrManager();
 		$exam_id = $this->input->get('examid');
 		$candidate_id = $this->input->get('userid');
-		if (empty($exam_id) || empty($candidate_id) || $this->input->method != 'post') {
+		if (empty($exam_id) || empty($candidate_id)) {
 			$data['status'] = 'ERROR';
 			$data['message'] = "Invalid request or missing required fields.";
 		}
@@ -1631,16 +1631,27 @@ class Exams extends CI_Controller
 		}
 
 		$data['status'] = 'SUCCESS';
-		$data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id);
-		$data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id);
+		if (isset($_GET['type'])) {
+			if (strtoupper($_GET['type'])=="SMS") {
+				$data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id, 'on');
+			} elseif (strtoupper($_GET['type'])=="E-MAIL") {
+				$data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id, 'on');
+			} else {
+				$data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id, 'on');
+				$data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id, 'on');
+			}
+		} else {
+			$data['email_status'] = $this->sendExamEmailNotification($candidate_id, $exam_id);
+			$data['sms_status'] = $this->sendExamSMSNotification($candidate_id, $exam_id);
+		}
 
 		echo json_encode($data);
 	}
 
-	protected function sendExamEmailNotification($user_id = '', $exam_id = '')
+	protected function sendExamEmailNotification($user_id='', $exam_id='', $notify='off')
 	{
 		$exam_details = $this->exam_model->get($exam_id);
-		if ($exam_details['email_notif'] == 'off') { return 'success'; }
+		if ($exam_details['email_notif'] == 'off' && $notify=='off') { return 'success'; }
 		$site_data = $this->setting_model->getSiteSetting();
 		$business = $this->business_model->get($exam_details['company_id']);
 		$user_info = $this->candidate_model->get($user_id);
@@ -1733,11 +1744,11 @@ class Exams extends CI_Controller
 		return $n_data['response'];
 	}
 
-	protected function sendExamSMSNotification($user_id = '', $exam_id = '')
+	protected function sendExamSMSNotification($user_id='', $exam_id='', $notify='off')
 	{
 		$site_data = $this->setting_model->getSiteSetting();
 		$exam_details = $this->exam_model->get($exam_id);
-		if ($exam_details['sms_notif'] == 'off') { return 'success'; }
+		if ($exam_details['email_notif'] == 'off' && $notify=='off') { return 'success'; }
 		$business = $this->business_model->get($exam_details['company_id']);
 		$get_candidate = $this->candidate_model->get($user_id);
 		$databaseValues = [
@@ -2819,6 +2830,34 @@ class Exams extends CI_Controller
 		$data['total_exams'] = count($exams);
 		$data['title'] = "Search Candidate Exams";
 		$this->load->view('app/search-candidate-exams', $data);
+	}
+
+	public function resendNotification($examId="")
+	{
+		if (empty($examId)) { redirect('dashboard'); }
+		
+		$data['title'] = "Resend Notification";
+		$data['exam'] = $this->exam_model->get($examId);
+		$data['candidates'] = $this->exam_model->getCandidateWithStats($examId);
+
+		$this->load->view('app/resend-notification', $data);
+	}
+
+	public function notifyExamCandidate() 
+	{
+		$this->isAdminOrManager();
+		if ($this->input->method() == "post") {
+			$candidateId = $this->input->post('candidateId');
+			$type = $this->input->post('type');
+			$examId = $this->input->post('examId');
+			if ($type == "sms") {
+				$data['message'] = $this->sendExamSMSNotification($candidateId, $examId, 'on');
+			} elseif ($type == "mail") {
+				$data['message'] = $this->sendExamEmailNotification($candidateId, $examId, 'on');
+			}
+			$data['status'] = 'SUCCESS';
+			echo json_encode($data);
+		}
 	}
 
 	

@@ -221,7 +221,7 @@
                         <th>Date Time</th>
                         <th>Questions</th>
                         <th>Candidates</th>
-                        <th>Clients</th>
+                        <!-- <th>Clients</th> -->
                         <th>Status</th>
                         <th>Actions</th>
                       </tr>
@@ -246,9 +246,9 @@
                         <td>
                           <?= $record['total_candidates']; ?>
                         </td>
-                        <td>
-                          <?= $record['total']; ?>
-                        </td>
+                        <!-- <td>
+                          <?#= $record['total']; ?>
+                        </td> -->
                         <td>
                           <?php if (empty($record['exam_datetime'])) { ?>
                             <span class="badge badge-pill badge-warning">Draft</span> 
@@ -306,12 +306,16 @@
                                   <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/edit-candidates'); ?>">Edit Candidate</a>
                                   <a class="dropdown-item btn-loader" href="<?= base_url('exams/'.$record['id'].'/download-paper'); ?>" target="_blank">Download Paper</a>
                                   <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/exam-settings'); ?>" target="_blank">Exam Settings</a>
+                                  <?php if ($currentDateTime < $examEndTime) { ?> 
+                                  <a class="dropdown-item btn-loader" href="<?= base_url('exam/'.$record['id'].'/resend-notification'); ?>" target="_blank">Resend Notification</a>
+                                  <?php } ?>
                                   <a class="dropdown-item btn-loader" href="<?= base_url('exam/delete/').$record['id']; ?>" onClick="return confirm('This exam along with its details will be deleted and can\'t be recovered. Are you sure to delete?');">Delete</a>
                               </div>
                           </div>
                           <?php } else {?> 
-                          <a href="<?= base_url('exams/'.$record['id'].'/view-exam-dashboard'); ?>" data-toggle="tooltip" data-placement="top" title="View"> <i class="fas fa-eye"></i> </a>/<a href="<?= base_url('exam/clone/').$record['id']; ?>"  data-toggle="tooltip" data-placement="top" title="Clone"> <i class="fas fa-copy"></i> </a>/<a href="<?= base_url('exam/edit/').$record['id']; ?>" data-toggle="tooltip" data-placement="top" title="Edit"> <i class="fas fa-pen"></i> </a>/<a href="<?= base_url('exam/'.$record['id'].'/exam-settings'); ?>" target="_blank" data-toggle="tooltip" data-placement="top" title="Settings"> <i class="fas fa-cog"></i> </a> /<a data-toggle="tooltip" data-placement="top" title="Download Paper" href="<?= base_url('exams/'.$record['id'].'/download-paper'); ?>" target="_blank"><i class="fas fa-download"></i></a>
-                          <?php } ?>
+                                  
+                          <a href="<?= base_url('exams/'.$record['id'].'/view-exam-dashboard'); ?>" data-toggle="tooltip" data-placement="top" title="View"> <i class="fas fa-eye"></i> </a>/<a href="<?= base_url('exam/clone/').$record['id']; ?>"  data-toggle="tooltip" data-placement="top" title="Clone"> <i class="fas fa-copy"></i> </a>/<a href="<?= base_url('exam/edit/').$record['id']; ?>" data-toggle="tooltip" data-placement="top" title="Edit"> <i class="fas fa-pen"></i> </a>/<a href="<?= base_url('exam/'.$record['id'].'/exam-settings'); ?>" target="_blank" data-toggle="tooltip" data-placement="top" title="Settings"> <i class="fas fa-cog"></i> </a> /<a data-toggle="tooltip" data-placement="top" title="Download Paper" href="<?= base_url('exams/'.$record['id'].'/download-paper'); ?>" target="_blank"><i class="fas fa-download"></i></a><?php if ($currentDateTime < $examEndTime) { ?> / <a data-toggle="tooltip" data-placement="top" title="Resend Notification" href="<?= base_url('exams/'.$record['id'].'/resend-notification'); ?>" target="_blank"><i class="fas fa-bell"></i></a>
+                          <?php }} ?>
                         </td>
                       </tr>
                       <?php $i++; } ?>
@@ -379,24 +383,24 @@
             {
               extend: 'excel',
               exportOptions: {
-                columns: [1,2,3,4,5,6,7,8]
+                columns: [1,2,3,4,5,6,7]
               }
             },
             { 
               extend: 'pdf',
               exportOptions: {
-                columns: [1,2,3,4,5,6,7,8]
+                columns: [1,2,3,4,5,6,7]
               }
             }, 
             {
                 extend: 'print',
                 exportOptions: {
-                  columns: [1,2,3,4,5,6,7,8]
+                  columns: [1,2,3,4,5,6,7]
                 }
             }
           ],
           "columnDefs": [{
-              "targets": [0,9],
+              "targets": [0,8],
               "orderable": false
           }],
           "order": [[1, 'asc']]

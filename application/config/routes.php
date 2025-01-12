@@ -71,6 +71,7 @@ $route['candidate/edit/(:num)'] = 'Candidates/edit/$1';
 $route['candidate/delete/(:num)'] = 'Candidates/delete/$1';
 $route['candidates/delete-selected'] = 'Candidates/deleteMultiple';
 $route['candidate/view-exam-result'] = 'Candidates/viewExamResult';
+$route['candidates/notify-candidate'] = 'Exams/notifyExamCandidate';
 
 $route['candidate/bulk-upload'] = 'Candidates/bulkUpload';
 $route['candidates/send-login-mail'] = 'Candidates/sendLoginMail';
@@ -132,6 +133,7 @@ $route['exams/(:num)/download-excel-format'] = 'Exams/downloadExcel/$1';
 $route['exams/(:num)/download-results-pdf'] = 'Exams/downloadResults/$1';
 $route['exams/(:num)/clear-results-pdf'] = 'Exams/clearResults/$1';
 $route['exams/(:num)/generate-marks'] = 'Exams/generateMarks/$1';
+$route['exams/(:num)/resend-notification'] = 'Exams/resendNotification/$1';
 $route['exams/download-exam-candidate/(:num)'] = 'Exams/generateExamCandidatePdf/$1';
 $route['exams/delete-selected'] = 'Exams/deleteMultiple';
 $route['exams/add-selected-candidates'] = 'Exams/addSelectedCandidates';

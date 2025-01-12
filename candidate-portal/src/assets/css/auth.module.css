@@ -334,7 +334,7 @@
 
 @media (max-width: 767px) {
 	.authfyLogin {
-		height: 460px;
+		min-height: 460px;
 	}
 
 	.authfyPanelLeft .brandCol {

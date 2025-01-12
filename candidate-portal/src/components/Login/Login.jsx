@@ -75,7 +75,7 @@ function Login() {
 			}
 		} catch (error) {
 			setErrorMessage(
-				error.response?.data?.message || "An error occurred during login."
+				error.response?.data?.message || "Network error occurred during login."
 			);
 		} finally {
 			setIsLoading(false); // Stop loading after response

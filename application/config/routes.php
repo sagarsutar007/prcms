@@ -134,6 +134,7 @@ $route['exams/(:num)/download-results-pdf'] = 'Exams/downloadResults/$1';
 $route['exams/(:num)/clear-results-pdf'] = 'Exams/clearResults/$1';
 $route['exams/(:num)/generate-marks'] = 'Exams/generateMarks/$1';
 $route['exams/(:num)/resend-notification'] = 'Exams/resendNotification/$1';
+$route['exams/(:num)/get-exam-candidate-results'] = 'Exams/getExamCandidateResults/$1';
 $route['exams/download-exam-candidate/(:num)'] = 'Exams/generateExamCandidatePdf/$1';
 $route['exams/delete-selected'] = 'Exams/deleteMultiple';
 $route['exams/add-selected-candidates'] = 'Exams/addSelectedCandidates';

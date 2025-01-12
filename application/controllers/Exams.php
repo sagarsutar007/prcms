@@ -2012,103 +2012,31 @@ class Exams extends CI_Controller
 			$exam['created_by'] = $user_info['firstname'] . " " . $user_info['middlename'] . " " . $user_info['lastname'];
 		}
 
-		$exam['appeared_candidates'] = $this->exam_model->countExamAppearedCandidates($exam_id);
+		$data['total_exam_candidates'] = $this->exam_model->countExamCandidates($exam_id);
 
-		$candidates = $this->exam_model->getCandidateWithStats($exam_id);
-		$candArr = [];
-		foreach ($candidates as $key => $obj) {
-			$temp = $obj;
-			if (!empty($obj['profile_img']) && file_exists('./assets/img/thumbnails/' . $obj['profile_img'])) {
-				$temp['profile_img'] = base_url('assets/img/thumbnails/' . $obj['profile_img']);
-			} else {
-				$temp['profile_img'] = base_url('assets/img/letter-p.png');
-			}
+		$data['appeared_candidates'] = $this->exam_model->countExamAppearedCandidates($exam_id);
+		$data['currently_appearing'] = $this->exam_model->countCurrentlyExamAppearingCandidates($exam_id);
 
-			//Check if candidate is appearing or not
-			$checkArr = ['user_id' => $obj['id'], 'exam_id' => $exam['id']];
-			$candidateInfo = $this->exam_model->checkCandidateExamInfo($checkArr);
-			if (!empty($candidateInfo)) {
+		$data['submitted'] = $this->exam_model->countExamCompletedCandidates($exam_id);
 
-				$from_time = strtotime($candidateInfo['entered_at']);
-				$exam_time = strtotime($exam['exam_datetime']);
-				if ($from_time <= $exam_time) {
-					$from_time = $exam_time;
-				}
+		$data['absent'] = $data['total_exam_candidates'] - $data['appeared_candidates'];
 
-				if ($candidateInfo['left_at'] == '0000-00-00 00:00:00' || empty($candidateInfo['left_at']) || strtotime($candidateInfo['left_at']) >= strtotime($exam['exam_endtime'])) {
-					$currentTimestamp = time();
-					$exam_endtime = strtotime($exam['exam_endtime']);
-					$to_time = $exam_endtime;
-					if ($currentTimestamp <= $exam_endtime) {
-						$to_time = $currentTimestamp;
-					}
-					
-					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
-					$temp['time'] = $diff_minutes;
-					$temp['status'] = "Appearing";
-					$appearing++;
-				} else {
-					$to_time = strtotime($candidateInfo['left_at']);
-
-					$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
-					$temp['time'] = $diff_minutes;
-					$temp['status'] = "Submitted";
-					$submitted++;
-				}
-
-				// Calculate Scores
-				$calc = $this->calcScore($exam_id, $obj['id'], $exam['pass_percentage']);
-				$temp['score'] = $calc['result'];
-				$temp['percentage'] = $calc['score'];
-				$temp['result'] = $calc['status'];
-			} else {
-				$temp['time'] = "";
-				$temp['status'] = "Absent";
-				$temp['score'] = "";
-				$temp['percentage'] = "0";
-				$temp['result'] = "Fail";
-				$absent++;
-			}
-
-			$candArr[] = $temp;
-		}
-
-		function customSort($a, $b)
-		{
-			$scoreComparison = (floatval($b['score']) - floatval($a['score']));
-			if ($scoreComparison === 0) {
-				$timeA = intval($a['time']);
-				$timeB = intval($b['time']);
-				if (strpos($a['time'], 'Mins') !== false) {
-					$timeA *= 1;
-				}
-				if (strpos($b['time'], 'Mins') !== false) {
-					$timeB *= 1;
-				}
-				// Sort by time in ascending order
-				return $timeA - $timeB;
-			}
-			// Sort by score in descending order
-			return $scoreComparison;
-		}
-
-		usort($candArr, 'customSort');
-
-		$data['candidates'] = $candArr;
+		$appearing = $data['appeared_candidates'] - $data['submitted'];
+		
 		$data['business'] = $this->business_model->get($exam['company_id']);
 		$data['exam'] = $exam;
 		$data['title'] = "Exam Dashboard";
 		$data['exam_id'] = $exam_id;
-		$data['absent'] = $absent;
 
 		$time = time();
 		$exam_time = strtotime($exam['exam_datetime']);
 		if ($time > $exam_time) {
 			$data['appearing'] = 0;
+			$data['currently_appearing'] = 0;
+			$data['submitted'] = $data['appeared_candidates'];
 		} else {
 			$data['appearing'] = $appearing;
 		}
-		$data['submitted'] = $submitted;
 		$data['site_data'] = $site_data;
 
 		$this->load->view('app/exam-dashboard', $data);
@@ -2150,7 +2078,7 @@ class Exams extends CI_Controller
 		}
 
 		$arr = [
-			'score' => $score,
+			'score' => number_format($score,2),
 			'result' => $resultString,
 			'status' => $resultStatus
 		];
@@ -2859,6 +2787,81 @@ class Exams extends CI_Controller
 			echo json_encode($data);
 		}
 	}
+
+	public function getExamCandidateResults($examId = "")
+	{
+		$absent = 0;
+		$submitted = 0;
+		$appearing = 0;
+		$exam = $this->exam_model->get($examId);
+		$candidates = $this->exam_model->getCandidateWithStats($examId);
+		$k = 0;
+		$candArr = []; // Initialize array
+
+		foreach ($candidates as $key => $obj) {
+			$temp = $obj;
+			$temp['profile_img'] = base_url('assets/img/letter-p.png'); // Default image
+
+			if (!empty($obj['profile_img']) && file_exists('./assets/img/thumbnails/' . $obj['profile_img'])) {
+				$temp['profile_img'] = base_url('assets/img/thumbnails/' . $obj['profile_img']);
+			}
+
+			$checkArr = ['user_id' => $obj['id'], 'exam_id' => $exam['id']];
+			$candidateInfo = $this->exam_model->checkCandidateExamInfo($checkArr);
+
+			if (!empty($candidateInfo)) {
+				$from_time = max(strtotime($candidateInfo['entered_at']), strtotime($exam['exam_datetime']));
+				$to_time = (!empty($candidateInfo['left_at']) && $candidateInfo['left_at'] != '0000-00-00 00:00:00')
+					? strtotime($candidateInfo['left_at'])
+					: min(time(), strtotime($exam['exam_endtime']));
+
+				$diff_minutes = round(abs($from_time - $to_time) / 60) . " Mins";
+				$temp['time'] = $diff_minutes;
+				$temp['status'] = (!empty($candidateInfo['left_at']) && strtotime($candidateInfo['left_at']) < strtotime($exam['exam_endtime'])) 
+					? "Submitted" 
+					: "Appearing";
+
+				$submitted += $temp['status'] == "Submitted" ? 1 : 0;
+				$appearing += $temp['status'] == "Appearing" ? 1 : 0;
+
+				$calc = $this->calcScore($examId, $obj['id'], $exam['pass_percentage']);
+				$temp['score'] = $calc['result'];
+				$temp['percentage'] = $calc['score'];
+				$temp['result'] = $calc['status'];
+			} else {
+				$temp['time'] = "";
+				$temp['status'] = "Absent";
+				$temp['score'] = "";
+				$temp['percentage'] = "0";
+				$temp['result'] = "Fail";
+				$absent++;
+			}
+
+			$k++;
+			$temp['serial'] = $k;
+			$temp['action'] = '
+				<a href="'. base_url('candidate/view-exam-result?examid='.$examId.'&userid='.$obj['id']) . '" data-toggle="tooltip" data-placement="top" title="View">
+					<i class="fas fa-eye"></i>
+				</a>
+				<a href="'. base_url('exams/enable-rentry?examid='.$examId.'&userid='.$obj['id']) . '" data-toggle="tooltip" data-placement="top" title="Enable Re-entry">
+					<i class="fas fa-pen"></i>
+				</a>
+				<a target="_blank" href="'. base_url('candidate/generate-candidate-result?examid='.$examId.'&userid='.$obj['id']) . '"  data-toggle="tooltip" data-placement="top" title="Download PDF"><i class="fas fa-download"></i></a>
+			';
+			$candArr[] = $temp;
+		}
+
+		usort($candArr, function ($a, $b) {
+			$scoreComparison = floatval($b['score']) - floatval($a['score']);
+			if ($scoreComparison === 0) {
+				return intval($a['time']) - intval($b['time']);
+			}
+			return $scoreComparison;
+		});
+
+		echo json_encode($candArr);
+	}
+
 
 	
 }

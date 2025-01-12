@@ -27,6 +27,10 @@
             color: rgb(255 255 255 / 15%);
             z-index: 0;
         }
+        .dataTables_filter {
+            display: inline;
+            float: right;
+        }
     </style>
   </head>
   <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
@@ -228,20 +232,8 @@
                                             <th>Time Taken</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <?php
-                                            if (isset($candidates)) {
-                                                $i=0;
-                                                foreach ($candidates as $key => $obj) {
-                                                    if ($i < 7 && !empty($obj['score'])){
-                                        ?>
-                                        <tr>
-                                            <td><img src="<?= $obj['profile_img']; ?>" width="30px" alt=""></td>
-                                            <td><?= ucfirst($obj['name']); ?></td>
-                                            <td><?= $obj['score']; ?></td>
-                                            <td><?= $obj['time']; ?></td>
-                                        </tr>
-                                        <?php } $i++; } } ?>
+                                    <tbody id="top-performer">
+                                        
                                     </tbody>
                                 </table>
                             </div>
@@ -271,71 +263,24 @@
                         <div class="card">
                             <div class="card-body" id="example1_wrapper">
                                 <table id="data-table" class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <td>SNo.</td>
-                                        <td>Candidate Name</td>
-                                        <td>Employee ID</td>
-                                        <td>Aadhaar</td>
-                                        <td>Phone</td>
-                                        <td>Score</td>
-                                        <td>Status</td>
-                                        <td>Time</td>
-                                        <td>Secured %</td>
-                                        <td>Result</td>
-                                        <td>Actions</td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php $i=1; foreach ($candidates as $records => $record) { ?>
-                                    <tr>
-                                        <td><?= $i; ?></td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="<?= $record['profile_img']; ?>" class="mr-2" width="30px" height="30px" alt="">
-                                                <?= ucfirst(str_replace(".", "", $record['name'])); ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <?= $record['empid']; ?>
-                                        </td>
-                                        <td>
-                                            <?= $record['aadhaar_number']; ?>
-                                        </td>
-                                        <td>
-                                            <?= $record['phone']; ?>
-                                        </td>
-                                        <td>
-                                            <?= $record['score']; ?>
-                                        </td>
-                                        <td>
-                                            <?php 
-                                                $now = time();
-                                                $exm_time = strtotime($exam['exam_endtime']);
-                                                if ($record['status'] == "Appearing" && $now > $exm_time ) {
-                                                    echo "Submitted";
-                                                } else {
-                                                    echo $record['status']; 
-                                                }
-                                            ?>
-                                        </td>
-                                        <td>
-                                            <?php echo $record['time']; ?>
-                                        </td>
-                                        <td><?= number_format($record['percentage'], 2); ?>%</td>
-                                        <td><?= $record['result']; ?></td>
-                                        <td>
-                                            <a href="<?= base_url('candidate/view-exam-result?examid='.$exam_id.'&userid='.$record['id']); ?>" data-toggle="tooltip" data-placement="top" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="<?= base_url('exams/enable-rentry?examid='.$exam_id.'&userid='.$record['id']); ?>" data-toggle="tooltip" data-placement="top" title="Enable Re-entry">
-                                                <i class="fas fa-pen"></i>
-                                            </a>
-                                            <a target="_blank" href="<?= base_url('candidate/generate-candidate-result?examid='.$exam_id.'&userid='.$record['id']); ?>"  data-toggle="tooltip" data-placement="top" title="Download PDF"><i class="fas fa-download"></i></a>
-                                        </td>
-                                    </tr>
-                                    <?php $i++; } ?>
-                                </tbody>
+                                    <thead>
+                                        <tr>
+                                            <td>SNo.</td>
+                                            <td>Candidate Name</td>
+                                            <td>Employee ID</td>
+                                            <td>Aadhaar</td>
+                                            <td>Phone</td>
+                                            <td>Score</td>
+                                            <td>Status</td>
+                                            <td>Time</td>
+                                            <td>Secured %</td>
+                                            <td>Result</td>
+                                            <td>Actions</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
                                 </table>
                             </div>
                         </div> 
@@ -388,14 +333,35 @@
             $('[data-toggle="tooltip"]').tooltip();
             
             $("#data-table").DataTable({
-               "responsive": true, 
-               "lengthChange": false, 
-               "autoWidth": false, 
-               "paging": false,
-               "scrollY": 400,
-               "lengthMenu": [
-                    [ 10, 25, 50, 100, 500, 1000,  -1 ],
-                    [ '10', '25',  '50', '100', '500', '1000', 'All' ]
+                "responsive": true, 
+                "lengthChange": false, 
+                "autoWidth": false, 
+                "paging": false,
+                "scrollY": 400,
+                "scrollCollapse": true,
+                "ajax": {
+                    "url": "<?= base_url('exams/'.$exam['id'].'/get-exam-candidate-results'); ?>",
+                    "type": "POST",
+                    "dataSrc": ""
+                },
+                "dom": 'lBftip',
+                "columns": [
+                    { 
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    {"data": "name"},             
+                    {"data": "empid"},            
+                    {"data": "aadhaar_number"},   
+                    {"data": "phone"},            
+                    {"data": "score"},            
+                    {"data": "status"},           
+                    {"data": "time"},             
+                    {"data": "percentage"},       
+                    {"data": "result"},
+                    {"data": "action"}
                 ],
                 "buttons": [
                     {
@@ -418,9 +384,29 @@
                     }
                 ],
                 "columnDefs": [{
-                  "targets": [9],
+                  "targets": [10],
                   "orderable": false
-                }]
+                }],
+                "initComplete": function(settings, json) {
+                    let topPerformerContainer = $("#top-performer");
+                    
+                    topPerformerContainer.empty();
+
+                    json.slice(0, 7).forEach(function(obj, index) {
+                        if (obj.score) {
+                            let row = `
+                                <tr>
+                                    <td><img src="${obj.profile_img}" width="30px" alt="Profile"></td>
+                                    <td>${obj.name.charAt(0).toUpperCase() + obj.name.slice(1)}</td>
+                                    <td>${obj.score}</td>
+                                    <td>${obj.time}</td>
+                                </tr>
+                            `;
+                            
+                            topPerformerContainer.append(row);
+                        }
+                    });
+                },
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
 
             var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
@@ -431,7 +417,7 @@
                 ],
                 datasets: [
                     {
-                        data: [<?= $exam['appeared_candidates']; ?>, <?= $absent; ?>],
+                        data: [<?= $appeared_candidates; ?>, <?= $absent; ?>],
                         backgroundColor : ['#00c0ef', '#d2d6de'],
                     }
                 ]
@@ -447,8 +433,8 @@
                 options: donutOptions
             })
             <?php
-                $num1 = $exam['appeared_candidates'];
-                $num2 = $absent - $exam['appeared_candidates'];
+                $num1 = $appeared_candidates;
+                $num2 = $absent - $appeared_candidates;
                 $num = ($num1>$num2)?$num1:$num2;
             ?>
             Chart.pluginService.register({
@@ -460,7 +446,7 @@
                     var fontSize = (height / 180).toFixed(2);
                     ctx.font = fontSize + "em sans-serif";
                     ctx.textBaseline = "middle";
-                    var text = "<?= $exam['candidates'] - $absent . "/" . $exam['candidates']; ?>",
+                    var text = "<?= $submitted . "/" . $total_exam_candidates; ?>",
                         textX = Math.round((width - ctx.measureText(text).width) / 2),
                         textY = (height / 2)+15;
                     ctx.fillText(text, textX, textY);
@@ -474,9 +460,9 @@
         function drawChart() {
             var data = new google.visualization.arrayToDataTable([
                 ['Status', 'Count'],
-                ['Appearing', <?= $appearing; ?>],
+                ['Appearing', <?= $currently_appearing; ?>],
                 ['Not Joined', <?= $absent; ?>],
-                ['Submitted', <?= $appearing + $submitted; ?>]
+                ['Submitted', <?= $submitted; ?>]
             ]);
             
             var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
@@ -518,7 +504,6 @@
                 `);
             });
         });
-        //<?= $absent; ?>
     </script>
   </body>
 </html>

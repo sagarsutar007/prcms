@@ -479,6 +479,13 @@ class Exams_model extends CI_Model
 		return $this->db->count_all_results('exam_candidates');
 	}
 
+	public function countExamCompletedCandidates($examId = '')
+	{
+		$this->db->where('exam_id', $examId);
+		$this->db->where('left_at !=', NULL);
+		return $this->db->count_all_results('candidate_exam_records');
+	}
+
 	public function checkExamAndQuestionExists($data = [])
 	{
 		$this->db->where($data);
@@ -771,6 +778,14 @@ class Exams_model extends CI_Model
 	public function countExamAppearedCandidates($exam_id = '')
 	{
 		$this->db->where('exam_id', $exam_id);
+		return $this->db->count_all_results('candidate_exam_records');
+	}
+
+	public function countCurrentlyExamAppearingCandidates($exam_id = '')
+	{
+		$this->db->where('exam_id', $exam_id);
+		$this->db->where('entered_at !=', NULL);
+		$this->db->where('left_at', NULL);
 		return $this->db->count_all_results('candidate_exam_records');
 	}
 

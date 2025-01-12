@@ -21,7 +21,7 @@ class Notification_model extends CI_Model {
     }
 
 	public function getLogs($type='') {
-		$this->db->limit(2000);
+		$this->db->limit(1000);
 		$this->db->order_by('created_on', 'DESC');
 		$q = $this->db->get_where('notification_logs_tbl', ['type' => $type]);
 		return $q->result_array();

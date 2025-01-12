@@ -127,7 +127,7 @@ function Login() {
 											<Row>
 												<Col xs={12}>
 													{errorMessage && (
-														<Alert variant="danger" className={styles.alert}>
+														<Alert variant="danger" className={styles.alert} dismissible>
 															{errorMessage}
 														</Alert>
 													)}

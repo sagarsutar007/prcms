@@ -3,3 +3,7 @@
         width: auto;
     }
 }
+
+.btn-close {
+	height: 10px!important;
+}
